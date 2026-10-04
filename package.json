@@ -12,7 +12,8 @@
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r test",
     "validate:cards": "pnpm --filter @hts/cards validate",
-    "copy:images": "pnpm --filter @hts/cards copy-images"
+    "copy:images": "pnpm --filter @hts/cards copy-images",
+    "sim": "pnpm --filter @hts/bots sim"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

@@ -37,7 +37,14 @@ importers:
 
   apps/web: {}
 
-  packages/bots: {}
+  packages/bots:
+    dependencies:
+      '@hts/cards':
+        specifier: workspace:*
+        version: link:../cards
+      '@hts/engine':
+        specifier: workspace:*
+        version: link:../engine
 
   packages/cards:
     dependencies:

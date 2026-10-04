@@ -8,7 +8,7 @@ por sesión**. Antes de escribir código, presenta el plan de la fase y espera l
 - [x] Fase 0 — Análisis (reglas, esquema de cartas, transcripción, validador)
 - [x] Fase 1 — Motor núcleo
 - [x] Fase 2 — Cartas (DSL + todos los efectos con test)
-- [ ] Fase 3 — Bots + simulación de 1.000 partidas
+- [x] Fase 3 — Bots + simulación de 1.000 partidas
 - [ ] Fase 4 — UI local (hot-seat y contra bots)
 - [ ] Fase 5 — Multijugador en línea
 - [ ] Fase 6 — Pulido, e2e con Playwright y README
@@ -40,6 +40,7 @@ pnpm typecheck        # tsc en todos los paquetes
 pnpm test             # Vitest en todos los paquetes
 pnpm validate:cards   # valida Referencias/cartas.es.json (errores → exit 1)
 pnpm copy:images      # copia Referencias/Imagenes/Cartas/** → assets/cartas/<id>.png
+pnpm sim [n] [semilla] # simula n partidas entre bots y muestra estadísticas
 ```
 
 Una fase está terminada cuando `pnpm lint`, `pnpm typecheck` y `pnpm test` pasan, y se cierra con
@@ -87,5 +88,10 @@ un commit descriptivo.
   - Las pasivas y los disparadores están en `pasivas.ts`.
   - Las operaciones con protecciones y reemplazos (destruir, sacrificar, arrebatar) están en
     `grupo.ts`.
+- **Bots** (`packages/bots`):
+  - Un bot recibe `{ vista, legales, catalogo, azar }` (lo mismo que un humano) y devuelve una acción, o `null` para no responder en una ventana.
+  - `botFacil` elige al azar; `botNormal` usa heurísticas por prioridades.
+  - `jugarPartida` (director) hace de host sin pantalla: pregunta a los bots en cada ventana y cierra la de Modificadores cuando nadie juega nada en una ronda.
+  - El test de 1.000 partidas tarda unos 75 s.
 - **Tests:** Vitest junto a cada paquete (`test/*.test.ts`). Los tests que leen `Referencias/` usan `describe.skipIf` cuando el archivo no existe.
 - Prettier: comillas simples, `;`, `printWidth` 100.
