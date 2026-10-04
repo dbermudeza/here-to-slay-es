@@ -7,7 +7,7 @@ por sesión**. Antes de escribir código, presenta el plan de la fase y espera l
 
 - [x] Fase 0 — Análisis (reglas, esquema de cartas, transcripción, validador)
 - [x] Fase 1 — Motor núcleo
-- [ ] Fase 2 — Cartas (DSL + todos los efectos con test)
+- [x] Fase 2 — Cartas (DSL + todos los efectos con test)
 - [ ] Fase 3 — Bots + simulación de 1.000 partidas
 - [ ] Fase 4 — UI local (hot-seat y contra bots)
 - [ ] Fase 5 — Multijugador en línea
@@ -62,7 +62,7 @@ un commit descriptivo.
   - Decisiones pendientes en pila.
   - Vistas filtradas por jugador.
   - Cada regla se prueba con un test que cita su `R-xxx`.
-- **API del motor** (`crearMotor(cartas, { efectos })`):
+- **API del motor** (`crearMotor(cartas, { definiciones?, custom? })`):
   - `reducer(state, { actor, accion })` devuelve `{ ok, state, events }` o `{ ok: false, error }`.
   - `validar` da el código de error de una acción ilegal; `accionesLegales` lista las legales.
   - `getPlayerView` devuelve la vista filtrada de un jugador.
@@ -70,5 +70,22 @@ un commit descriptivo.
   - `describirEvento` genera el log en español.
   - Las ventanas no miden tiempo: el host envía `CERRAR_VENTANA` como actor `SISTEMA`, con la `secuencia` de la ventana, cuando vence el temporizador (`duracionMs`).
   - `dadosForzados` solo se usa en tests.
+- **Efectos de carta (DSL):**
+  - Están en `packages/cards/src/efectos/efectos.json`, indexados por id de carta y validados con
+    Zod (`efectos/esquema.ts`).
+  - Héroes y Magias tienen `programa` (lista de pasos); Líderes, Monstruos y Objetos tienen
+    `pasivas` (bonos, disparadores, restricciones, reemplazos, habilidades); Modificadores,
+    Desafío y máscaras son `nucleo`.
+  - Lo que no encaja en el DSL es un paso `{ "paso": "custom", "nombre": … }` implementado en
+    `packages/engine/src/customs.ts`.
+  - Para añadir una carta: añadir su definición en efectos.json (`pnpm validate:cards` exige una
+    por carta) y un test en `packages/engine/test/cartas/`. El test de cobertura falla si falta.
+- **Motor de efectos:**
+  - Un efecto en curso es un marco `efecto` en la pila; una pregunta a un jugador es una
+    `decision` encima, que se responde con `RESPONDER`.
+  - El intérprete (`interprete.ts`) ejecuta pasos hasta que uno espera.
+  - Las pasivas y los disparadores están en `pasivas.ts`.
+  - Las operaciones con protecciones y reemplazos (destruir, sacrificar, arrebatar) están en
+    `grupo.ts`.
 - **Tests:** Vitest junto a cada paquete (`test/*.test.ts`). Los tests que leen `Referencias/` usan `describe.skipIf` cuando el archivo no existe.
 - Prettier: comillas simples, `;`, `printWidth` 100.

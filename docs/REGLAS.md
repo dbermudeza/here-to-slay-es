@@ -144,3 +144,28 @@ La partida se juega con uno de dos modos de reglas, elegido al crearla (D-15).
 - **R-095** Si hay que robar y el mazo está vacío, se **baraja la pila de descarte** y pasa a ser el nuevo mazo. El juego sigue sin penalización (D-16, decisión del usuario).
 - **R-097** SACAR una carta de la mano de otro jugador: el jugador activo ve solo los **reversos** de esa mano, en un orden barajado, y elige uno. Solo si la carta lo dice expresamente (p. ej. *Silent Shadow*: "mira la mano… elige") puede ver el contenido antes de elegir (D-12, decisión del usuario).
 - **R-096** La pila de descarte está boca arriba y es pública (p.3).
+
+## 13. Efectos de carta (Fase 2)
+
+- **R-100** El efecto de un Héroe se resuelve al superar su tirada (R-031); el de una Magia, al no
+  ser desafiada o superar el desafío (R-051). Los objetivos se eligen al resolverse (D-19).
+- **R-101** Si un paso del efecto no tiene objetivos válidos, ese paso no tiene efecto y el resto
+  del efecto continúa.
+- **R-102** "Inmediatamente" significa sin coste de PA (R-025). La carta jugada así puede ser
+  desafiada (D-39).
+- **R-103** Las habilidades de Líderes, Monstruos y Objetos se aplican cada vez que se cumple su
+  condición (R-082). Si dicen "puedes", se pregunta al jugador en ese momento (R-083).
+- **R-104** Bonos de tirada: se suman al total junto con los Modificadores al cerrar la ventana de
+  la tirada. Los de Objetos solo se aplican a la tirada del Héroe que los lleva.
+- **R-105** Protecciones:
+  - *Terratuga* y *Mighty Blade*: los Héroes no pueden ser destruidos.
+  - *Calming Voice*: los Héroes no pueden ser arrebatados.
+  - *Iron Resolve*: tus cartas no pueden ser desafiadas.
+  - *Osolechuza Veterano*: tus Objetos no pueden ser desafiados.
+  - Los Héroes protegidos no se ofrecen como objetivo.
+- **R-106** Reemplazos:
+  - *Muñeco Señuelo*: si el Héroe equipado fuera a ser sacrificado o destruido, el Muñeco va al
+    descarte en su lugar.
+  - *Dientes de Sable Corrupto*: al destruir, puedes arrebatar en su lugar.
+- **R-107** *Llave Selladora*: no se puede tirar para usar el efecto del Héroe equipado.
+- **R-108** SACAR es a ciegas (R-097). MIRAR una mano o el mazo solo lo ve quien mira.
