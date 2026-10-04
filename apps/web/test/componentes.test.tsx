@@ -183,6 +183,27 @@ describe('Mesa', () => {
     expect(within(dialogo).getByText('El Héroe equipado cuenta como Mago.')).toBeInTheDocument();
   });
 
+  it('al robar, una animación muestra qué carta se ha robado', () => {
+    let superior = '';
+    const { director } = directorEn(config('bots', ['humano', 'normal']), (s) => {
+      superior = s.mazo[0] ?? '';
+    });
+    montar(director);
+    fireEvent.click(screen.getByRole('button', { name: /^Robar/ }));
+    const aviso = screen.getByRole('status', { name: 'Robas una carta del mazo' });
+    const nombre = motor.catalogo.get(director.estado.instancias[superior] ?? '')?.nombre ?? '?';
+    expect(aviso).toHaveTextContent(nombre);
+  });
+
+  it('cuando roba un rival solo se ve el reverso', () => {
+    const { director, reloj } = directorEn(config('bots', ['humano', 'normal']));
+    montar(director);
+    fireEvent.click(screen.getByRole('button', { name: /Terminar turno/ }));
+    act(() => reloj.avanzar(0));
+    const aviso = screen.getByRole('status', { name: 'J2 roba una carta del mazo' });
+    expect(within(aviso).getByLabelText('Here to Slay')).toBeInTheDocument();
+  });
+
   it('los textos vienen del i18n (sin claves sin traducir en la mesa)', () => {
     const { director } = directorEn(config('bots', ['humano', 'normal', 'facil']));
     const { container } = montar(director);

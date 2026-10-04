@@ -14,6 +14,7 @@ import { AccionesTurno } from './AccionesTurno';
 import { Centro } from './Centro';
 import { MesaContexto, mismaAccion, type ValorMesa } from './contexto';
 import { Dados } from './Dados';
+import { Vuelos } from './Vuelos';
 import { DialogoDecision } from './DialogoDecision';
 import { Historial } from './Historial';
 import { Mano } from './Mano';
@@ -175,6 +176,7 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial }: Props) {
         <VentanaRespuesta />
         <DialogoDecision />
         <Dados />
+        <Vuelos />
         <Traspaso />
         <Victoria onRevancha={onRevancha} onInicio={onSalir} />
         <DetalleCarta detalle={detalle} onCerrar={() => setDetalle(null)} />

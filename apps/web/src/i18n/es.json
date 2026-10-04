@@ -363,5 +363,23 @@
     "equipadoA": "Equipado a {heroe}",
     "objetoEquipado": "Objeto equipado: {objeto}",
     "sinImagen": "Sin imagen"
+  },
+  "animacion": {
+    "mazoYo": "Robas {cartas} del mazo",
+    "mazo": "{nombre} roba {cartas} del mazo",
+    "descarteYo": "Recuperas {cartas} de la pila de descarte",
+    "descarte": "{nombre} recupera {cartas} de la pila de descarte",
+    "sacarYo": "Sacas {cartas} de la mano de {de}",
+    "sacarAMi": "{nombre} te saca {cartas} de la mano",
+    "sacar": "{nombre} saca {cartas} de la mano de {de}",
+    "darYo": "Le das {cartas} a {a}",
+    "darAMi": "{nombre} te da {cartas}",
+    "dar": "{nombre} le da {cartas} a {a}",
+    "arrebatarYo": "Arrebatas {carta} del Grupo de {de}",
+    "arrebatarAMi": "{nombre} te arrebata {carta}",
+    "arrebatar": "{nombre} arrebata {carta} del Grupo de {de}",
+    "mover": "{carta} pasa del Grupo de {de} al de {a}",
+    "unaCarta": "una carta",
+    "variasCartas": "{n} cartas"
   }
 }

@@ -15,6 +15,7 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
   return (
     <section
       aria-label={jugador.nombre}
+      data-zona={`grupo:${jugador.id}`}
       className={`rounded-xl p-2 ring-1 transition ${
         enTurno
           ? 'bg-amber-50 ring-2 ring-amber-400 dark:bg-amber-950/30'
@@ -29,7 +30,7 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
           </span>
         )}
         {!propia && (
-          <span className="text-stone-500">
+          <span className="text-stone-500" data-zona={`mano:${jugador.id}`}>
             {t('mesa.cartasEnMano', { n: jugador.cartasEnMano })}
           </span>
         )}

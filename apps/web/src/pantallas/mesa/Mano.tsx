@@ -15,7 +15,7 @@ export function Mano() {
   const seleccionada = sel !== null && mano.includes(sel) ? sel : null;
 
   return (
-    <section aria-label={t('mesa.mano')}>
+    <section aria-label={t('mesa.mano')} data-zona={`mano:${m.yo}`}>
       <h2 className="mb-1 text-sm font-semibold">{t('mesa.mano')}</h2>
       {mano.length === 0 ? (
         <p className="text-sm text-stone-500">{t('mesa.manoVacia')}</p>

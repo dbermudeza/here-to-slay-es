@@ -41,13 +41,13 @@ export function Centro() {
         </p>
       </div>
       <div className="flex gap-3">
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-1" data-zona="mazo">
           <Carta cartaId={null} tamano="sm" />
           <span className="text-xs">
             {t('mesa.mazo')} ({vista.cartasEnMazo})
           </span>
         </div>
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-1" data-zona="descarte">
           {superior === undefined ? (
             <div className="flex aspect-[5/7] w-16 items-center justify-center rounded-lg border-2 border-dashed border-stone-400 text-xs text-stone-500">
               {t('mesa.vacia')}
