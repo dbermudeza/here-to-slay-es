@@ -91,7 +91,10 @@ describe('Propiedades del motor', () => {
 });
 
 describe.skipIf(!existsSync(RUTA_CARTAS_JSON))('Catálogo real (Referencias/cartas.es.json)', () => {
-  const { cartas } = ArchivoCartasSchema.parse(JSON.parse(readFileSync(RUTA_CARTAS_JSON, 'utf8')));
+  // El cuerpo de un describe se ejecuta aunque se salte: solo se lee el archivo si existe.
+  const { cartas } = existsSync(RUTA_CARTAS_JSON)
+    ? ArchivoCartasSchema.parse(JSON.parse(readFileSync(RUTA_CARTAS_JSON, 'utf8')))
+    : { cartas: [] };
   const real = crearMotor(cartas);
 
   it('el mazo principal tiene 115 cartas y cada jugador empieza con 5', () => {

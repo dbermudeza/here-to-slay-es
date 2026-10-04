@@ -93,7 +93,11 @@ describe('validarCartas', () => {
 });
 
 describe.skipIf(!existsSync(RUTA_CARTAS_JSON))('Referencias/cartas.es.json', () => {
-  const { datos, problemas } = validarCartas(JSON.parse(readFileSync(RUTA_CARTAS_JSON, 'utf8')));
+  // El cuerpo de un describe se ejecuta aunque se salte: solo se lee el archivo si existe.
+  const crudo: unknown = existsSync(RUTA_CARTAS_JSON)
+    ? JSON.parse(readFileSync(RUTA_CARTAS_JSON, 'utf8'))
+    : { version: 1, cartas: [] };
+  const { datos, problemas } = validarCartas(crudo);
 
   it('cumple el esquema sin errores', () => {
     expect(problemas.filter((p) => p.severidad === 'error')).toEqual([]);
