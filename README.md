@@ -15,7 +15,7 @@ _Here to Slay_ (Unstable Games), en español y fiel a las reglas del juego base.
 | 1    | Motor de reglas: turnos, PA, ventanas de desafío y Modificadores, victoria | ✅     |
 | 2    | Efectos de las 95 cartas (DSL en JSON), cada una con su test               | ✅     |
 | 3    | Bots (fácil y normal) y simulación de 1.000 partidas                       | ✅     |
-| 4    | Interfaz local: partidas en el mismo dispositivo y contra bots             | ⏳     |
+| 4    | Interfaz local: partidas en el mismo dispositivo y contra bots             | ✅     |
 | 5    | Multijugador en línea (servidor autoritativo)                              | ⏳     |
 | 6    | Pulido, tests e2e y documentación de uso                                   | ⏳     |
 
@@ -50,6 +50,8 @@ Sin `Referencias/cartas.es.json`, los tests que usan el catálogo real se saltan
 
 | Comando                  | Qué hace                                                          |
 | ------------------------ | ----------------------------------------------------------------- |
+| `pnpm dev`               | Arranca la aplicación en http://localhost:5173                    |
+| `pnpm build`             | Compila la aplicación web para producción (`apps/web/dist`)       |
 | `pnpm lint`              | ESLint con TypeScript estricto                                    |
 | `pnpm typecheck`         | Comprobación de tipos en todos los paquetes                       |
 | `pnpm test`              | Tests (Vitest) de todos los paquetes                              |
@@ -66,7 +68,7 @@ packages/
   bots/     Bots fácil y normal, director de partidas y simulador
 apps/
   server/   Servidor autoritativo Fastify + Socket.IO (Fase 5)
-  web/      Cliente React + Vite (Fase 4)
+  web/      Aplicación React + Vite: modos en este dispositivo y contra bots
 docs/
   REGLAS.md         Reglas como especificación (R-xxx)
   DUDAS_REGLAS.md   Ambigüedades del reglamento y decisiones tomadas (D-xx)

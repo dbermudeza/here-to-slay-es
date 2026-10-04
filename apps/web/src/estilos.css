@@ -1,0 +1,44 @@
+@import 'tailwindcss';
+
+/* Modo oscuro controlado por la clase .dark en <html> (sistema, claro u oscuro). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-titulo: Georgia, 'Times New Roman', serif;
+
+  /* Colores de las clases (símbolos del reglamento). */
+  --color-luchador: #b91c1c;
+  --color-bardo: #ea580c;
+  --color-guardian: #ca8a04;
+  --color-cazador: #15803d;
+  --color-ladron: #1d4ed8;
+  --color-mago: #7e22ce;
+  --color-cualquiera: #57534e;
+}
+
+html,
+body,
+#raiz {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-stone-100);
+  color: var(--color-stone-900);
+}
+
+.dark body {
+  background: var(--color-stone-950);
+  color: var(--color-stone-100);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

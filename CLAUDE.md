@@ -9,7 +9,7 @@ por sesión**. Antes de escribir código, presenta el plan de la fase y espera l
 - [x] Fase 1 — Motor núcleo
 - [x] Fase 2 — Cartas (DSL + todos los efectos con test)
 - [x] Fase 3 — Bots + simulación de 1.000 partidas
-- [ ] Fase 4 — UI local (hot-seat y contra bots)
+- [x] Fase 4 — UI local (hot-seat y contra bots)
 - [ ] Fase 5 — Multijugador en línea
 - [ ] Fase 6 — Pulido, e2e con Playwright y README
 
@@ -35,6 +35,7 @@ docs/             REGLAS.md, DUDAS_REGLAS.md
 
 ```sh
 pnpm install          # dependencias (pnpm 9; si falta: npm i -g pnpm@9)
+pnpm dev              # aplicación web en http://localhost:5173
 pnpm lint             # ESLint (TS estricto)
 pnpm typecheck        # tsc en todos los paquetes
 pnpm test             # Vitest en todos los paquetes
@@ -93,5 +94,11 @@ un commit descriptivo.
   - `botFacil` elige al azar; `botNormal` usa heurísticas por prioridades.
   - `jugarPartida` (director) hace de host sin pantalla: pregunta a los bots en cada ventana y cierra la de Modificadores cuando nadie juega nada en una ronda.
   - El test de 1.000 partidas tarda unos 75 s.
+- **Web** (`apps/web`):
+  - React + Zustand + Tailwind 4 + Framer Motion.
+  - Las cartas llegan por el módulo virtual `virtual:cartas` (lee `Referencias/cartas.es.json` al compilar) y las imágenes se sirven desde `assets/` en `/cartas/<archivo>`.
+  - `DirectorVivo` (`src/juego/director-vivo.ts`) es el host local: temporizadores reales, bots y traspaso del dispositivo. Se prueba con un reloj falso.
+  - Todos los textos están en `src/i18n/es.json` (función `t`).
+  - Tests con Vitest + Testing Library (jsdom); los del director usan el entorno node.
 - **Tests:** Vitest junto a cada paquete (`test/*.test.ts`). Los tests que leen `Referencias/` usan `describe.skipIf` cuando el archivo no existe.
 - Prettier: comillas simples, `;`, `printWidth` 100.

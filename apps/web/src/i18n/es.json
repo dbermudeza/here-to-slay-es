@@ -1,1 +1,337 @@
-{}
+{
+  "app": {
+    "titulo": "Here to Slay",
+    "subtitulo": "Versión digital no oficial · uso personal"
+  },
+  "comun": {
+    "volver": "Volver",
+    "cerrar": "Cerrar",
+    "aceptar": "Aceptar",
+    "cancelar": "Cancelar",
+    "si": "Sí",
+    "no": "No",
+    "siguiente": "Siguiente",
+    "anterior": "Anterior",
+    "tema": "Tema",
+    "temas": { "sistema": "Automático", "claro": "Claro", "oscuro": "Oscuro" }
+  },
+  "inicio": {
+    "jugarLocal": "Jugar en este dispositivo",
+    "jugarLocalDesc": "De 2 a 6 personas, pasándose el dispositivo.",
+    "jugarBots": "Jugar contra bots",
+    "jugarBotsDesc": "Tú contra 1–5 bots.",
+    "enLinea": "Jugar en línea",
+    "enLineaDesc": "Disponible próximamente.",
+    "continuar": "Continuar partida",
+    "continuarDesc": "Retoma la última partida guardada automáticamente.",
+    "cargar": "Cargar partida desde archivo",
+    "reglas": "Reglas",
+    "tutorial": "Tutorial",
+    "errorCarga": "No se pudo cargar la partida: {motivo}"
+  },
+  "config": {
+    "titulo": "Nueva partida",
+    "modo": "Modo de juego",
+    "modoLocal": "En este dispositivo",
+    "modoLocalDesc": "Todos los jugadores son personas y se pasan el dispositivo.",
+    "modoBots": "Contra bots",
+    "modoBotsDesc": "Juegas tú contra jugadores controlados por el ordenador.",
+    "reglas": "Reglas",
+    "reglasNormal": "Normales",
+    "reglasNormalDesc": "Gana quien mate 3 Monstruos o termine su turno con las 6 clases en su Grupo.",
+    "reglasDificil": "Difíciles",
+    "reglasDificilDesc": "Gana quien tenga las 6 clases y 1 Monstruo, o 4 Monstruos y 3 clases.",
+    "jugadores": "Jugadores",
+    "numJugadores": "Número de jugadores",
+    "nombreJugador": "Jugador {n}",
+    "tuNombre": "Tu nombre",
+    "numBots": "Número de bots",
+    "dificultad": "Dificultad de los bots",
+    "facil": "Fácil",
+    "facilDesc": "Juegan al azar.",
+    "normal": "Normal",
+    "normalDesc": "Piensan sus jugadas y van a por la victoria.",
+    "mixta": "Mixta",
+    "mixtaDesc": "Bots normales y fáciles alternados.",
+    "avanzadas": "Opciones avanzadas",
+    "segDesafio": "Ventana de desafío (segundos)",
+    "segModificadores": "Ventana de Modificadores (segundos)",
+    "segModificadoresDesafio": "Ventana de Modificadores en un desafío (segundos)",
+    "semilla": "Semilla (para repetir una partida)",
+    "empezar": "Empezar partida",
+    "errores": {
+      "nombreVacio": "Todos los jugadores necesitan un nombre.",
+      "nombresRepetidos": "Los nombres no se pueden repetir."
+    }
+  },
+  "bots": {
+    "nombres": ["Bot Bigotes", "Bot Zarpas", "Bot Cascabel", "Bot Pelusa", "Bot Trufa"]
+  },
+  "niveles": { "facil": "fácil", "normal": "normal" },
+  "mesa": {
+    "turnoDe": "Turno de {nombre}",
+    "tuTurno": "Tu turno",
+    "turnoNumero": "Turno {n}",
+    "pa": "PA",
+    "paRestantes": "{n} puntos de acción",
+    "mazo": "Mazo",
+    "descarte": "Descarte",
+    "mazoMonstruos": "Monstruos en el mazo: {n}",
+    "monstruos": "Monstruos",
+    "mano": "Tu mano",
+    "cartasEnMano": "{n} en mano",
+    "grupo": "Grupo",
+    "monstruosMatados": "Monstruos: {n}",
+    "sinHeroes": "Sin Héroes",
+    "manoVacia": "No tienes cartas en la mano.",
+    "reglasModo": { "normal": "Reglas normales", "dificil": "Reglas difíciles" },
+    "bot": "bot {nivel}",
+    "esperando": "{nombre} está pensando…",
+    "esperandoRespuesta": "Esperando a que alguien responda…",
+    "acciones": {
+      "robar": "Robar",
+      "renovar": "Descartar mano y robar 5",
+      "habilidad": "Usar {carta}",
+      "terminar": "Terminar turno",
+      "jugar": "Jugar",
+      "equipar": "Equipar a un Héroe",
+      "usarEfecto": "Usar efecto",
+      "atacar": "Atacar",
+      "cancelar": "Cancelar",
+      "coste": "{n} PA",
+      "eligeObjetivo": "Elige el Héroe al que equipar {carta}.",
+      "soloRespuesta": "Esta carta se juega en respuesta, durante una ventana.",
+      "ampliar": "Ampliar"
+    },
+    "menu": {
+      "titulo": "Menú",
+      "exportar": "Guardar partida en un archivo",
+      "reglas": "Ver reglas",
+      "tutorial": "Ver tutorial",
+      "salir": "Salir al inicio",
+      "salirConfirmar": "¿Salir al inicio? La partida queda guardada y podrás continuarla."
+    },
+    "log": "Historial",
+    "verLog": "Ver historial",
+    "pilaDescarte": "Pila de descarte ({n})",
+    "vacia": "Vacía"
+  },
+  "ventana": {
+    "desafioTitulo": "{nombre} intenta jugar {carta}",
+    "desafioPregunta": "¿Alguien quiere desafiarla?",
+    "desafiar": "Desafiar",
+    "pasar": "Pasar",
+    "yaPasaste": "Has pasado.",
+    "contexto": {
+      "heroe": "{nombre} tira por {carta} (necesita {n}+)",
+      "ataque": "{nombre} ataca a {carta}",
+      "desafio": "Desafío: {desafiante} contra {desafiado}"
+    },
+    "tiradaDe": "{nombre}",
+    "modificadores": "Modificadores",
+    "sinModificadores": "Ninguno todavía",
+    "total": "Total",
+    "jugarModificador": "{valor} a {nombre}",
+    "tusModificadores": "Tus Modificadores",
+    "sinTusModificadores": "No tienes Modificadores en la mano.",
+    "responde": "Responde {nombre}",
+    "responderAqui": "¿Quién quiere responder?",
+    "terminarRespuesta": "He terminado",
+    "pausa": "En pausa",
+    "segundos": "{s} s",
+    "bonos": "Los bonos de Líderes, Monstruos y Objetos se suman al cerrar la ventana."
+  },
+  "decision": {
+    "aceptar": "Confirmar",
+    "seleccion": "Elegidas: {n} (entre {min} y {max})",
+    "seleccionExacta": "Elegidas: {n} de {max}",
+    "ordenar": "Pulsa las cartas en el orden en que quedarán en el mazo (la primera queda arriba).",
+    "reverso": "Carta {n}",
+    "elegirReverso": "Elige una carta sin verla.",
+    "tiradaInmediata": "{carta} ha entrado en tu Grupo. ¿Tiras ahora para usar su efecto? (no cuesta PA)",
+    "tirar": "Tirar los dados",
+    "noTirar": "Ahora no",
+    "elegirSacrificar": "Debes sacrificar {n} Héroe(s) de tu Grupo.",
+    "elegirDescartar": "Debes descartar {n} carta(s) de tu mano.",
+    "verMano": "Mano de {nombre}",
+    "nadie": "No hay opciones.",
+    "motivos": {
+      "elegirJugador": "{carta}: elige un jugador",
+      "descartar": "{carta}: descarta",
+      "sacrificar": "{carta}: sacrifica un Héroe",
+      "dar": "{carta}: da una carta",
+      "sacar": "{carta}: saca una carta",
+      "verMano": "{carta}",
+      "tomarDeMano": "{carta}: elige una carta y quédatela",
+      "recuperarDescarte": "{carta}: elige una carta de la pila de descarte",
+      "destruir": "{carta}: elige el Héroe que destruyes",
+      "arrebatarEnLugarDeDestruir": "{carta}: ¿arrebatas el Héroe en lugar de destruirlo?",
+      "arrebatar": "{carta}: elige el Héroe que arrebatas",
+      "darHeroe": "{carta}: elige el Héroe que entregas",
+      "jugarInmediato": "{carta}: elige la carta que juegas inmediatamente",
+      "objetivoObjeto": "{carta}: elige el Héroe al que equipar el Objeto",
+      "confirmar": "{carta}: ¿activas la habilidad?",
+      "robar": "{carta}: ¿robas una carta?",
+      "devolverObjeto": "{carta}: elige el Objeto que vuelve a la mano",
+      "elegirDelMazo": "{carta}: elige una carta para tu mano",
+      "ordenarMazo": "{carta}: ordena las cartas del mazo",
+      "bonoCuerno": "{carta}: ¿+1 o −1 a la tirada?"
+    }
+  },
+  "traspaso": {
+    "titulo": "Pásale el dispositivo a {nombre}",
+    "texto": "Que nadie más mire la pantalla.",
+    "soy": "Soy {nombre}"
+  },
+  "dados": {
+    "titulo": "Tirada de dados",
+    "suma": "= {n}"
+  },
+  "victoria": {
+    "titulo": "¡{nombre} gana la partida!",
+    "motivos": {
+      "tresMonstruos": "Ha matado 3 Monstruos.",
+      "grupoCompleto": "Ha completado un Grupo con las 6 clases.",
+      "grupoCompletoYMonstruo": "Tiene las 6 clases y al menos un Monstruo.",
+      "cuatroMonstruosTresClases": "Tiene 4 Monstruos y al menos 3 clases."
+    },
+    "turnos": "Partida de {n} turnos.",
+    "revancha": "Revancha",
+    "inicio": "Volver al inicio"
+  },
+  "errores": {
+    "PARTIDA_TERMINADA": "La partida ha terminado.",
+    "JUGADOR_DESCONOCIDO": "Jugador desconocido.",
+    "SOLO_SISTEMA": "Solo el sistema puede hacer esto.",
+    "NO_ES_TU_TURNO": "No es tu turno.",
+    "HAY_DECISION_PENDIENTE": "Primero hay que resolver lo que está pendiente.",
+    "NO_ES_MOMENTO": "Ahora no se puede hacer esto.",
+    "PA_INSUFICIENTES": "No te quedan suficientes puntos de acción.",
+    "CARTA_NO_EN_MANO": "Esa carta no está en tu mano.",
+    "TIPO_DE_CARTA_INVALIDO": "Esta carta no se puede jugar así.",
+    "OBJETIVO_INVALIDO": "No hay ningún Héroe sin Objeto al que equiparla.",
+    "HEROE_NO_EN_GRUPO": "Ese Héroe no está en tu Grupo.",
+    "HEROE_YA_USADO": "Ya has tirado por este Héroe en este turno.",
+    "HEROE_SELLADO": "La Llave Selladora impide usar el efecto de este Héroe.",
+    "HABILIDAD_NO_DISPONIBLE": "Ya has usado esta habilidad en este turno.",
+    "MONSTRUO_NO_DISPONIBLE": "Ese Monstruo no se puede atacar.",
+    "REQUISITOS_NO_CUMPLIDOS": "Tu Grupo no cumple los requisitos de este Monstruo.",
+    "NO_PUEDES_DESAFIARTE": "No puedes desafiar tu propia carta.",
+    "YA_PASASTE": "Ya has pasado en esta ventana.",
+    "VALOR_INVALIDO": "Ese valor no está en la carta.",
+    "TIRADA_INVALIDA": "Esa tirada no existe.",
+    "SELECCION_INVALIDA": "La selección no es válida.",
+    "RESPUESTA_INVALIDA": "La respuesta no es válida.",
+    "SECUENCIA_OBSOLETA": "La ventana ya había cambiado."
+  },
+  "tipos": {
+    "heroe": "Héroe",
+    "objeto": "Objeto",
+    "objeto_maldito": "Objeto Maldito",
+    "magia": "Magia",
+    "modificador": "Modificador",
+    "desafio": "Desafío",
+    "monstruo": "Monstruo",
+    "lider": "Líder de Grupo"
+  },
+  "clases": {
+    "bardo": "Bardo",
+    "luchador": "Luchador",
+    "guardian": "Guardián",
+    "cazador": "Cazador",
+    "ladron": "Ladrón",
+    "mago": "Mago",
+    "heroe": "Cualquier Héroe"
+  },
+  "carta": {
+    "requisitos": "Requisitos",
+    "reverso": "Here to Slay"
+  },
+  "catalogo": {
+    "faltaTitulo": "Faltan las cartas",
+    "faltaTexto": "No se encuentra Referencias/cartas.es.json. Es un recurso personal que no se incluye en el repositorio: cópialo en esa carpeta y vuelve a arrancar la aplicación.",
+    "invalidoTitulo": "El archivo de cartas no es válido",
+    "invalidoTexto": "Referencias/cartas.es.json no cumple el esquema. Ejecuta «pnpm validate:cards» para ver el detalle.",
+    "detalle": "Detalle: {detalle}"
+  },
+  "reglas": {
+    "titulo": "Reglas resumidas",
+    "secciones": [
+      {
+        "titulo": "Objetivo",
+        "parrafos": [
+          "Reglas normales: gana quien MATE 3 Monstruos, o quien termine su turno con un Grupo que represente las 6 clases (contando su Líder).",
+          "Reglas difíciles: gana quien termine su turno con las 6 clases y al menos 1 Monstruo, o quien tenga 4 Monstruos y al menos 3 clases."
+        ]
+      },
+      {
+        "titulo": "Preparación",
+        "parrafos": [
+          "Cada jugador recibe al azar un Líder de Grupo (en partidas de 2 no se usa el Líder Ladrón) y 5 cartas. Se ponen 3 Monstruos boca arriba. Empieza quien recibió el último Líder."
+        ]
+      },
+      {
+        "titulo": "Tu turno: 3 puntos de acción (PA)",
+        "parrafos": [
+          "1 PA: robar una carta; jugar un Héroe, Objeto o Magia; o tirar para usar el efecto de un Héroe de tu Grupo (una vez por Héroe y turno).",
+          "2 PA: atacar un Monstruo cuyos requisitos cumplas.",
+          "3 PA: descartar toda tu mano y robar 5 cartas.",
+          "Al jugar un Héroe puedes tirar inmediatamente para usar su efecto sin coste (cuenta como su uso de ese turno). El turno termina al gastar los PA o cuando quieras."
+        ]
+      },
+      {
+        "titulo": "Tiradas",
+        "parrafos": [
+          "Se tiran dos dados. Para usar el efecto de un Héroe hay que igualar o superar su número. Al atacar un Monstruo: si sacas su rango de éxito lo matas; si sacas su rango de fracaso pagas el precio; entre medias no pasa nada. Los PA gastados no se recuperan."
+        ]
+      },
+      {
+        "titulo": "Modificadores",
+        "parrafos": [
+          "Tras cada tirada se abre una ventana de 5 segundos (10 en un desafío) en la que cualquiera puede jugar Modificadores sobre cualquier tirada. Cada Modificador reinicia la cuenta. Al acabar, se suman todos los cambios y los bonos de Líderes, Monstruos y Objetos."
+        ]
+      },
+      {
+        "titulo": "Desafíos",
+        "parrafos": [
+          "Cuando otro jugador intenta jugar un Héroe, Objeto o Magia puedes desafiarlo con una carta de Desafío. Ambos tiráis: el desafiado solo gana si saca más; con empate gana quien desafía. Si el desafío tiene éxito, la carta va al descarte y no se recupera el PA. Cada jugada solo se puede desafiar una vez."
+        ]
+      },
+      {
+        "titulo": "Términos",
+        "parrafos": [
+          "ROBAR: tomar la carta superior del mazo. ARREBATAR: llevarte un Héroe del Grupo de otro jugador. SACAR: tomar una carta a ciegas de la mano de otro jugador. DESTRUIR: mandar al descarte un Héroe de otro jugador. SACRIFICAR: mandar al descarte un Héroe tuyo. MATAR: añadir a tu Grupo un Monstruo atacado con éxito."
+        ]
+      }
+    ]
+  },
+  "tutorial": {
+    "titulo": "Tutorial",
+    "pasos": [
+      {
+        "titulo": "Tu objetivo",
+        "texto": "Forma un Grupo de Héroes de distintas clases y mata Monstruos. Arriba ves los Grupos de tus rivales y en el centro los Monstruos que se pueden atacar."
+      },
+      {
+        "titulo": "Puntos de acción",
+        "texto": "En tu turno tienes 3 PA. El contador está en la barra superior. Los botones muestran cuánto cuesta cada acción; si una acción no se puede hacer, pasa el ratón por encima para ver por qué."
+      },
+      {
+        "titulo": "Tu mano",
+        "texto": "Toca una carta de tu mano para ver qué puedes hacer con ella. Los Héroes van a tu Grupo, los Objetos se equipan a un Héroe y las Magias tienen un efecto de un solo uso."
+      },
+      {
+        "titulo": "Efectos de los Héroes",
+        "texto": "Cada Héroe tiene un número (por ejemplo 7+). Tira dos dados igualando o superando ese número para usar su efecto. Puedes hacerlo al jugarlo o, más tarde, gastando 1 PA."
+      },
+      {
+        "titulo": "Desafíos y Modificadores",
+        "texto": "Cuando alguien juega una carta o tira los dados aparece una ventana con cuenta atrás. Es tu momento de desafiar o de jugar Modificadores para cambiar el resultado."
+      },
+      {
+        "titulo": "Monstruos",
+        "texto": "Para atacar un Monstruo necesitas los Héroes (o clases) que indica. Cuesta 2 PA. Cada Monstruo que matas te da una habilidad permanente. ¡Suerte, aventurero!"
+      }
+    ]
+  }
+}

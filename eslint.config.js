@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
 // Regla local: los únicos comentarios de tareas pendientes permitidos son los
@@ -39,5 +40,10 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'error',
       'hts/solo-todo-regla': 'error',
     },
+  },
+  {
+    files: ['apps/web/**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: reactHooks.configs.recommended.rules,
   },
 );
