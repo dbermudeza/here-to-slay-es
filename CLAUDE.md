@@ -1,0 +1,66 @@
+# Here to Slay — versión digital en español (uso personal)
+
+Especificación completa: [PROMPT_HERE_TO_SLAY.md](PROMPT_HERE_TO_SLAY.md). Se trabaja **una fase
+por sesión**. Antes de escribir código, presenta el plan de la fase y espera la aprobación.
+
+## Estado de las fases
+
+- [x] Fase 0 — Análisis (reglas, esquema de cartas, transcripción, validador)
+- [ ] Fase 1 — Motor núcleo
+- [ ] Fase 2 — Cartas (DSL + todos los efectos con test)
+- [ ] Fase 3 — Bots + simulación de 1.000 partidas
+- [ ] Fase 4 — UI local (hot-seat y contra bots)
+- [ ] Fase 5 — Multijugador en línea
+- [ ] Fase 6 — Pulido, e2e con Playwright y README
+
+## Fuentes de verdad
+
+- Reglas: `Referencias/Reglas.pdf`, resumido como especificación en [docs/REGLAS.md](docs/REGLAS.md) (ids `R-xxx`).
+- Ambigüedades: [docs/DUDAS_REGLAS.md](docs/DUDAS_REGLAS.md) (ids `D-xx`). No inventes reglas: si algo no está claro, añade una `D-xx`, aplica la lectura más literal y marca el código con `// TODO(regla) D-xx`.
+- Cartas: `Referencias/cartas.es.json`, validado con el esquema Zod de `packages/cards/src/schema.ts`.
+- `Referencias/` y `assets/cartas/` son personales y **no se publican** (están en `.gitignore`). No descargues ni generes arte o texto oficial desde internet.
+
+## Estructura
+
+```
+packages/engine   Motor de reglas puro y determinista (sin UI ni red)       — Fase 1
+packages/cards    Esquema Zod, validación, scripts de datos; registro de efectos — Fase 0/2
+packages/bots     IA fácil/normal (misma API de acciones que un humano)     — Fase 3
+apps/server       Fastify + Socket.IO, servidor autoritativo                — Fase 5
+apps/web          React + Vite + Zustand + Tailwind + Framer Motion         — Fase 4
+docs/             REGLAS.md, DUDAS_REGLAS.md
+```
+
+## Comandos
+
+```sh
+pnpm install          # dependencias (pnpm 9; si falta: npm i -g pnpm@9)
+pnpm lint             # ESLint (TS estricto)
+pnpm typecheck        # tsc en todos los paquetes
+pnpm test             # Vitest en todos los paquetes
+pnpm validate:cards   # valida Referencias/cartas.es.json (errores → exit 1)
+pnpm copy:images      # copia Referencias/Imagenes/Cartas/** → assets/cartas/<id>.png
+```
+
+Una fase está terminada cuando `pnpm lint`, `pnpm typecheck` y `pnpm test` pasan, y se cierra con
+un commit descriptivo.
+
+## Convenciones
+
+- **TypeScript estricto** (`strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`). Prohibido usar `any` y `!` (non-null assertion); ESLint lo comprueba.
+- **Comentarios de tarea pendiente:** solo `TODO(regla) D-xx`. Cualquier otro TODO/FIXME es error de lint.
+- **Idioma:** dominio, datos y textos en español (`carta`, `jugador`, `tirada`, `Grupo`…). Las APIs técnicas genéricas pueden ir en inglés (`reducer`, `state`, `events`). Toda la UI sale de `apps/web/src/i18n/es.json`; nada hardcodeado.
+- **Glosario de verbos** (ver REGLAS.md §0): DRAW = ROBAR, STEAL = ARREBATAR, PULL = SACAR, DISCARD = DESCARTAR, DESTROY = DESTRUIR, SACRIFICE = SACRIFICAR, CHALLENGE = DESAFIAR, ATTACK = ATACAR, SLAY = MATAR, Party = Grupo.
+- **Cartas:**
+  - Los Héroes conservan el nombre original y su id es `heroe_<nombre_original>`.
+  - El resto lleva nombre traducido y su id es `<tipo>_<nombre_traducido>`, en snake_case ASCII.
+  - `textoOriginal` guarda el texto en inglés.
+  - Una carta dudosa lleva `"revisar": true` y una `nota`.
+- **Motor:**
+  - Estado inmutable con `reducer(state, action) => { state, events }`.
+  - RNG con semilla dentro del estado.
+  - Decisiones pendientes en pila.
+  - Vistas filtradas por jugador.
+  - Cada regla se prueba con un test que cita su `R-xxx`.
+- **Tests:** Vitest junto a cada paquete (`test/*.test.ts`). Los tests que leen `Referencias/` usan `describe.skipIf` cuando el archivo no existe.
+- Prettier: comillas simples, `;`, `printWidth` 100.

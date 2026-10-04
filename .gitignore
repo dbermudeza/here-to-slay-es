@@ -1,0 +1,20 @@
+# Dependencias y build
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.vite/
+playwright-report/
+test-results/
+
+# Recursos personales: NO publicar
+Referencias/
+referencias/
+assets/cartas/
+
+# Entorno / SO
+.env
+.env.*
+.DS_Store
+Thumbs.db
+desktop.ini

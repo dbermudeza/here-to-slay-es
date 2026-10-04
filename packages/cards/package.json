@@ -1,0 +1,16 @@
+{
+  "name": "@hts/cards",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "validate": "tsx src/scripts/validar-cartas.ts",
+    "copy-images": "tsx src/scripts/copiar-imagenes.ts"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  }
+}
