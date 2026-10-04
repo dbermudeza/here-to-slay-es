@@ -1,6 +1,6 @@
 import { buscarJugador, cartaDe, cimaPila } from './consultas';
 import type { Ctx } from './efectos';
-import type { Accion, Actor, GameState, Uid } from './tipos';
+import type { Accion, Actor, GameState, Pregunta, Respuesta, Uid } from './tipos';
 import { validar } from './validar';
 
 function combinaciones<T>(lista: readonly T[], k: number): T[][] {
@@ -10,6 +10,39 @@ function combinaciones<T>(lista: readonly T[], k: number): T[][] {
     for (const resto of combinaciones(lista.slice(i + 1), k - 1)) resultado.push([x, ...resto]);
   });
   return resultado;
+}
+
+function permutaciones<T>(lista: readonly T[]): T[][] {
+  if (lista.length <= 1) return [[...lista]];
+  return lista.flatMap((x, i) =>
+    permutaciones([...lista.slice(0, i), ...lista.slice(i + 1)]).map((resto) => [x, ...resto]),
+  );
+}
+
+/** Todas las respuestas posibles a una pregunta. */
+export function respuestasPosibles(s: GameState, p: Pregunta): Respuesta[] {
+  switch (p.tipo) {
+    case 'jugador':
+      return p.opciones.map((jugador) => ({ jugador }));
+    case 'cartas': {
+      if (p.ordenado) return permutaciones(p.opciones).map((cartas) => ({ cartas }));
+      const r: Respuesta[] = [];
+      for (let k = p.min; k <= p.max; k++) {
+        for (const cartas of combinaciones(p.opciones, k)) r.push({ cartas });
+      }
+      return r;
+    }
+    case 'oculta': {
+      const n = buscarJugador(s, p.de)?.mano.length ?? 0;
+      return Array.from({ length: n }, (_, indice) => ({ indice }));
+    }
+    case 'confirmar':
+      return [{ si: true }, { si: false }];
+    case 'valor':
+      return p.opciones.map((valor) => ({ valor }));
+    case 'ver':
+      return [{ ok: true }];
+  }
 }
 
 /**
@@ -37,6 +70,7 @@ export function accionesLegales(ctx: Ctx, s: GameState, actor: Actor): Accion[] 
     }
     for (const r of j.grupo) candidatas.push({ tipo: 'TIRAR_HEROE', uid: r.heroe });
     for (const uid of s.monstruosCentro) candidatas.push({ tipo: 'ATACAR', uid });
+    for (const uid of [j.lider, ...j.monstruos]) candidatas.push({ tipo: 'USAR_HABILIDAD', uid });
   }
 
   switch (cima?.tipo) {
@@ -63,10 +97,19 @@ export function accionesLegales(ctx: Ctx, s: GameState, actor: Actor): Accion[] 
       break;
     case 'elegir': {
       const opciones: Uid[] = cima.accion === 'descartar' ? j.mano : j.grupo.map((r) => r.heroe);
-      for (const uids of combinaciones(opciones, cima.cantidad))
+      for (const uids of combinaciones(opciones, cima.cantidad)) {
         candidatas.push({ tipo: 'ELEGIR', uids });
+      }
       break;
     }
+    case 'decision':
+      if (cima.jugador === actor) {
+        for (const respuesta of respuestasPosibles(s, cima.pregunta)) {
+          candidatas.push({ tipo: 'RESPONDER', respuesta });
+        }
+      }
+      break;
+    case 'efecto':
     case undefined:
       break;
   }

@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
-import { clasesDelGrupo, type ResolverEfecto } from '../src';
+import { describe, expect, it } from 'vitest';
+import { clasesDelGrupo } from '../src';
 import {
   A,
   B,
@@ -10,6 +10,7 @@ import {
   forzarDados,
   hacer,
   jugadorDe,
+  motorConEspia,
   nuevaPartida,
   nuevoMotor,
   ponerHeroe,
@@ -108,8 +109,7 @@ describe('Héroes', () => {
   });
 
   it('R-031: el efecto se activa si la tirada es ≥ al requisito, con el resolutor registrado', () => {
-    const efecto = vi.fn<ResolverEfecto>();
-    const m = nuevoMotor({ efectos: { heroe_bardo: efecto } });
+    const { motor: m, espia: efecto } = motorConEspia('heroe_bardo');
     const s = escenario(nuevaPartida(m), { turnoDe: A });
     const h = ponerHeroe(s, A, 'bardo'); // requisito 7+
     let r = hacer(m, forzarDados(s, 3, 3), A, { tipo: 'TIRAR_HEROE', uid: h });
@@ -119,7 +119,7 @@ describe('Héroes', () => {
     r = hacer(m, forzarDados(s2, 3, 4), A, { tipo: 'TIRAR_HEROE', uid: h });
     r = cerrar(m, r.state);
     expect(efecto).toHaveBeenCalledTimes(1);
-    expect(efecto.mock.calls[0]?.[0]).toMatchObject({ jugador: A, uid: h });
+    expect(efecto.mock.calls[0]?.[0].f).toMatchObject({ jugador: A, fuente: h });
     expect(tipos(r.events)).toContain('efectoActivado');
   });
 
@@ -214,8 +214,7 @@ describe('Objetos', () => {
 
 describe('Magia', () => {
   it('R-050 / R-051: cuesta 1 PA, resuelve su efecto y va a la pila de descarte', () => {
-    const efecto = vi.fn<ResolverEfecto>();
-    const m = nuevoMotor({ efectos: { magia_prueba: efecto } });
+    const { motor: m, espia: efecto } = motorConEspia('magia_prueba');
     const s = escenario(nuevaPartida(m), { turnoDe: A });
     const magia = darCarta(s, A, 'magia_prueba');
     let r = hacer(m, s, A, { tipo: 'JUGAR_CARTA', uid: magia });

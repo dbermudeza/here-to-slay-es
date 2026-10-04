@@ -1,28 +1,29 @@
-import type { Catalogo, Evento, GameState, JugadorId, Uid } from './tipos';
+import type { DefinicionesEfectos } from '@hts/cards';
+import type { Catalogo, Emitir, GameState, MarcoEfecto } from './tipos';
 
-/**
- * Punto de enganche para los efectos de carta (Fase 2). El motor llama al resolutor
- * registrado para el id de carta cuando:
- * - un Héroe supera su tirada (R-031);
- * - una carta de Magia se resuelve (R-051).
- *
- * El resolutor recibe un borrador del estado que puede modificar y apilar decisiones.
- */
-export interface ContextoEfecto {
-  catalogo: Catalogo;
-  /** Borrador mutable del estado. */
-  estado: GameState;
-  jugador: JugadorId;
-  uid: Uid;
-  emitir: (evento: Evento) => void;
+/** Entorno con el que se ejecuta un paso de efecto sobre el borrador del estado. */
+export interface EntornoPaso {
+  ctx: Ctx;
+  d: GameState;
+  f: MarcoEfecto;
+  emitir: Emitir;
 }
 
-export type ResolverEfecto = (contexto: ContextoEfecto) => void;
+/**
+ * - siguiente: el paso ha terminado.
+ * - esperar: el paso ha apilado una pregunta o una ventana y continuará cuando se resuelva.
+ */
+export type ResultadoPaso = 'siguiente' | 'esperar';
 
-/** Resolutores indexados por id de carta del catálogo. */
-export type RegistroEfectos = Readonly<Record<string, ResolverEfecto>>;
+/**
+ * Paso implementado en TypeScript (`{ "paso": "custom", "nombre": … }`) para efectos que no
+ * encajan en el DSL. Puede usar `f.sub`, `f.i`, `f.cola` y `f.respuesta` para pausarse y reanudarse.
+ */
+export type ManejadorCustom = (entorno: EntornoPaso) => ResultadoPaso;
+export type RegistroCustom = Readonly<Record<string, ManejadorCustom>>;
 
 export interface Ctx {
   catalogo: Catalogo;
-  efectos: RegistroEfectos;
+  definiciones: DefinicionesEfectos;
+  custom: RegistroCustom;
 }

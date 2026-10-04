@@ -38,6 +38,7 @@ export function cargarPartida(ctx: Ctx, texto: string): GameState {
     'pila',
     'rng',
     'dadosForzados',
+    'temporales',
   ];
   for (const campo of listas) {
     if (!Array.isArray(e[campo])) throw new ErrorCarga(`Campo inválido: ${campo}.`);

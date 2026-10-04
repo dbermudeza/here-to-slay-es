@@ -1,4 +1,4 @@
-/** Resolución de ventanas, jugadas, tiradas y fin de turno (sobre un borrador del estado). */
+/** Resolución de jugadas, ventanas, tiradas y turnos (sobre un borrador del estado). */
 import type { AccionMonstruo } from '@hts/cards';
 import {
   buscarRanura,
@@ -12,18 +12,14 @@ import {
   totalTirada,
 } from './consultas';
 import type { Ctx } from './efectos';
-import {
-  abrirVentanaModificadores,
-  descartarDeMano,
-  PA_POR_TURNO,
-  robar,
-  sacrificarHeroe,
-  tirar,
-  type Emitir,
-} from './ops';
+import { robarCartas, sacrificarHeroe } from './grupo';
+import { apilarMarco } from './marcos';
+import { abrirVentanaModificadores, descartarDeMano, PA_POR_TURNO, tirar } from './ops';
+import { bonosDeTirada, jugadaIndesafiable, notificar, paExtra } from './pasivas';
 import type {
   AccionElegir,
   ContextoTirada,
+  Emitir,
   GameState,
   Jugada,
   Jugador,
@@ -33,7 +29,7 @@ import type {
 } from './tipos';
 import { comprobarVictoria } from './victoria';
 
-/** Llama al resolutor de efecto registrado para la carta (Fase 2), si lo hay. */
+/** Ejecuta el programa de efecto de la carta (Héroe con éxito o Magia), si tiene. */
 export function activarEfecto(
   ctx: Ctx,
   d: GameState,
@@ -43,7 +39,9 @@ export function activarEfecto(
 ): void {
   const carta = idCarta(d, uid);
   emitir({ tipo: 'efectoActivado', jugador: jugadorId, carta });
-  ctx.efectos[carta]?.({ catalogo: ctx.catalogo, estado: d, jugador: jugadorId, uid, emitir });
+  if (ctx.definiciones[carta]?.programa !== undefined) {
+    apilarMarco(d, { jugador: jugadorId, fuente: uid, carta, pasiva: null });
+  }
 }
 
 /** Tirada para usar el efecto de un Héroe (R-031..R-035). */
@@ -59,10 +57,35 @@ export function iniciarTiradaHeroe(
 }
 
 /**
- * Apila una decisión de SACRIFICAR o DESCARTAR. Si el jugador no tiene suficientes cartas, se
- * piden las que tenga. Si no hay elección posible (todas o ninguna), se aplica directamente.
+ * Intento de jugar una carta (desde la mano o "inmediatamente" por un efecto). Abre la ventana de
+ * desafío (R-070), salvo que la jugada no se pueda desafiar (Iron Resolve, Osolechuza Veterano).
+ */
+export function iniciarJugada(ctx: Ctx, d: GameState, jugada: Jugada, emitir: Emitir): void {
+  const carta = idCarta(d, jugada.uid);
+  emitir({
+    tipo: 'cartaJugada',
+    jugador: jugada.jugador,
+    uid: jugada.uid,
+    carta,
+    objetivo: jugada.tipo === 'objeto' ? jugada.objetivo : null,
+  });
+  if (jugadaIndesafiable(ctx, d, jugada)) {
+    emitir({ tipo: 'jugadaIndesafiable', jugador: jugada.jugador, carta });
+    resolverJugada(ctx, d, jugada, emitir);
+    return;
+  }
+  d.secuencia += 1;
+  const duracionMs = d.opciones.duracionVentanaDesafioMs;
+  d.pila.push({ tipo: 'ventanaDesafio', secuencia: d.secuencia, duracionMs, jugada, pasaron: [] });
+  emitir({ tipo: 'ventanaDesafioAbierta', secuencia: d.secuencia, duracionMs });
+}
+
+/**
+ * Apila una decisión de SACRIFICAR o DESCARTAR (penalización de Monstruo). Si el jugador no tiene
+ * suficientes cartas, se piden las que tenga. Si no hay elección posible, se aplica directamente.
  */
 export function pedirEleccion(
+  ctx: Ctx,
   d: GameState,
   j: Jugador,
   accion: AccionElegir,
@@ -73,7 +96,7 @@ export function pedirEleccion(
   const n = Math.min(cantidad, disponibles.length);
   if (n === 0) return;
   if (n === disponibles.length) {
-    aplicarEleccion(d, j, accion, disponibles, emitir);
+    aplicarEleccion(ctx, d, j, accion, disponibles, emitir);
     return;
   }
   d.pila.push({ tipo: 'elegir', jugador: j.id, accion, cantidad: n });
@@ -81,6 +104,7 @@ export function pedirEleccion(
 }
 
 export function aplicarEleccion(
+  ctx: Ctx,
   d: GameState,
   j: Jugador,
   accion: AccionElegir,
@@ -90,7 +114,7 @@ export function aplicarEleccion(
   if (accion === 'descartar') {
     descartarDeMano(d, j, uids, emitir);
   } else {
-    for (const uid of uids) sacrificarHeroe(d, j, uid, emitir);
+    for (const uid of uids) sacrificarHeroe(ctx, d, j, uid, emitir);
   }
 }
 
@@ -124,10 +148,13 @@ export function resolverJugada(ctx: Ctx, d: GameState, jugada: Jugada, emitir: E
       return;
     }
     case 'magia':
-      // R-051: efecto de un solo uso; después va a la pila de descarte.
-      activarEfecto(ctx, d, j.id, jugada.uid, emitir);
+      // R-051: efecto de un solo uso; la carta va a la pila de descarte.
       d.descarte.push(jugada.uid);
       emitir({ tipo: 'magiaResuelta', jugador: j.id, carta });
+      // TODO(regla) D-35 / D-37: el Sabio Encapuchado solo se activa si la Magia se resuelve, y
+      // el efecto de la carta se resuelve antes que los disparadores (se apila encima).
+      notificar(ctx, d, [{ tipo: 'magiaJugada', jugador: j.id }], emitir);
+      activarEfecto(ctx, d, j.id, jugada.uid, emitir);
       return;
   }
 }
@@ -143,17 +170,20 @@ function matar(
 ): void {
   const i = d.monstruosCentro.indexOf(monstruo);
   if (i === -1) throw new ErrorInterno(`El monstruo ${monstruo} no está en el centro`);
+  const paAntes = paExtra(ctx, d, j);
   d.monstruosCentro.splice(i, 1);
   j.monstruos.push(monstruo);
   emitir({ tipo: 'monstruoMatado', jugador: j.id, carta: idCarta(d, monstruo) });
-  if (robarN > 0) robar(d, j, robarN, emitir);
+  // TODO(regla) D-36: Megababosa da su PA extra ya en el turno en que se mata.
+  if (d.turno.jugador === j.id) d.turno.pa += paExtra(ctx, d, j) - paAntes;
   // D-14: si el mazo de Monstruos está vacío, no se repone.
   const nuevo = d.mazoMonstruos.shift();
   if (nuevo !== undefined) {
     d.monstruosCentro.push(nuevo);
     emitir({ tipo: 'monstruoRevelado', carta: idCarta(d, nuevo) });
   }
-  comprobarVictoria(ctx.catalogo, d, j, 'alMatar', emitir);
+  if (comprobarVictoria(ctx.catalogo, d, j, 'alMatar', emitir)) return;
+  if (robarN > 0) robarCartas(ctx, d, j, robarN, emitir);
 }
 
 function aplicarAccionMonstruo(
@@ -170,9 +200,33 @@ function aplicarAccionMonstruo(
       return;
     case 'sacrificar':
     case 'descartar':
-      pedirEleccion(d, j, accion.tipo, accion.cantidad, emitir);
+      pedirEleccion(ctx, d, j, accion.tipo, accion.cantidad, emitir);
       return;
   }
+}
+
+/** Total final de cada tirada (dados + Modificadores + bonos de pasivas y temporales). */
+function totalesFinales(
+  ctx: Ctx,
+  d: GameState,
+  tiradas: readonly Tirada[],
+  contexto: ContextoTirada,
+  emitir: Emitir,
+): number[] {
+  return tiradas.map((t, indice) => {
+    const bonos = bonosDeTirada(ctx, d, t, contexto, indice);
+    const base = totalTirada(t);
+    const total = base + bonos.reduce((s, b) => s + b.valor, 0);
+    emitir({
+      tipo: 'tiradaFinal',
+      jugador: t.jugador,
+      dados: t.dados,
+      modificadores: base - t.dados[0] - t.dados[1],
+      bonos,
+      total,
+    });
+    return total;
+  });
 }
 
 function resolverTiradas(
@@ -182,16 +236,24 @@ function resolverTiradas(
   contexto: ContextoTirada,
   emitir: Emitir,
 ): void {
-  const [primera, segunda] = tiradas;
+  const [primera] = tiradas;
   if (primera === undefined) throw new ErrorInterno('Ventana de modificadores sin tiradas');
+  const totales = totalesFinales(ctx, d, tiradas, contexto, emitir);
+  const total = totales[0] ?? 0;
 
   switch (contexto.tipo) {
     case 'heroe': {
       const heroe = cartaDe(ctx.catalogo, d, contexto.heroe);
       if (heroe.tipo !== 'heroe') throw new ErrorInterno(`${contexto.heroe} no es un Héroe`);
-      const total = totalTirada(primera);
       const exito = total >= heroe.tirada;
       emitir({ tipo: 'tiradaHeroe', jugador: primera.jugador, heroe: heroe.id, total, exito });
+      // TODO(regla) D-37: los disparadores (Aries Ártico, monedas) se resuelven después del efecto del Héroe.
+      notificar(
+        ctx,
+        d,
+        [{ tipo: 'tiradaHeroe', jugador: primera.jugador, heroe: contexto.heroe, exito }],
+        emitir,
+      );
       if (exito) activarEfecto(ctx, d, primera.jugador, contexto.heroe, emitir);
       return;
     }
@@ -199,7 +261,6 @@ function resolverTiradas(
       const monstruo = cartaDe(ctx.catalogo, d, contexto.monstruo);
       if (monstruo.tipo !== 'monstruo')
         throw new ErrorInterno(`${contexto.monstruo} no es un Monstruo`);
-      const total = totalTirada(primera);
       const resultado = enRango(total, monstruo.exito.rango)
         ? 'exito'
         : enRango(total, monstruo.fracaso.rango)
@@ -213,9 +274,10 @@ function resolverTiradas(
       return;
     }
     case 'desafio': {
-      if (segunda === undefined) throw new ErrorInterno('Desafío sin tirada del desafiante');
-      const totalDesafiado = totalTirada(primera);
-      const totalDesafiante = totalTirada(segunda);
+      const totalDesafiado = total;
+      const totalDesafiante = totales[1];
+      if (totalDesafiante === undefined)
+        throw new ErrorInterno('Desafío sin tirada del desafiante');
       // R-072 / D-10: el desafiado solo gana si saca estrictamente más.
       const ganaDesafiante = totalDesafiante >= totalDesafiado;
       emitir({
@@ -257,24 +319,45 @@ export function cerrarVentana(ctx: Ctx, d: GameState, emitir: Emitir): void {
   }
 }
 
+function expirarTemporales(
+  d: GameState,
+  jugadorId: JugadorId,
+  expira: 'finTurno' | 'inicioTurnoPropio',
+  emitir: Emitir,
+): void {
+  const quedan = [];
+  for (const t of d.temporales) {
+    if (t.jugador === jugadorId && t.expira === expira) {
+      emitir({ tipo: 'temporalTerminado', jugador: t.jugador, efecto: t.tipo, carta: t.carta });
+    } else {
+      quedan.push(t);
+    }
+  }
+  d.temporales = quedan;
+}
+
 /** Fin de turno (R-026, R-027): comprueba la victoria y pasa al siguiente jugador en sentido horario. */
 export function finTurno(ctx: Ctx, d: GameState, emitir: Emitir): void {
   const actual = jugadorActivo(d);
   emitir({ tipo: 'turnoTerminado', jugador: actual.id });
+  expirarTemporales(d, actual.id, 'finTurno', emitir);
   if (comprobarVictoria(ctx.catalogo, d, actual, 'finTurno', emitir)) return;
   const i = d.jugadores.indexOf(actual);
   const siguiente = d.jugadores[(i + 1) % d.jugadores.length];
   if (siguiente === undefined) throw new ErrorInterno('Sin jugadores');
+  expirarTemporales(d, siguiente.id, 'inicioTurnoPropio', emitir);
   d.turno = {
     jugador: siguiente.id,
     numero: d.turno.numero + 1,
-    pa: PA_POR_TURNO,
+    // D-03 / D-26: 3 PA, más los extra de Megababosa.
+    pa: PA_POR_TURNO + paExtra(ctx, d, siguiente),
     heroesUsados: [],
+    habilidadesUsadas: [],
   };
   emitir({ tipo: 'turnoIniciado', jugador: siguiente.id, numero: d.turno.numero });
 }
 
-/** Tras cada acción: si no queda nada pendiente y no quedan PA, el turno termina solo (R-026). */
-export function avanzar(ctx: Ctx, d: GameState, emitir: Emitir): void {
+/** Si no queda nada pendiente y no quedan PA, el turno termina solo (R-026). */
+export function avanzarTurno(ctx: Ctx, d: GameState, emitir: Emitir): void {
   if (d.ganador === null && d.pila.length === 0 && d.turno.pa <= 0) finTurno(ctx, d, emitir);
 }

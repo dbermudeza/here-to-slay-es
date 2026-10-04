@@ -4,9 +4,9 @@
  */
 import { siguienteRng } from './rng';
 import { idCarta } from './consultas';
-import type { ContextoTirada, Evento, GameState, Jugador, JugadorId, Tirada, Uid } from './tipos';
+import type { ContextoTirada, Emitir, GameState, Jugador, JugadorId, Tirada, Uid } from './tipos';
 
-export type Emitir = (evento: Evento) => void;
+export type { Emitir };
 
 export const PA_POR_TURNO = 3;
 export const CARTAS_MANO_INICIAL = 5;
@@ -42,25 +42,39 @@ export function quitar<T>(lista: T[], valor: T): boolean {
   return true;
 }
 
-/** ROBAR n cartas. Si el mazo se agota, se baraja el descarte como nuevo mazo (R-095). */
-export function robar(d: GameState, j: Jugador, n: number, emitir: Emitir): void {
+/**
+ * Si el mazo está vacío, baraja la pila de descarte como nuevo mazo (R-095).
+ * Devuelve false si no hay cartas ni en el mazo ni en el descarte.
+ */
+export function reponerMazo(d: GameState, emitir: Emitir): boolean {
+  if (d.mazo.length > 0) return true;
+  if (d.descarte.length === 0) {
+    // TODO(regla) D-16: sin mazo ni descarte, la acción de robar no tiene efecto.
+    emitir({ tipo: 'mazoAgotado' });
+    return false;
+  }
+  d.mazo = d.descarte;
+  d.descarte = [];
+  barajar(d, d.mazo);
+  emitir({ tipo: 'mazoRebarajado', cartas: d.mazo.length });
+  return true;
+}
+
+/**
+ * ROBAR n cartas del mazo, sin activar disparadores. Devuelve las cartas robadas.
+ * Usa `robarCartas` (grupo.ts) salvo en la preparación.
+ */
+export function robar(d: GameState, j: Jugador, n: number, emitir: Emitir): Uid[] {
+  const robadas: Uid[] = [];
   for (let i = 0; i < n; i++) {
-    if (d.mazo.length === 0) {
-      if (d.descarte.length === 0) {
-        // TODO(regla) D-16: sin mazo ni descarte, la acción de robar no tiene efecto.
-        emitir({ tipo: 'mazoAgotado' });
-        return;
-      }
-      d.mazo = d.descarte;
-      d.descarte = [];
-      barajar(d, d.mazo);
-      emitir({ tipo: 'mazoRebarajado', cartas: d.mazo.length });
-    }
+    if (!reponerMazo(d, emitir)) break;
     const uid = d.mazo.shift();
-    if (uid === undefined) return;
+    if (uid === undefined) break;
     j.mano.push(uid);
+    robadas.push(uid);
     emitir({ tipo: 'cartaRobada', jugador: j.id, uid, carta: idCarta(d, uid) });
   }
+  return robadas;
 }
 
 /** DESCARTAR cartas concretas de la mano. */
@@ -76,22 +90,6 @@ export function descartarDeMano(
     d.descarte.push(uid);
   }
   emitir({ tipo: 'cartasDescartadas', jugador: j.id, cartas: uids.map((u) => idCarta(d, u)) });
-}
-
-/** SACRIFICAR un Héroe propio. Su Objeto equipado también va al descarte (D-07). */
-export function sacrificarHeroe(d: GameState, j: Jugador, heroe: Uid, emitir: Emitir): void {
-  const i = j.grupo.findIndex((r) => r.heroe === heroe);
-  const ranura = j.grupo[i];
-  if (ranura === undefined) return;
-  j.grupo.splice(i, 1);
-  d.descarte.push(ranura.heroe);
-  if (ranura.objeto !== null) d.descarte.push(ranura.objeto);
-  emitir({
-    tipo: 'heroeSacrificado',
-    jugador: j.id,
-    carta: idCarta(d, ranura.heroe),
-    objeto: ranura.objeto === null ? null : idCarta(d, ranura.objeto),
-  });
 }
 
 export function tirar(d: GameState, jugador: JugadorId, emitir: Emitir): Tirada {

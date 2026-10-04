@@ -1,16 +1,33 @@
 import { cartaDe, cimaPila, ErrorInterno, idCarta, jugador } from './consultas';
 import type { Ctx } from './efectos';
-import { aplicarEleccion, cerrarVentana, finTurno, iniciarTiradaHeroe } from './flujo';
+import {
+  aplicarEleccion,
+  cerrarVentana,
+  finTurno,
+  iniciarJugada,
+  iniciarTiradaHeroe,
+} from './flujo';
+import { robarCartas } from './grupo';
+import { entregarRespuesta } from './interprete';
+import { apilarMarco } from './marcos';
 import {
   abrirVentanaModificadores,
   CARTAS_MANO_INICIAL,
   descartarDeMano,
   quitar,
-  robar,
   tirar,
-  type Emitir,
 } from './ops';
-import type { Envio, GameState, Jugada } from './tipos';
+import { habilidadDe, heroeSellado, notificar } from './pasivas';
+import type { Emitir, Envio, GameState, Jugada, Respuesta, Valor } from './tipos';
+
+function valorDeRespuesta(r: Respuesta): Valor {
+  if ('jugador' in r) return r.jugador;
+  if ('cartas' in r) return [...r.cartas];
+  if ('indice' in r) return r.indice;
+  if ('si' in r) return r.si;
+  if ('valor' in r) return r.valor;
+  return true;
+}
 
 /** Aplica una acción YA VALIDADA sobre el borrador `d`. */
 export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir: Emitir): void {
@@ -21,11 +38,10 @@ export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir
       cerrarVentana(ctx, d, emitir);
       return;
 
-    case 'ROBAR': {
+    case 'ROBAR':
       d.turno.pa -= 1;
-      robar(d, jugador(d, actor), 1, emitir);
+      robarCartas(ctx, d, jugador(d, actor), 1, emitir);
       return;
-    }
 
     case 'RENOVAR_MANO': {
       // R-023: descartar toda la mano (si hay) y robar 5.
@@ -33,7 +49,7 @@ export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir
       d.turno.pa -= 3;
       descartarDeMano(d, j, [...j.mano], emitir);
       emitir({ tipo: 'manoRenovada', jugador: j.id });
-      robar(d, j, CARTAS_MANO_INICIAL, emitir);
+      robarCartas(ctx, d, j, CARTAS_MANO_INICIAL, emitir);
       return;
     }
 
@@ -48,24 +64,7 @@ export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir
       else if (accion.objetivo !== undefined) {
         jugada = { tipo: 'objeto', jugador: j.id, uid: accion.uid, objetivo: accion.objetivo };
       } else throw new ErrorInterno('Objeto sin objetivo');
-      emitir({
-        tipo: 'cartaJugada',
-        jugador: j.id,
-        uid: accion.uid,
-        carta: carta.id,
-        objetivo: accion.objetivo ?? null,
-      });
-      // R-070: los demás pueden desafiar la carta antes de que tenga efecto.
-      d.secuencia += 1;
-      const duracionMs = d.opciones.duracionVentanaDesafioMs;
-      d.pila.push({
-        tipo: 'ventanaDesafio',
-        secuencia: d.secuencia,
-        duracionMs,
-        jugada,
-        pasaron: [],
-      });
-      emitir({ tipo: 'ventanaDesafioAbierta', secuencia: d.secuencia, duracionMs });
+      iniciarJugada(ctx, d, jugada, emitir);
       return;
     }
 
@@ -85,6 +84,18 @@ export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir
     case 'FIN_TURNO':
       finTurno(ctx, d, emitir);
       return;
+
+    case 'USAR_HABILIDAD': {
+      const j = jugador(d, actor);
+      const hab = habilidadDe(ctx, d, j, accion.uid);
+      if (hab === null || hab.pasiva.tipo !== 'habilidad')
+        throw new ErrorInterno('Habilidad inexistente');
+      d.turno.pa -= hab.pasiva.costePa;
+      d.turno.habilidadesUsadas.push(accion.uid);
+      emitir({ tipo: 'habilidadUsada', jugador: j.id, carta: hab.carta });
+      apilarMarco(d, { jugador: j.id, fuente: accion.uid, carta: hab.carta, pasiva: hab.indice });
+      return;
+    }
 
     case 'DESAFIAR': {
       if (cima?.tipo !== 'ventanaDesafio') throw new ErrorInterno('Desafío sin ventana');
@@ -109,6 +120,12 @@ export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir
         { tipo: 'desafio', jugada: cima.jugada, desafiante: actor },
         emitir,
       );
+      notificar(
+        ctx,
+        d,
+        [{ tipo: 'desafiado', desafiado: cima.jugada.jugador, desafiante: actor }],
+        emitir,
+      );
       return;
     }
 
@@ -126,13 +143,14 @@ export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir
       const j = jugador(d, actor);
       const tirada = cima.tiradas[accion.tirada];
       if (tirada === undefined) throw new ErrorInterno('Tirada inexistente');
+      const carta = idCarta(d, accion.uid);
       quitar(j.mano, accion.uid);
       d.descarte.push(accion.uid);
-      tirada.modificaciones.push({ jugador: actor, uid: accion.uid, valor: accion.valor });
+      tirada.modificaciones.push({ jugador: actor, uid: accion.uid, carta, valor: accion.valor });
       emitir({
         tipo: 'modificadorJugado',
         jugador: actor,
-        carta: idCarta(d, accion.uid),
+        carta,
         valor: accion.valor,
         sobre: tirada.jugador,
       });
@@ -140,6 +158,12 @@ export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir
       d.secuencia += 1;
       cima.secuencia = d.secuencia;
       emitir({ tipo: 'ventanaReiniciada', secuencia: d.secuencia, duracionMs: cima.duracionMs });
+      notificar(
+        ctx,
+        d,
+        [{ tipo: 'modificadorJugado', jugador: actor, tirada: accion.tirada }],
+        emitir,
+      );
       return;
     }
 
@@ -148,14 +172,22 @@ export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir
         throw new ErrorInterno('Sin tirada inmediata pendiente');
       d.pila.pop();
       // D-05: la tirada inmediata no cuesta PA, pero cuenta como el uso de ese turno.
-      if (accion.tirar) iniciarTiradaHeroe(d, actor, cima.heroe, emitir);
+      if (accion.tirar && !heroeSellado(ctx, d, cima.heroe))
+        iniciarTiradaHeroe(d, actor, cima.heroe, emitir);
       return;
     }
 
     case 'ELEGIR': {
       if (cima?.tipo !== 'elegir') throw new ErrorInterno('Sin elección pendiente');
       d.pila.pop();
-      aplicarEleccion(d, jugador(d, actor), cima.accion, accion.uids, emitir);
+      aplicarEleccion(ctx, d, jugador(d, actor), cima.accion, accion.uids, emitir);
+      return;
+    }
+
+    case 'RESPONDER': {
+      if (cima?.tipo !== 'decision') throw new ErrorInterno('Sin decisión pendiente');
+      d.pila.pop();
+      entregarRespuesta(d, cima.efecto, valorDeRespuesta(accion.respuesta));
       return;
     }
   }

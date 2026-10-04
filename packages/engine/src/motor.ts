@@ -1,14 +1,17 @@
-import type { Carta } from '@hts/cards';
+import { DEFINICIONES_EFECTOS, type Carta, type DefinicionesEfectos } from '@hts/cards';
 import { aplicar } from './aplicar';
 import { crearPartida, type ConfigPartida } from './crear';
-import type { Ctx, RegistroEfectos } from './efectos';
-import { avanzar } from './flujo';
+import { CUSTOM_POR_DEFECTO } from './customs';
+import type { Ctx, RegistroCustom } from './efectos';
+import { avanzarTurno } from './flujo';
+import { ejecutarEfectos } from './interprete';
 import { accionesLegales } from './legales';
 import { cargarPartida, serializarPartida } from './serializar';
 import type {
   Accion,
   Actor,
   CodigoError,
+  Emitir,
   Envio,
   Evento,
   GameState,
@@ -19,10 +22,19 @@ import { validar } from './validar';
 import { getPlayerView, type VistaJugador } from './vista';
 
 export interface OpcionesMotor {
-  efectos?: RegistroEfectos;
+  /** Definiciones de efectos (por defecto, las del juego base de @hts/cards). */
+  definiciones?: DefinicionesEfectos;
+  /** Pasos custom adicionales; se combinan con los del juego base. */
+  custom?: RegistroCustom;
 }
 
 const clonar = <T>(valor: T): T => JSON.parse(JSON.stringify(valor)) as T;
+
+/** Tras cada acción: ejecuta los efectos pendientes y, si no queda nada ni PA, termina el turno. */
+function avanzar(ctx: Ctx, d: GameState, emitir: Emitir): void {
+  ejecutarEfectos(ctx, d, emitir);
+  avanzarTurno(ctx, d, emitir);
+}
 
 /** Núcleo puro: valida y aplica una acción sin mutar el estado recibido. */
 export function reducir(ctx: Ctx, state: GameState, envio: Envio): Resultado {
@@ -52,7 +64,8 @@ export interface Motor {
 export function crearMotor(cartas: readonly Carta[], opciones: OpcionesMotor = {}): Motor {
   const ctx: Ctx = {
     catalogo: new Map(cartas.map((c) => [c.id, c])),
-    efectos: opciones.efectos ?? {},
+    definiciones: opciones.definiciones ?? DEFINICIONES_EFECTOS,
+    custom: { ...CUSTOM_POR_DEFECTO, ...opciones.custom },
   };
   return {
     catalogo: ctx.catalogo,

@@ -1,6 +1,15 @@
 import { buscarJugador, buscarRanura, cartaDe, cimaPila, cumpleRequisitos } from './consultas';
 import type { Ctx } from './efectos';
-import { SISTEMA, type CodigoError, type Envio, type GameState, type Jugador } from './tipos';
+import { habilidadDe, heroeSellado } from './pasivas';
+import {
+  SISTEMA,
+  type CodigoError,
+  type Envio,
+  type GameState,
+  type Jugador,
+  type Pregunta,
+  type Respuesta,
+} from './tipos';
 
 const TIPOS_JUGABLES = new Set(['heroe', 'objeto', 'objeto_maldito', 'magia']);
 
@@ -29,6 +38,7 @@ export function validar(ctx: Ctx, s: GameState, { actor, accion }: Envio): Codig
     case 'TIRAR_HEROE':
     case 'ATACAR':
     case 'RENOVAR_MANO':
+    case 'USAR_HABILIDAD':
     case 'FIN_TURNO': {
       if (actor !== s.turno.jugador) return 'NO_ES_TU_TURNO';
       if (cima !== undefined) return 'HAY_DECISION_PENDIENTE';
@@ -73,6 +83,44 @@ export function validar(ctx: Ctx, s: GameState, { actor, accion }: Envio): Codig
           : accion.uids.every((u) => j.grupo.some((r) => r.heroe === u));
       return validos ? null : 'SELECCION_INVALIDA';
     }
+
+    case 'RESPONDER':
+      if (cima?.tipo !== 'decision' || cima.jugador !== actor) return 'NO_ES_MOMENTO';
+      return respuestaValida(s, cima.pregunta, accion.respuesta) ? null : 'RESPUESTA_INVALIDA';
+  }
+}
+
+/** Comprueba que la respuesta tenga la forma y los valores que admite la pregunta. */
+export function respuestaValida(s: GameState, p: Pregunta, r: Respuesta): boolean {
+  switch (p.tipo) {
+    case 'jugador':
+      return 'jugador' in r && p.opciones.includes(r.jugador);
+    case 'cartas': {
+      if (!('cartas' in r) || !Array.isArray(r.cartas)) return false;
+      const unicas = new Set(r.cartas);
+      return (
+        unicas.size === r.cartas.length &&
+        r.cartas.length >= p.min &&
+        r.cartas.length <= p.max &&
+        r.cartas.every((c) => p.opciones.includes(c))
+      );
+    }
+    case 'oculta': {
+      const de = buscarJugador(s, p.de);
+      return (
+        'indice' in r &&
+        Number.isInteger(r.indice) &&
+        de !== undefined &&
+        r.indice >= 0 &&
+        r.indice < de.mano.length
+      );
+    }
+    case 'confirmar':
+      return 'si' in r && typeof r.si === 'boolean';
+    case 'valor':
+      return 'valor' in r && p.opciones.includes(r.valor);
+    case 'ver':
+      return 'ok' in r && r.ok === true;
   }
 }
 
@@ -82,7 +130,16 @@ function validarAccionDeTurno(
   j: Jugador,
   accion: Extract<
     Envio['accion'],
-    { tipo: 'ROBAR' | 'JUGAR_CARTA' | 'TIRAR_HEROE' | 'ATACAR' | 'RENOVAR_MANO' | 'FIN_TURNO' }
+    {
+      tipo:
+        | 'ROBAR'
+        | 'JUGAR_CARTA'
+        | 'TIRAR_HEROE'
+        | 'ATACAR'
+        | 'RENOVAR_MANO'
+        | 'USAR_HABILIDAD'
+        | 'FIN_TURNO';
+    }
   >,
 ): CodigoError | null {
   const pa = s.turno.pa;
@@ -108,7 +165,17 @@ function validarAccionDeTurno(
     case 'TIRAR_HEROE':
       if (pa < 1) return 'PA_INSUFICIENTES';
       if (!j.grupo.some((r) => r.heroe === accion.uid)) return 'HEROE_NO_EN_GRUPO';
-      return s.turno.heroesUsados.includes(accion.uid) ? 'HEROE_YA_USADO' : null;
+      if (s.turno.heroesUsados.includes(accion.uid)) return 'HEROE_YA_USADO';
+      // Llave Selladora.
+      return heroeSellado(ctx, s, accion.uid) ? 'HEROE_SELLADO' : null;
+    case 'USAR_HABILIDAD': {
+      const hab = habilidadDe(ctx, s, j, accion.uid);
+      if (hab === null || hab.pasiva.tipo !== 'habilidad') return 'HABILIDAD_NO_DISPONIBLE';
+      if (pa < hab.pasiva.costePa) return 'PA_INSUFICIENTES';
+      return hab.pasiva.unaVezPorTurno && s.turno.habilidadesUsadas.includes(accion.uid)
+        ? 'HABILIDAD_NO_DISPONIBLE'
+        : null;
+    }
     case 'ATACAR': {
       if (pa < 2) return 'PA_INSUFICIENTES';
       if (!s.monstruosCentro.includes(accion.uid)) return 'MONSTRUO_NO_DISPONIBLE';

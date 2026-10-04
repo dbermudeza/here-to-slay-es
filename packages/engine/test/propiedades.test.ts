@@ -134,6 +134,59 @@ describe.skipIf(!existsSync(RUTA_CARTAS_JSON))('Catálogo real (Referencias/cart
   });
 });
 
+describe.skipIf(!existsSync(RUTA_CARTAS_JSON))(
+  'Información oculta con efectos (catálogo real)',
+  () => {
+    it('ninguna vista contiene cartas de manos ajenas, salvo las que un efecto le enseña', () => {
+      const { cartas } = ArchivoCartasSchema.parse(
+        JSON.parse(readFileSync(RUTA_CARTAS_JSON, 'utf8')),
+      );
+      const real = crearMotor(cartas);
+      for (let partida = 0; partida < 6; partida++) {
+        let s = nuevaPartida(real, { jugadores: [A, B, C, 'dani'], semilla: `oculta${partida}` });
+        let rng: EstadoRng = crearRng(`oculta${partida}`);
+        for (let paso = 0; paso < 250 && s.ganador === null; paso++) {
+          for (const j of s.jugadores) {
+            const permitidas = new Set<string>(j.mano);
+            for (const p of s.pila) {
+              if (p.tipo !== 'decision' || p.jugador !== j.id) continue;
+              if (p.pregunta.tipo === 'cartas')
+                p.pregunta.opciones.forEach((u) => permitidas.add(u));
+              if (p.pregunta.tipo === 'ver') p.pregunta.cartas.forEach((u) => permitidas.add(u));
+            }
+            const texto = JSON.stringify(real.getPlayerView(s, j.id));
+            for (const otro of s.jugadores) {
+              if (otro === j) continue;
+              for (const u of otro.mano) {
+                if (!permitidas.has(u))
+                  expect(texto, `${j.id} ve ${u} de ${otro.id}`).not.toContain(`"${u}"`);
+              }
+            }
+            for (const u of s.mazo) if (!permitidas.has(u)) expect(texto).not.toContain(`"${u}"`);
+          }
+          const opciones: { actor: Actor; accion: Accion }[] = s.jugadores.flatMap((j) =>
+            real.accionesLegales(s, j.id).map((accion) => ({ actor: j.id, accion })),
+          );
+          const v = s.pila[s.pila.length - 1];
+          if (v !== undefined && 'secuencia' in v) {
+            opciones.push({
+              actor: SISTEMA,
+              accion: { tipo: 'CERRAR_VENTANA', secuencia: v.secuencia },
+            });
+          }
+          let x: number;
+          [x, rng] = siguienteRng(rng);
+          const elegida = opciones[Math.floor(x * opciones.length)];
+          if (elegida === undefined) throw new Error('bloqueo');
+          const r = real.reducer(s, elegida);
+          if (!r.ok) throw new Error(r.error.codigo);
+          s = r.state;
+        }
+      }
+    });
+  },
+);
+
 describe('Información oculta (getPlayerView)', () => {
   it('cada jugador ve su mano, el tamaño de las ajenas y nunca el mazo ni el RNG', () => {
     const s = nuevaPartida(motor);

@@ -3,7 +3,7 @@
  * Referencias/cartas.es.json.
  */
 import { CartaSchema, CLASES, type Carta, type Clase } from '@hts/cards';
-import { expect } from 'vitest';
+import { expect, vi } from 'vitest';
 import {
   crearMotor,
   problemaDeConservacion,
@@ -11,6 +11,7 @@ import {
   type Accion,
   type Actor,
   type CodigoError,
+  type EntornoPaso,
   type Evento,
   type GameState,
   type Motor,
@@ -153,6 +154,21 @@ export const CATALOGO: Carta[] = crudas.map((c) => CartaSchema.parse(c));
 
 export const nuevoMotor = (opciones?: OpcionesMotor): Motor => crearMotor(CATALOGO, opciones);
 
+/** Motor cuyo efecto para `cartaId` es un espía: registra cada activación y no hace nada más. */
+export function motorConEspia(cartaId: string) {
+  const espia = vi.fn<(e: EntornoPaso) => void>();
+  const motor = nuevoMotor({
+    definiciones: { [cartaId]: { programa: [{ paso: 'custom', nombre: 'espia' }] } },
+    custom: {
+      espia: (e) => {
+        espia(e);
+        return 'siguiente';
+      },
+    },
+  });
+  return { motor, espia };
+}
+
 export const A = 'ana';
 export const B = 'beto';
 export const C = 'cata';
@@ -217,7 +233,13 @@ export function escenario(
       return uid;
     });
   }
-  s.turno = { jugador: turnoDe, numero: s.turno.numero, pa: 3, heroesUsados: [] };
+  s.turno = {
+    jugador: turnoDe,
+    numero: s.turno.numero,
+    pa: 3,
+    heroesUsados: [],
+    habilidadesUsadas: [],
+  };
   s.pila = [];
   return s;
 }

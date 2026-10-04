@@ -1,4 +1,4 @@
-import type { AccionElegir, Evento, MotivoVictoria } from './tipos';
+import type { AccionElegir, Evento, MotivoVictoria, TipoTemporal } from './tipos';
 
 export interface Nombres {
   carta: (id: string) => string;
@@ -10,6 +10,14 @@ const MOTIVOS: Record<MotivoVictoria, string> = {
   grupoCompleto: 'ha completado un Grupo con las 6 clases',
   grupoCompletoYMonstruo: 'tiene las 6 clases y al menos 1 Monstruo',
   cuatroMonstruosTresClases: 'tiene 4 Monstruos y al menos 3 clases',
+};
+
+const TEMPORALES: Record<TipoTemporal, (valor: number) => string> = {
+  bonoTirada: (v) =>
+    `${v > 0 ? '+' : '−'}${Math.abs(v)} a todas sus tiradas hasta el final de su turno`,
+  noDestruible: () => 'sus Héroes no pueden ser destruidos hasta su próximo turno',
+  noArrebatable: () => 'sus Héroes no pueden ser arrebatados hasta su próximo turno',
+  noDesafiable: () => 'sus cartas no pueden ser desafiadas el resto del turno',
 };
 
 const VERBOS: Record<AccionElegir, string> = { sacrificar: 'sacrificar', descartar: 'descartar' };
@@ -49,6 +57,7 @@ export function describirEvento(e: Evento, n: Nombres): string | null {
     case 'ventanaReiniciada':
     case 'ventanaCerrada':
     case 'efectoActivado':
+    case 'esperandoDecision':
       return null;
     case 'pasa':
       return `${J(e.jugador)} no desafía.`;
@@ -96,5 +105,61 @@ export function describirEvento(e: Evento, n: Nombres): string | null {
         : `${J(e.jugador)} sacrifica a ${C(e.carta)} (y su ${C(e.objeto)}).`;
     case 'victoria':
       return `🏆 ¡${J(e.jugador)} gana la partida! ${MOTIVOS[e.motivo]}.`;
+    case 'jugadaIndesafiable':
+      return `${C(e.carta)} no se puede desafiar.`;
+    case 'tiradaFinal': {
+      const partes = [`${e.dados[0]} + ${e.dados[1]}`];
+      if (e.modificadores !== 0) partes.push(`${conSigno(e.modificadores)} (Modificadores)`);
+      for (const b of e.bonos) partes.push(`${conSigno(b.valor)} (${C(b.carta)})`);
+      return partes.length === 1
+        ? null
+        : `Tirada final de ${J(e.jugador)}: ${partes.join(' ')} = ${e.total}.`;
+    }
+    case 'heroeSellado':
+      return `${C(e.heroe)} está sellado: no se puede usar su efecto.`;
+    case 'disparadorActivado':
+      return `Se activa la habilidad de ${C(e.carta)} (${J(e.jugador)}).`;
+    case 'habilidadUsada':
+      return `${J(e.jugador)} usa la habilidad de ${C(e.carta)}.`;
+    case 'sinObjetivos':
+      return `${C(e.carta)}: no hay objetivos válidos.`;
+    case 'heroeDestruido':
+      return e.objeto === null
+        ? `${J(e.jugador)} DESTRUYE a ${C(e.carta)} de ${J(e.dueno)}.`
+        : e.objetoAMano
+          ? `${J(e.jugador)} DESTRUYE a ${C(e.carta)} de ${J(e.dueno)} y se queda su ${C(e.objeto)}.`
+          : `${J(e.jugador)} DESTRUYE a ${C(e.carta)} (y su ${C(e.objeto)}) de ${J(e.dueno)}.`;
+    case 'senueloUsado':
+      return `${C(e.objeto)} protege a ${C(e.heroe)} de ${J(e.dueno)} y va a la pila de descarte.`;
+    case 'heroeArrebatado':
+      return `${J(e.jugador)} ARREBATA a ${C(e.carta)} de ${J(e.de)}.`;
+    case 'heroeMovido':
+      return `${C(e.carta)} pasa del Grupo de ${J(e.de)} al de ${J(e.a)}.`;
+    case 'cartaSacada':
+      return e.carta === null
+        ? `${J(e.jugador)} saca una carta de la mano de ${J(e.de)}.`
+        : `${J(e.jugador)} saca ${C(e.carta)} de la mano de ${J(e.de)}.`;
+    case 'cartaDada':
+      return e.carta === null
+        ? `${J(e.jugador)} da una carta a ${J(e.a)}.`
+        : `${J(e.jugador)} da ${C(e.carta)} a ${J(e.a)}.`;
+    case 'manoVista':
+      return `${J(e.jugador)} mira la mano de ${J(e.de)}.`;
+    case 'manosIntercambiadas':
+      return `${J(e.jugador)} intercambia su mano con ${J(e.con)}.`;
+    case 'cartaRecuperada':
+      return `${J(e.jugador)} recupera ${C(e.carta)} de la pila de descarte.`;
+    case 'cartaRevelada':
+      return `${J(e.jugador)} revela ${C(e.carta)}.`;
+    case 'mazoMirado':
+      return `${J(e.jugador)} mira las ${plural(e.cartas, 'carta superior', 'cartas superiores')} del mazo.`;
+    case 'mazoReordenado':
+      return `${J(e.jugador)} devuelve ${plural(e.cartas, 'carta', 'cartas')} a la parte superior del mazo.`;
+    case 'objetoDevuelto':
+      return `${C(e.carta)} (equipado a ${C(e.heroe)}) vuelve a la mano de ${J(e.dueno)}.`;
+    case 'temporalActivado':
+      return `${J(e.jugador)}: ${TEMPORALES[e.efecto](e.valor)} (${C(e.carta)}).`;
+    case 'temporalTerminado':
+      return `Termina el efecto de ${C(e.carta)} para ${J(e.jugador)}.`;
   }
 }
