@@ -139,8 +139,18 @@ export const RangoTiradaSchema = z.discriminatedUnion('tipo', [
 ]);
 export type RangoTirada = z.infer<typeof RangoTiradaSchema>;
 
+/** Consecuencia estructurada de un resultado de ataque, que aplica el motor. */
+export const AccionMonstruoSchema = z.discriminatedUnion('tipo', [
+  /** MATAR el monstruo y, opcionalmente, ROBAR cartas. */
+  z.object({ tipo: z.literal('matar'), robar: z.number().int().min(0).default(0) }),
+  z.object({ tipo: z.literal('sacrificar'), cantidad: z.number().int().min(1) }),
+  z.object({ tipo: z.literal('descartar'), cantidad: z.number().int().min(1) }),
+]);
+export type AccionMonstruo = z.infer<typeof AccionMonstruoSchema>;
+
 export const ResultadoMonstruoSchema = z.object({
   rango: RangoTiradaSchema,
+  accion: AccionMonstruoSchema,
   texto: textoSchema,
   textoOriginal: textoSchema,
 });
@@ -150,9 +160,13 @@ export const MonstruoSchema = z.object({
   tipo: z.literal('monstruo'),
   requisitos: z.array(RequisitoSchema).min(1),
   /** Resultado que mata al monstruo (lo mueve a tu zona). */
-  exito: ResultadoMonstruoSchema,
+  exito: ResultadoMonstruoSchema.refine((r) => r.accion.tipo === 'matar', {
+    message: 'El resultado de éxito debe MATAR al monstruo.',
+  }),
   /** Resultado negativo (sacrificar, descartar…). */
-  fracaso: ResultadoMonstruoSchema,
+  fracaso: ResultadoMonstruoSchema.refine((r) => r.accion.tipo !== 'matar', {
+    message: 'El resultado de fracaso no puede MATAR al monstruo.',
+  }),
   /** Efecto pasivo que obtienes al matarlo. */
   texto: textoSchema,
   textoOriginal: textoSchema,

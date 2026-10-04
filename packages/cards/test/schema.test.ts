@@ -20,8 +20,18 @@ const monstruo = {
   nombreOriginal: 'Dracos',
   copias: 1,
   requisitos: ['heroe'],
-  exito: { rango: { tipo: 'max', valor: 5 }, texto: 'MATA', textoOriginal: 'SLAY' },
-  fracaso: { rango: { tipo: 'min', valor: 8 }, texto: 'SACRIFICA', textoOriginal: 'SACRIFICE' },
+  exito: {
+    rango: { tipo: 'max', valor: 5 },
+    accion: { tipo: 'matar' },
+    texto: 'MATA',
+    textoOriginal: 'SLAY',
+  },
+  fracaso: {
+    rango: { tipo: 'min', valor: 8 },
+    accion: { tipo: 'sacrificar', cantidad: 1 },
+    texto: 'SACRIFICA',
+    textoOriginal: 'SACRIFICE',
+  },
   texto: 'x',
   textoOriginal: 'x',
 };
@@ -53,6 +63,13 @@ describe('CartaSchema', () => {
 
   it('acepta monstruos con rangos invertidos (Dracos)', () => {
     expect(CartaSchema.safeParse(monstruo).success).toBe(true);
+  });
+
+  it('exige que el éxito mate y que el fracaso no mate', () => {
+    const exitoQueSacrifica = { ...monstruo.exito, accion: { tipo: 'sacrificar', cantidad: 1 } };
+    const fracasoQueMata = { ...monstruo.fracaso, accion: { tipo: 'matar', robar: 0 } };
+    expect(CartaSchema.safeParse({ ...monstruo, exito: exitoQueSacrifica }).success).toBe(false);
+    expect(CartaSchema.safeParse({ ...monstruo, fracaso: fracasoQueMata }).success).toBe(false);
   });
 
   it('exige al menos un requisito en monstruos', () => {

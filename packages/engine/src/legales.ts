@@ -1,0 +1,75 @@
+import { buscarJugador, cartaDe, cimaPila } from './consultas';
+import type { Ctx } from './efectos';
+import type { Accion, Actor, GameState, Uid } from './tipos';
+import { validar } from './validar';
+
+function combinaciones<T>(lista: readonly T[], k: number): T[][] {
+  if (k === 0) return [[]];
+  const resultado: T[][] = [];
+  lista.forEach((x, i) => {
+    for (const resto of combinaciones(lista.slice(i + 1), k - 1)) resultado.push([x, ...resto]);
+  });
+  return resultado;
+}
+
+/**
+ * Todas las acciones legales de `actor` en el estado actual. Se generan candidatas y se filtran con
+ * `validar`, así que la lista nunca contradice al reducer. Sirve para la UI y los bots.
+ */
+export function accionesLegales(ctx: Ctx, s: GameState, actor: Actor): Accion[] {
+  const j = buscarJugador(s, actor);
+  if (j === undefined || s.ganador !== null) return [];
+  const candidatas: Accion[] = [];
+  const cima = cimaPila(s);
+
+  if (cima === undefined && s.turno.jugador === actor) {
+    candidatas.push({ tipo: 'ROBAR' }, { tipo: 'RENOVAR_MANO' }, { tipo: 'FIN_TURNO' });
+    const huecos = s.jugadores.flatMap((x) =>
+      x.grupo.filter((r) => r.objeto === null).map((r) => r.heroe),
+    );
+    for (const uid of j.mano) {
+      const tipo = cartaDe(ctx.catalogo, s, uid).tipo;
+      if (tipo === 'objeto' || tipo === 'objeto_maldito') {
+        for (const objetivo of huecos) candidatas.push({ tipo: 'JUGAR_CARTA', uid, objetivo });
+      } else {
+        candidatas.push({ tipo: 'JUGAR_CARTA', uid });
+      }
+    }
+    for (const r of j.grupo) candidatas.push({ tipo: 'TIRAR_HEROE', uid: r.heroe });
+    for (const uid of s.monstruosCentro) candidatas.push({ tipo: 'ATACAR', uid });
+  }
+
+  switch (cima?.tipo) {
+    case 'ventanaDesafio':
+      candidatas.push({ tipo: 'PASAR' });
+      for (const uid of j.mano) candidatas.push({ tipo: 'DESAFIAR', uid });
+      break;
+    case 'ventanaModificadores':
+      for (const uid of j.mano) {
+        const carta = cartaDe(ctx.catalogo, s, uid);
+        if (carta.tipo !== 'modificador') continue;
+        for (const valor of carta.opciones) {
+          cima.tiradas.forEach((_, tirada) => {
+            candidatas.push({ tipo: 'JUGAR_MODIFICADOR', uid, valor, tirada });
+          });
+        }
+      }
+      break;
+    case 'tiradaInmediata':
+      candidatas.push(
+        { tipo: 'TIRADA_INMEDIATA', tirar: true },
+        { tipo: 'TIRADA_INMEDIATA', tirar: false },
+      );
+      break;
+    case 'elegir': {
+      const opciones: Uid[] = cima.accion === 'descartar' ? j.mano : j.grupo.map((r) => r.heroe);
+      for (const uids of combinaciones(opciones, cima.cantidad))
+        candidatas.push({ tipo: 'ELEGIR', uids });
+      break;
+    }
+    case undefined:
+      break;
+  }
+
+  return candidatas.filter((accion) => validar(ctx, s, { actor, accion }) === null);
+}

@@ -6,7 +6,7 @@ por sesión**. Antes de escribir código, presenta el plan de la fase y espera l
 ## Estado de las fases
 
 - [x] Fase 0 — Análisis (reglas, esquema de cartas, transcripción, validador)
-- [ ] Fase 1 — Motor núcleo
+- [x] Fase 1 — Motor núcleo
 - [ ] Fase 2 — Cartas (DSL + todos los efectos con test)
 - [ ] Fase 3 — Bots + simulación de 1.000 partidas
 - [ ] Fase 4 — UI local (hot-seat y contra bots)
@@ -62,5 +62,13 @@ un commit descriptivo.
   - Decisiones pendientes en pila.
   - Vistas filtradas por jugador.
   - Cada regla se prueba con un test que cita su `R-xxx`.
+- **API del motor** (`crearMotor(cartas, { efectos })`):
+  - `reducer(state, { actor, accion })` devuelve `{ ok, state, events }` o `{ ok: false, error }`.
+  - `validar` da el código de error de una acción ilegal; `accionesLegales` lista las legales.
+  - `getPlayerView` devuelve la vista filtrada de un jugador.
+  - `serializar` / `cargar` guardan y cargan partidas.
+  - `describirEvento` genera el log en español.
+  - Las ventanas no miden tiempo: el host envía `CERRAR_VENTANA` como actor `SISTEMA`, con la `secuencia` de la ventana, cuando vence el temporizador (`duracionMs`).
+  - `dadosForzados` solo se usa en tests.
 - **Tests:** Vitest junto a cada paquete (`test/*.test.ts`). Los tests que leen `Referencias/` usan `describe.skipIf` cuando el archivo no existe.
 - Prettier: comillas simples, `;`, `printWidth` 100.
