@@ -21,7 +21,12 @@ export function Centro() {
             const atacar = { tipo: 'ATACAR' as const, uid };
             return (
               <div key={uid} className="flex flex-col items-center gap-1">
-                <Carta cartaId={m.idDe(uid)} tamano="md" onZoom={m.ampliar} />
+                <Carta
+                  cartaId={m.idDe(uid)}
+                  tamano="md"
+                  onZoom={m.ampliar}
+                  onClick={() => m.detalleDe(uid)}
+                />
                 {m.esMiTurnoLibre && (
                   <Boton pequeno motivo={m.motivo(atacar)} onClick={() => m.enviar(atacar)}>
                     {t('mesa.acciones.atacar')} · {t('mesa.acciones.coste', { n: 2 })}
@@ -68,7 +73,13 @@ export function Centro() {
       >
         <div className="flex flex-wrap gap-2">
           {[...vista.descarte].reverse().map((uid) => (
-            <Carta key={uid} cartaId={m.idDe(uid)} tamano="md" onZoom={m.ampliar} />
+            <Carta
+              key={uid}
+              cartaId={m.idDe(uid)}
+              tamano="md"
+              onZoom={m.ampliar}
+              onClick={() => m.detalleDe(uid)}
+            />
           ))}
         </div>
         <div className="mt-4 text-right">

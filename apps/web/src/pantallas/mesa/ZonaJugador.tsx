@@ -38,7 +38,12 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
         </span>
       </header>
       <div className="flex items-end gap-2 overflow-x-auto pb-1">
-        <Carta cartaId={m.idDe(jugador.lider)} tamano={tam} onZoom={m.ampliar} />
+        <Carta
+          cartaId={m.idDe(jugador.lider)}
+          tamano={tam}
+          onZoom={m.ampliar}
+          onClick={() => m.detalleDe(jugador.lider)}
+        />
         {jugador.grupo.length === 0 && (
           <span className="self-center px-2 text-xs text-stone-500">{t('mesa.sinHeroes')}</span>
         )}
@@ -65,12 +70,24 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
                           });
                           m.setEquipando(null);
                         }
-                      : undefined
+                      : () =>
+                          m.detalleDe(r.heroe, {
+                            objetoId:
+                              r.objeto === null ? undefined : (m.idDe(r.objeto) ?? undefined),
+                          })
                   }
                 />
                 {r.objeto !== null && (
                   <div className="absolute -bottom-1 -right-2">
-                    <Carta cartaId={m.idDe(r.objeto)} tamano="xs" onZoom={m.ampliar} />
+                    <Carta
+                      cartaId={m.idDe(r.objeto)}
+                      tamano="xs"
+                      onZoom={m.ampliar}
+                      onClick={() =>
+                        r.objeto !== null &&
+                        m.detalleDe(r.objeto, { heroeId: heroeId ?? undefined })
+                      }
+                    />
                   </div>
                 )}
               </div>
@@ -90,6 +107,7 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
                 cartaId={m.idDe(uid)}
                 tamano={propia ? 'sm' : 'xs'}
                 onZoom={m.ampliar}
+                onClick={() => m.detalleDe(uid)}
               />
             ))}
           </div>

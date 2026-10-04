@@ -59,6 +59,9 @@ interface Props {
   orden?: number | undefined;
   onClick?: (() => void) | undefined;
   onZoom?: ((cartaId: string) => void) | undefined;
+  onDoubleClick?: (() => void) | undefined;
+  /** Texto de ayuda al pasar el ratón. */
+  titulo?: string | undefined;
   className?: string;
 }
 
@@ -72,6 +75,8 @@ export function Carta({
   orden,
   onClick,
   onZoom,
+  onDoubleClick,
+  titulo,
   className = '',
 }: Props) {
   const carta = useCarta(cartaId);
@@ -89,6 +94,8 @@ export function Carta({
     <Contenedor
       type={onClick ? 'button' : undefined}
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
+      title={titulo}
       onMouseEnter={carta && onZoom ? () => onZoom(carta.id) : undefined}
       aria-label={nombre}
       aria-pressed={onClick ? seleccionada : undefined}

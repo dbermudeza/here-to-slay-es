@@ -1,7 +1,14 @@
 import { TIPOS_MAZO_PRINCIPAL } from '@hts/cards';
 import type { Ctx } from './efectos';
 import { crearRng } from './rng';
-import { barajar, CARTAS_MANO_INICIAL, MONSTRUOS_EN_CENTRO, PA_POR_TURNO } from './ops';
+import {
+  barajar,
+  CARTAS_MANO_INICIAL,
+  CARTAS_ROBO_INICIO_TURNO,
+  MONSTRUOS_EN_CENTRO,
+  PA_POR_TURNO,
+  robar,
+} from './ops';
 import {
   OPCIONES_POR_DEFECTO,
   type Evento,
@@ -130,6 +137,9 @@ export function crearPartida(
   if (ultimo === undefined) throw new ErrorConfiguracion('Sin jugadores.');
   d.turno.jugador = ultimo.id;
   events.push({ tipo: 'turnoIniciado', jugador: ultimo.id, numero: 1 });
+  // R-029 / D-42: también el primer turno empieza robando una carta gratis.
+  // (Al empezar no hay Monstruos matados, así que no hay disparadores que avisar.)
+  robar(d, ultimo, CARTAS_ROBO_INICIO_TURNO, (e) => events.push(e));
 
   return { state: d, events };
 }

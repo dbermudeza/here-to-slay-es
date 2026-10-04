@@ -9,18 +9,18 @@ Las ambigüedades están en [DUDAS_REGLAS.md](DUDAS_REGLAS.md) como `D-xx`.
 
 El PDF en español usa "ROBAR" para dos verbos distintos del original. El código y la UI usan:
 
-| Original   | Español en el proyecto | Significado (p.3)                                                 |
-| ---------- | ---------------------- | ----------------------------------------------------------------- |
-| DRAW       | **ROBAR**              | Tomar la carta superior del mazo y añadirla a tu mano.             |
-| STEAL      | **ARREBATAR**          | Mover una carta del Grupo de otro jugador a tu Grupo.              |
-| PULL       | **SACAR**              | Tomar una carta de la mano de otro jugador viendo solo los reversos. → D-12 |
-| DISCARD    | **DESCARTAR**          | Mover una carta de tu mano a la pila de descarte.                  |
-| DESTROY    | **DESTRUIR**           | Mover una carta del Grupo de otro jugador a la pila de descarte.   |
-| SACRIFICE  | **SACRIFICAR**         | Mover una carta de tu propio Grupo a la pila de descarte.          |
-| CHALLENGE  | **DESAFIAR**           | Intentar impedir que otro jugador juegue un Héroe, Objeto o Magia. |
-| ATTACK     | **ATACAR**             | Tirar para MATAR un Monstruo.                                      |
-| SLAY       | **MATAR**              | Añadir a tu Grupo un Monstruo atacado con éxito.                   |
-| Party      | **Grupo**              | Área frente a ti con tu Líder, Héroes (con sus Objetos) y Monstruos. |
+| Original  | Español en el proyecto | Significado (p.3)                                                           |
+| --------- | ---------------------- | --------------------------------------------------------------------------- |
+| DRAW      | **ROBAR**              | Tomar la carta superior del mazo y añadirla a tu mano.                      |
+| STEAL     | **ARREBATAR**          | Mover una carta del Grupo de otro jugador a tu Grupo.                       |
+| PULL      | **SACAR**              | Tomar una carta de la mano de otro jugador viendo solo los reversos. → D-12 |
+| DISCARD   | **DESCARTAR**          | Mover una carta de tu mano a la pila de descarte.                           |
+| DESTROY   | **DESTRUIR**           | Mover una carta del Grupo de otro jugador a la pila de descarte.            |
+| SACRIFICE | **SACRIFICAR**         | Mover una carta de tu propio Grupo a la pila de descarte.                   |
+| CHALLENGE | **DESAFIAR**           | Intentar impedir que otro jugador juegue un Héroe, Objeto o Magia.          |
+| ATTACK    | **ATACAR**             | Tirar para MATAR un Monstruo.                                               |
+| SLAY      | **MATAR**              | Añadir a tu Grupo un Monstruo atacado con éxito.                            |
+| Party     | **Grupo**              | Área frente a ti con tu Líder, Héroes (con sus Objetos) y Monstruos.        |
 
 Clases (p.2): Luchador (Fighter), Bardo (Bard), Guardián (Guardian), Cazador (Ranger),
 Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase.
@@ -37,7 +37,7 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
 ## 2. Preparación (p.1)
 
 - **R-010** Cada jugador recibe **al azar** un Líder de Grupo y lo coloca en su Grupo (p.1, D-02).
-- **R-011** En partidas de 2 jugadores no se puede elegir el Líder Ladrón (*La Garra Sombría*) (p.3).
+- **R-011** En partidas de 2 jugadores no se puede elegir el Líder Ladrón (_La Garra Sombría_) (p.3).
 - **R-012** Los Líderes no elegidos se retiran de la partida (p.1).
 - **R-013** Se baraja el mazo principal y se reparten **5 cartas** a cada jugador. El resto queda boca abajo como mazo; junto a él, la pila de descarte (vacía) (p.1).
 - **R-014** Se barajan los Monstruos y se ponen **3 boca arriba** en el centro; el resto forma el mazo de Monstruos boca abajo (p.1).
@@ -57,6 +57,7 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
 - **R-026** El turno termina cuando te quedas sin PA o decides no hacer más acciones (p.2).
 - **R-027** Al terminar el turno se comprueban las condiciones de victoria de fin de turno (§11) y el turno pasa al siguiente jugador en sentido horario.
 - **R-028** Los PA no usados se pierden. No hay límite de mano (D-04).
+- **R-029** Al empezar su turno, el jugador **roba una carta gratis** (sin gastar PA); después empieza oficialmente su turno con sus 3 PA. También en el primer turno de la partida. Si el mazo está vacío, se aplica R-095 (D-42).
 
 ## 4. Cartas de Héroe (p.2, ref)
 
@@ -122,6 +123,7 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
   - en otro valor → no pasa nada.
 
   En ningún caso se recuperan los PA (p.3). → D-13
+
 - **R-088** El Monstruo matado va a tu Grupo, junto al Líder, y su habilidad pasa a funcionar como una habilidad de Líder (R-082, R-083) durante el resto de la partida. No puede ser arrebatado, destruido, atacado ni devuelto a la mano (p.3).
 - **R-089** Tras matar un Monstruo se pone boca arriba otro del mazo de Monstruos (p.3). Si el mazo de Monstruos está vacío, no se repone (D-14).
 
@@ -142,7 +144,7 @@ La partida se juega con uno de dos modos de reglas, elegido al crearla (D-15).
 ## 12. Mazo y descarte
 
 - **R-095** Si hay que robar y el mazo está vacío, se **baraja la pila de descarte** y pasa a ser el nuevo mazo. El juego sigue sin penalización (D-16, decisión del usuario).
-- **R-097** SACAR una carta de la mano de otro jugador: el jugador activo ve solo los **reversos** de esa mano, en un orden barajado, y elige uno. Solo si la carta lo dice expresamente (p. ej. *Silent Shadow*: "mira la mano… elige") puede ver el contenido antes de elegir (D-12, decisión del usuario).
+- **R-097** SACAR una carta de la mano de otro jugador: el jugador activo ve solo los **reversos** de esa mano, en un orden barajado, y elige uno. Solo si la carta lo dice expresamente (p. ej. _Silent Shadow_: "mira la mano… elige") puede ver el contenido antes de elegir (D-12, decisión del usuario).
 - **R-096** La pila de descarte está boca arriba y es pública (p.3).
 
 ## 13. Efectos de carta (Fase 2)
@@ -158,14 +160,14 @@ La partida se juega con uno de dos modos de reglas, elegido al crearla (D-15).
 - **R-104** Bonos de tirada: se suman al total junto con los Modificadores al cerrar la ventana de
   la tirada. Los de Objetos solo se aplican a la tirada del Héroe que los lleva.
 - **R-105** Protecciones:
-  - *Terratuga* y *Mighty Blade*: los Héroes no pueden ser destruidos.
-  - *Calming Voice*: los Héroes no pueden ser arrebatados.
-  - *Iron Resolve*: tus cartas no pueden ser desafiadas.
-  - *Osolechuza Veterano*: tus Objetos no pueden ser desafiados.
+  - _Terratuga_ y _Mighty Blade_: los Héroes no pueden ser destruidos.
+  - _Calming Voice_: los Héroes no pueden ser arrebatados.
+  - _Iron Resolve_: tus cartas no pueden ser desafiadas.
+  - _Osolechuza Veterano_: tus Objetos no pueden ser desafiados.
   - Los Héroes protegidos no se ofrecen como objetivo.
 - **R-106** Reemplazos:
-  - *Muñeco Señuelo*: si el Héroe equipado fuera a ser sacrificado o destruido, el Muñeco va al
+  - _Muñeco Señuelo_: si el Héroe equipado fuera a ser sacrificado o destruido, el Muñeco va al
     descarte en su lugar.
-  - *Dientes de Sable Corrupto*: al destruir, puedes arrebatar en su lugar.
-- **R-107** *Llave Selladora*: no se puede tirar para usar el efecto del Héroe equipado.
+  - _Dientes de Sable Corrupto_: al destruir, puedes arrebatar en su lugar.
+- **R-107** _Llave Selladora_: no se puede tirar para usar el efecto del Héroe equipado.
 - **R-108** SACAR es a ciegas (R-097). MIRAR una mano o el mazo solo lo ve quien mira.

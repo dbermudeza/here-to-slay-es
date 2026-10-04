@@ -34,6 +34,8 @@ const clonar = <T>(valor: T): T => JSON.parse(JSON.stringify(valor)) as T;
 function avanzar(ctx: Ctx, d: GameState, emitir: Emitir): void {
   ejecutarEfectos(ctx, d, emitir);
   avanzarTurno(ctx, d, emitir);
+  // El robo al empezar el turno (R-029) puede activar disparadores (Malamamut, Orthus…).
+  ejecutarEfectos(ctx, d, emitir);
 }
 
 /** Núcleo puro: valida y aplica una acción sin mutar el estado recibido. */

@@ -14,7 +14,13 @@ import {
 import type { Ctx } from './efectos';
 import { robarCartas, sacrificarHeroe } from './grupo';
 import { apilarMarco } from './marcos';
-import { abrirVentanaModificadores, descartarDeMano, PA_POR_TURNO, tirar } from './ops';
+import {
+  abrirVentanaModificadores,
+  CARTAS_ROBO_INICIO_TURNO,
+  descartarDeMano,
+  PA_POR_TURNO,
+  tirar,
+} from './ops';
 import { bonosDeTirada, jugadaIndesafiable, notificar, paExtra } from './pasivas';
 import type {
   AccionElegir,
@@ -352,6 +358,8 @@ export function finTurno(ctx: Ctx, d: GameState, emitir: Emitir): void {
     habilidadesUsadas: [],
   };
   emitir({ tipo: 'turnoIniciado', jugador: siguiente.id, numero: d.turno.numero });
+  // R-029 / D-42: al empezar el turno se roba una carta gratis (sin gastar PA).
+  robarCartas(ctx, d, siguiente, CARTAS_ROBO_INICIO_TURNO, emitir);
 }
 
 /** Si no queda nada pendiente y no quedan PA, el turno termina solo (R-026). */

@@ -6,49 +6,50 @@ estado. En el código, cada punto provisional aparece como `// TODO(regla) D-xx`
 
 **Estados:** 🟡 pendiente de que decidas · ✅ resuelta (indica quién y cuándo).
 
-| Id   | Tema                                         | Estado |
-| ---- | -------------------------------------------- | ------ |
-| D-01 | Número de jugadores                          | ✅     |
-| D-02 | Reparto de Líderes                           | ✅     |
-| D-03 | Acción de 2–3 PA con menos PA                | ✅     |
-| D-04 | Límite de mano                               | ✅     |
-| D-05 | Tirada inmediata y límite de una por turno   | ✅     |
-| D-06 | ¿A qué Héroes se puede equipar un Objeto?    | ✅     |
-| D-07 | Objeto equipado cuando el Héroe se sacrifica | ✅     |
-| D-08 | Cierre de la ventana de Modificadores        | ✅     |
-| D-09 | Modificadores y tiradas de desafío           | ✅     |
-| D-10 | Desafíos encadenados                         | ✅     |
-| D-11 | Destino de la carta de Desafío               | ✅     |
-| D-12 | "Sacar" carta de la mano: ¿al azar?          | ✅     |
-| D-13 | Monstruo con rangos invertidos (Dracos)      | ✅     |
-| D-14 | Mazo de Monstruos vacío                      | ✅     |
-| D-15 | Momento de la victoria y modo difícil        | ✅     |
-| D-16 | Mazo principal vacío                         | ✅     |
-| D-17 | Composición del mazo: 112 frente a 115       | ✅     |
-| D-18 | Empates en la tirada de desafío              | ✅     |
-| D-19 | Momento de elegir los objetivos de un efecto | ✅     |
-| D-20 | Momento de la victoria en modo difícil       | ✅     |
-| D-21 | Sacar 2 cartas de la misma mano              | ✅     |
-| D-22 | Greedy Cheeks: quién elige la carta          | ✅     |
-| D-23 | Beary Wise: quién elige                      | ✅     |
-| D-24 | "Con un Luchador/Ladrón en su Grupo"         | ✅     |
-| D-25 | Duración de los efectos temporales           | ✅     |
-| D-26 | Megababosa y el límite de 3 PA               | ✅     |
-| D-27 | La Garra Sombría                             | ✅     |
-| D-28 | El Cuerno Protector                          | ✅     |
-| D-29 | Caldero Anuro                                | ✅     |
-| D-30 | Fuzzy Cheeks: jugar un Héroe es obligatorio  | ✅     |
-| D-31 | Wiggles                                      | ✅     |
-| D-32 | Héroes movidos conservan su Objeto           | ✅     |
-| D-33 | Puño de la Razón y Guiverno Titán            | ✅     |
-| D-34 | A qué mano vuelven los Objetos devueltos     | ✅     |
-| D-35 | Sabio Encapuchado y Magias desafiadas        | ✅     |
-| D-36 | Megababosa en el turno en que se mata        | ✅     |
-| D-37 | Orden: efecto de la carta y disparadores     | ✅     |
-| D-38 | Disparadores durante una ventana             | ✅     |
+| Id   | Tema                                                   | Estado |
+| ---- | ------------------------------------------------------ | ------ |
+| D-01 | Número de jugadores                                    | ✅     |
+| D-02 | Reparto de Líderes                                     | ✅     |
+| D-03 | Acción de 2–3 PA con menos PA                          | ✅     |
+| D-04 | Límite de mano                                         | ✅     |
+| D-05 | Tirada inmediata y límite de una por turno             | ✅     |
+| D-06 | ¿A qué Héroes se puede equipar un Objeto?              | ✅     |
+| D-07 | Objeto equipado cuando el Héroe se sacrifica           | ✅     |
+| D-08 | Cierre de la ventana de Modificadores                  | ✅     |
+| D-09 | Modificadores y tiradas de desafío                     | ✅     |
+| D-10 | Desafíos encadenados                                   | ✅     |
+| D-11 | Destino de la carta de Desafío                         | ✅     |
+| D-12 | "Sacar" carta de la mano: ¿al azar?                    | ✅     |
+| D-13 | Monstruo con rangos invertidos (Dracos)                | ✅     |
+| D-14 | Mazo de Monstruos vacío                                | ✅     |
+| D-15 | Momento de la victoria y modo difícil                  | ✅     |
+| D-16 | Mazo principal vacío                                   | ✅     |
+| D-17 | Composición del mazo: 112 frente a 115                 | ✅     |
+| D-18 | Empates en la tirada de desafío                        | ✅     |
+| D-19 | Momento de elegir los objetivos de un efecto           | ✅     |
+| D-20 | Momento de la victoria en modo difícil                 | ✅     |
+| D-21 | Sacar 2 cartas de la misma mano                        | ✅     |
+| D-22 | Greedy Cheeks: quién elige la carta                    | ✅     |
+| D-23 | Beary Wise: quién elige                                | ✅     |
+| D-24 | "Con un Luchador/Ladrón en su Grupo"                   | ✅     |
+| D-25 | Duración de los efectos temporales                     | ✅     |
+| D-26 | Megababosa y el límite de 3 PA                         | ✅     |
+| D-27 | La Garra Sombría                                       | ✅     |
+| D-28 | El Cuerno Protector                                    | ✅     |
+| D-29 | Caldero Anuro                                          | ✅     |
+| D-30 | Fuzzy Cheeks: jugar un Héroe es obligatorio            | ✅     |
+| D-31 | Wiggles                                                | ✅     |
+| D-32 | Héroes movidos conservan su Objeto                     | ✅     |
+| D-33 | Puño de la Razón y Guiverno Titán                      | ✅     |
+| D-34 | A qué mano vuelven los Objetos devueltos               | ✅     |
+| D-35 | Sabio Encapuchado y Magias desafiadas                  | ✅     |
+| D-36 | Megababosa en el turno en que se mata                  | ✅     |
+| D-37 | Orden: efecto de la carta y disparadores               | ✅     |
+| D-38 | Disparadores durante una ventana                       | ✅     |
 | D-39 | Las cartas jugadas "inmediatamente" se pueden desafiar | ✅     |
-| D-40 | Elecciones forzosas automáticas              | ✅     |
-| D-41 | Hook: jugar el Objeto es obligatorio         | ✅     |
+| D-40 | Elecciones forzosas automáticas                        | ✅     |
+| D-41 | Hook: jugar el Objeto es obligatorio                   | ✅     |
+| D-42 | Robo gratis al empezar el turno                        | ✅     |
 
 ---
 
@@ -78,6 +79,7 @@ puede hacer si cuesta más PA de los que quedan.
 Si juegas un Héroe y tiras inmediatamente, ¿cuenta como el uso de ese turno, de modo que no
 puedas volver a gastar 1 PA para tirar por él ese mismo turno?
 **✅ Resuelta (usuario, 2026-10-04):**
+
 - Jugar el Héroe cuesta 1 PA. La tirada inmediata al jugarlo **no** cuesta PA.
 - La tirada inmediata **cuenta como el uso de ese turno**: ese Héroe no puede volver a tirar
   hasta un turno posterior.
@@ -103,6 +105,7 @@ que una carta concreta diga otra cosa (Fase 2).
 "Una vez que todos los jugadores hayan terminado de jugar sus cartas modificadoras…". No se
 define cómo se sabe que todos han terminado.
 **✅ Resuelta (usuario, 2026-10-04):**
+
 - Tras cada tirada empieza una cuenta regresiva de **5 segundos**.
 - Cada Modificador jugado la **reinicia**. Si pasan 5 s sin un Modificador nuevo, la ventana se
   cierra (R-067).
@@ -115,6 +118,7 @@ define cómo se sabe que todos han terminado.
 ### D-09 · Modificadores y tiradas de desafío (p.2)
 
 **✅ Resuelta (usuario, 2026-10-04):**
+
 - Hay una ventana para cada tirada. En un desafío las dos ventanas (una por participante) están
   abiertas **a la vez**.
 - Cualquier jugador puede jugar su Modificador sobre cualquiera de las dos tiradas.
@@ -126,6 +130,7 @@ En el motor es una única ventana con dos tiradas. Cada Modificador indica a cu�
 ### D-10 · Desafíos encadenados (p.2)
 
 **✅ Resuelta (usuario, 2026-10-04):**
+
 - La carta de Desafío no se puede desafiar.
 - Una misma jugada solo se desafía una vez. Si varios quieren desafiar, vale el primero que lo
   declara.
@@ -137,12 +142,12 @@ En el motor es una única ventana con dos tiradas. Cada Modificador indica a cu�
 
 ### D-12 · "Sacar" carta de la mano: ¿al azar? (texto de cartas)
 
-Las cartas dicen "Pull a card from another player's hand" y el reglamento no define *pull*. Cartas
-como Silent Shadow distinguen "mira la mano y elige", lo que sugiere que *pull* es a ciegas.
+Las cartas dicen "Pull a card from another player's hand" y el reglamento no define _pull_. Cartas
+como Silent Shadow distinguen "mira la mano y elige", lo que sugiere que _pull_ es a ciegas.
 **✅ Resuelta (usuario, 2026-10-04):** el jugador activo ve solo los **reversos** de la mano del
 otro jugador y elige uno sin conocer su contenido. El motor baraja el orden con el RNG con
 semilla para que la posición no revele nada. Solo cuando la carta dice expresamente que puedes
-mirar la mano (*Sharp Fox*, *Silent Shadow*) se ve el contenido (R-097).
+mirar la mano (_Sharp Fox_, _Silent Shadow_) se ve el contenido (R-097).
 
 ### D-13 · Monstruo con rangos invertidos — Dracos (texto de carta)
 
@@ -159,6 +164,7 @@ algún jugador. Si no queda ninguno atacable, la partida sigue.
 
 **✅ Resuelta (usuario, 2026-10-04):** hay dos modos de reglas, que se eligen al crear la partida.
 Es la única diferencia entre ellos.
+
 - **Normal:** se gana con 3 Monstruos (en el momento de matar el tercero) o con 6 clases al
   terminar el turno.
 - **Difícil:** se gana con 6 clases + 1 Monstruo, o con 4 Monstruos + 3 clases. El momento exacto
@@ -197,6 +203,7 @@ jugadores tienen motivos para intervenir en cualquier tirada, en lugar de un enf
 
 No se indicó cuándo se comprueban las condiciones difíciles.
 **✅ Resuelta (usuario, 2026-10-04), por analogía con el modo normal:**
+
 - "**4 Monstruos + 3 clases**" se comprueba **al matar un Monstruo** (como los 3 Monstruos del
   modo normal) y también al terminar el turno.
 - "**6 clases + 1 Monstruo**" solo se comprueba **al terminar el turno** (como el Grupo completo
@@ -225,6 +232,7 @@ requisitos de Monstruos (R-086).
 ### D-25 · Duración de los efectos temporales
 
 **✅ Resuelta (usuario, 2026-10-04):**
+
 - "Hasta tu próximo turno" (Calming Voice, Mighty Blade) termina al **empezar** tu siguiente
   turno.
 - "Hasta el final de tu turno" (Wise Shield, Vibrant Glow, Hechizo Encantado, Iron Resolve)
@@ -273,18 +281,18 @@ aplica la interpretación indicada y el código las marca con `TODO(regla)`.
 
 ### D-33 · Puño de la Razón y Guiverno Titán
 
-- *El Puño de la Razón*: "cada vez que tiras para DESAFIAR, +2". **Provisional:** solo cuando
+- _El Puño de la Razón_: "cada vez que tiras para DESAFIAR, +2". **Provisional:** solo cuando
   eres tú quien desafía.
-- *Guiverno Titán*: "cada vez que tiras por una carta de Desafío, +1". **Provisional:** en
+- _Guiverno Titán_: "cada vez que tiras por una carta de Desafío, +1". **Provisional:** en
   cualquier desafío en el que participes, como desafiante o como desafiado.
-**✅ Resuelta (usuario, 2026-10-04):** el Puño de la Razón suma +2 en **cualquier** desafío en el que participe su dueño (desafiando o desafiado), igual que el Guiverno Titán (+1).
+  **✅ Resuelta (usuario, 2026-10-04):** el Puño de la Razón suma +2 en **cualquier** desafío en el que participe su dueño (desafiando o desafiado), igual que el Guiverno Titán (+1).
 
 ### D-34 · A qué mano vuelven los Objetos devueltos
 
-*Vientos Huracanados* y *Vientos de Cambio* devuelven el Objeto "a la mano de su jugador".
+_Vientos Huracanados_ y _Vientos de Cambio_ devuelven el Objeto "a la mano de su jugador".
 **Provisional:** a la mano del dueño del Héroe que lo llevaba, aunque lo hubiera jugado otro (por
 ejemplo, un Objeto Maldito que le pusiste a un rival vuelve a la mano de ese rival).
-*Holy Curselifter* dice "a tu mano": va a la tuya.
+_Holy Curselifter_ dice "a tu mano": va a la tuya.
 **✅ Resuelta (usuario, 2026-10-04):** vuelven a la mano del dueño del Héroe.
 
 ### D-35 · Sabio Encapuchado y Magias desafiadas
@@ -308,11 +316,12 @@ roba 2 y después descarta 1 (puede descartar una de las recién robadas).
 
 ### D-38 · Disparadores durante una ventana de Modificadores
 
-Si una habilidad se dispara mientras hay una ventana abierta (p. ej. *Serpiente Coronada* al
-jugarse un Modificador, o *Alasangre* al desafiar), **provisional:**
+Si una habilidad se dispara mientras hay una ventana abierta (p. ej. _Serpiente Coronada_ al
+jugarse un Modificador, o _Alasangre_ al desafiar), **provisional:**
+
 - la ventana se pausa hasta que se resuelva la habilidad;
 - después, la cuenta regresiva se reinicia.
-**✅ Resuelta (usuario, 2026-10-04):** confirmado.
+  **✅ Resuelta (usuario, 2026-10-04):** confirmado.
 
 ### D-39 · Las cartas jugadas "inmediatamente" se pueden desafiar
 
@@ -330,6 +339,15 @@ preguntar. Si es opcional ("puedes…"), siempre se pregunta.
 
 ### D-41 · Hook: jugar el Objeto es obligatorio
 
-"Juega inmediatamente un Objeto de tu mano y ROBA una carta." **Provisional:** como en *Fuzzy
-Cheeks* (D-30), jugar el Objeto es opcional y robas siempre.
+"Juega inmediatamente un Objeto de tu mano y ROBA una carta." **Provisional:** como en _Fuzzy
+Cheeks_ (D-30), jugar el Objeto es opcional y robas siempre.
 **✅ Resuelta (usuario, 2026-10-04):** un efecto solo es opcional si la carta dice "puedes". Hook no lo dice: si tienes un Objeto y hay un Héroe sin Objeto, **debes** jugarlo (y después robas). Fuzzy Cheeks se mantiene opcional por D-30.
+
+### D-42 · Robo gratis al empezar el turno
+
+El reglamento en PDF no lo menciona.
+**✅ Resuelta (usuario, 2026-10-04):** al empezar su turno, cada jugador roba automáticamente una carta
+"por derecho" sin gastar PA; después empieza oficialmente su turno (R-029).
+**Aplicado también al primer turno de la partida** (interpretación de "al inicio del turno de un
+jugador"). Las habilidades de "cada vez que robas…" (Malamamut, Orthus, Rex Mayor) también se activan
+con este robo.

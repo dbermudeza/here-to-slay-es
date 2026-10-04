@@ -28,6 +28,8 @@ export function Mano() {
               tamano="md"
               seleccionada={uid === seleccionada}
               onZoom={m.ampliar}
+              titulo={t('mesa.acciones.dobleClic')}
+              onDoubleClick={() => m.detalleDe(uid)}
               onClick={() => {
                 m.setEquipando(null);
                 setSel(uid === seleccionada ? null : uid);
@@ -99,8 +101,8 @@ function AccionesCarta({ uid, alTerminar }: { uid: Uid; alTerminar: () => void }
     <div className="mt-1 flex flex-wrap items-center gap-3 rounded-lg bg-white p-2 ring-1 ring-stone-200 dark:bg-stone-900 dark:ring-stone-700">
       <span className="font-semibold">{carta.nombre}</span>
       {contenido}
-      <Boton pequeno variante="fantasma" onClick={() => m.ampliar(carta.id)}>
-        {t('mesa.acciones.ampliar')}
+      <Boton pequeno variante="fantasma" onClick={() => m.verDetalle({ cartaId: carta.id })}>
+        {t('mesa.acciones.verDetalle')}
       </Boton>
     </div>
   );

@@ -39,7 +39,12 @@ describe('Turno y puntos de acción', () => {
     s = hacer(motor, s, A, { tipo: 'ROBAR' }).state;
     s = hacer(motor, s, A, { tipo: 'ROBAR' }).state;
     const { state, events } = hacer(motor, s, A, { tipo: 'ROBAR' });
-    expect(tipos(events)).toEqual(['cartaRobada', 'turnoTerminado', 'turnoIniciado']);
+    expect(tipos(events)).toEqual([
+      'cartaRobada',
+      'turnoTerminado',
+      'turnoIniciado',
+      'cartaRobada',
+    ]);
     expect(state.turno).toEqual({
       jugador: B,
       numero: s.turno.numero + 1,
@@ -47,6 +52,28 @@ describe('Turno y puntos de acción', () => {
       heroesUsados: [],
       habilidadesUsadas: [],
     });
+  });
+
+  it('R-029: al empezar el turno se roba una carta gratis y se conservan los 3 PA', () => {
+    const s = base();
+    const superior = s.mazo[0];
+    const { state, events } = hacer(motor, s, A, { tipo: 'FIN_TURNO' });
+    expect(jugadorDe(state, B).mano).toEqual([superior]);
+    expect(state.turno).toMatchObject({ jugador: B, pa: 3 });
+    expect(events).toContainEqual({
+      tipo: 'cartaRobada',
+      jugador: B,
+      uid: superior,
+      carta: expect.any(String),
+    });
+  });
+
+  it('R-029 / R-095: el robo de inicio de turno también rebaraja el descarte si el mazo está vacío', () => {
+    const s = base();
+    s.descarte = s.mazo.splice(0);
+    const { state, events } = hacer(motor, s, A, { tipo: 'FIN_TURNO' });
+    expect(tipos(events)).toContain('mazoRebarajado');
+    expect(jugadorDe(state, B).mano).toHaveLength(1);
   });
 
   it('R-026: FIN_TURNO termina el turno aunque queden PA; el último jugador pasa al primero', () => {

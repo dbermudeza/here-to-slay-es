@@ -249,6 +249,19 @@ describeReal('Monstruos (habilidades al matarlos)', () => {
     expect(r.state.turno.pa).toBe(2);
   });
 
+  it('monstruo_malamamut: también se activa con el robo al empezar el turno (R-029)', () => {
+    const s = mesa();
+    monstruo(s, B, 'monstruo_malamamut');
+    const h = heroe(s, B, 'heroe_peanut');
+    const [anillo] = arriba(s, 'objeto_anillo_realmente_grande');
+    let r = acumular({ state: s, events: [] }, hacer(motor, s, A, { tipo: 'FIN_TURNO' }));
+    expect(decision(r.state)).toMatchObject({ jugador: B, motivo: 'jugarInmediato' });
+    r = responder(r, B, { cartas: [anillo ?? ''] });
+    r = acumular(r, todosPasan(motor, r.state));
+    expect(jugadorDe(r.state, B).grupo).toEqual([{ heroe: h, objeto: anillo }]);
+    expect(r.state.turno).toMatchObject({ jugador: B, pa: 3 });
+  });
+
   it('monstruo_megababosa: un PA extra en cada uno de tus turnos', () => {
     const s = mesa();
     monstruo(s, A, 'monstruo_megababosa');

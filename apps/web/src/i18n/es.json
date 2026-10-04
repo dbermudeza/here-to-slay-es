@@ -13,7 +13,11 @@
     "siguiente": "Siguiente",
     "anterior": "Anterior",
     "tema": "Tema",
-    "temas": { "sistema": "Automático", "claro": "Claro", "oscuro": "Oscuro" }
+    "temas": {
+      "sistema": "Automático",
+      "claro": "Claro",
+      "oscuro": "Oscuro"
+    }
   },
   "inicio": {
     "jugarLocal": "Jugar en este dispositivo",
@@ -67,7 +71,10 @@
   "bots": {
     "nombres": ["Bot Bigotes", "Bot Zarpas", "Bot Cascabel", "Bot Pelusa", "Bot Trufa"]
   },
-  "niveles": { "facil": "fácil", "normal": "normal" },
+  "niveles": {
+    "facil": "fácil",
+    "normal": "normal"
+  },
   "mesa": {
     "turnoDe": "Turno de {nombre}",
     "tuTurno": "Tu turno",
@@ -84,7 +91,10 @@
     "monstruosMatados": "Monstruos: {n}",
     "sinHeroes": "Sin Héroes",
     "manoVacia": "No tienes cartas en la mano.",
-    "reglasModo": { "normal": "Reglas normales", "dificil": "Reglas difíciles" },
+    "reglasModo": {
+      "normal": "Reglas normales",
+      "dificil": "Reglas difíciles"
+    },
     "bot": "bot {nivel}",
     "esperando": "{nombre} está pensando…",
     "esperandoRespuesta": "Esperando a que alguien responda…",
@@ -101,7 +111,9 @@
       "coste": "{n} PA",
       "eligeObjetivo": "Elige el Héroe al que equipar {carta}.",
       "soloRespuesta": "Esta carta se juega en respuesta, durante una ventana.",
-      "ampliar": "Ampliar"
+      "ampliar": "Ampliar",
+      "dobleClic": "Doble clic para ver la carta en detalle",
+      "verDetalle": "Ver carta"
     },
     "menu": {
       "titulo": "Menú",
@@ -273,6 +285,7 @@
       {
         "titulo": "Tu turno: 3 puntos de acción (PA)",
         "parrafos": [
+          "Al empezar tu turno robas una carta gratis.",
           "1 PA: robar una carta; jugar un Héroe, Objeto o Magia; o tirar para usar el efecto de un Héroe de tu Grupo (una vez por Héroe y turno).",
           "2 PA: atacar un Monstruo cuyos requisitos cumplas.",
           "3 PA: descartar toda tu mano y robar 5 cartas.",
@@ -333,5 +346,22 @@
         "texto": "Para atacar un Monstruo necesitas los Héroes (o clases) que indica. Cuesta 2 PA. Cada Monstruo que matas te da una habilidad permanente. ¡Suerte, aventurero!"
       }
     ]
+  },
+  "detalle": {
+    "cerrar": "Cerrar",
+    "nombreOriginal": "Nombre original: {nombre}",
+    "tirada": "Tirada necesaria para usar su efecto",
+    "efecto": "Efecto",
+    "habilidad": "Habilidad",
+    "habilidadMonstruo": "Habilidad que ganas al matarlo",
+    "requisitos": "Requisitos para atacarlo",
+    "fracaso": "Fracaso ({rango})",
+    "exito": "Éxito ({rango})",
+    "valores": "Valores",
+    "claseOtorgada": "El Héroe equipado cuenta como {clase}.",
+    "copias": "Copias en el mazo: {n}",
+    "equipadoA": "Equipado a {heroe}",
+    "objetoEquipado": "Objeto equipado: {objeto}",
+    "sinImagen": "Sin imagen"
   }
 }

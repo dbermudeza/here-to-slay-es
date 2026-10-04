@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { darCarta, ponerHeroe } from '../../../packages/engine/test/fixtures';
 import { ProveedorCatalogo } from '../src/estado/contexto';
@@ -138,6 +138,49 @@ describe('Mesa', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Soy J2' }));
     expect(screen.queryByText('Pásale el dispositivo a J2')).not.toBeInTheDocument();
     expect(screen.getByText('Tu turno')).toBeInTheDocument();
+  });
+
+  it('clic en una carta de la mesa (de un rival) abre su detalle en español', async () => {
+    const { director } = directorEn(config('bots', ['humano', 'normal']), (s) => {
+      ponerHeroe(s, 'j2', 'mago');
+    });
+    montar(director);
+    const rival = screen.getByRole('region', { name: 'J2' });
+    fireEvent.click(within(rival).getByRole('button', { name: 'Héroe mago' }));
+    const dialogo = screen.getByRole('dialog', { name: 'Héroe mago' });
+    // La carta genérica (sin imagen) también muestra estos textos: basta con que aparezcan.
+    expect(within(dialogo).getAllByText('Héroe · Mago').length).toBeGreaterThan(0);
+    expect(within(dialogo).getByText('Tirada necesaria para usar su efecto')).toBeInTheDocument();
+    expect(within(dialogo).getAllByText('7+').length).toBeGreaterThan(0);
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Cerrar' }));
+    // Espera a que termine la animación de salida.
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('en la mano, un clic selecciona la carta y un doble clic abre su detalle', () => {
+    const { director } = directorEn(config('bots', ['humano', 'normal']), (s) => {
+      darCarta(s, 'j1', 'magia_prueba');
+    });
+    montar(director);
+    const carta = within(screen.getByRole('region', { name: 'Tu mano' })).getByRole('button', {
+      name: 'Magia',
+    });
+    fireEvent.click(carta);
+    expect(carta).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    fireEvent.doubleClick(carta);
+    expect(screen.getByRole('dialog', { name: 'Magia' })).toBeInTheDocument();
+  });
+
+  it('el detalle de un Objeto equipado indica a qué Héroe va', () => {
+    const { director } = directorEn(config('bots', ['humano', 'normal']), (s) => {
+      ponerHeroe(s, 'j1', 'bardo', 'objeto_mascara_mago');
+    });
+    montar(director);
+    fireEvent.click(screen.getByRole('button', { name: 'Máscara de Mago' }));
+    const dialogo = screen.getByRole('dialog', { name: 'Máscara de Mago' });
+    expect(within(dialogo).getByText('Equipado a Héroe bardo')).toBeInTheDocument();
+    expect(within(dialogo).getByText('El Héroe equipado cuenta como Mago.')).toBeInTheDocument();
   });
 
   it('los textos vienen del i18n (sin claves sin traducir en la mesa)', () => {

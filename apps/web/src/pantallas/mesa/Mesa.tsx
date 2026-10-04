@@ -6,6 +6,7 @@ import { descargar, guardarAuto } from '../../juego/guardado';
 import { t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
 import { Carta } from '../../ui/Carta';
+import { DetalleCarta, type Detalle } from '../../ui/DetalleCarta';
 import { Modal } from '../../ui/Modal';
 import { SelectorTema } from '../../ui/SelectorTema';
 import { ContenidoReglas } from '../Reglas';
@@ -32,6 +33,7 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial }: Props) {
   const { motor } = useCatalogo();
   const [ampliada, setAmpliada] = useState<string | null>(null);
   const [equipando, setEquipando] = useState<Uid | null>(null);
+  const [detalle, setDetalle] = useState<Detalle | null>(null);
   const [menu, setMenu] = useState(false);
   const [reglas, setReglas] = useState(false);
   const [historialMovil, setHistorialMovil] = useState(false);
@@ -75,6 +77,11 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial }: Props) {
       nombreCarta: (id: string) => motor.catalogo.get(id)?.nombre ?? id,
       idDe: (uid: Uid) => vista.cartas[uid] ?? null,
       ampliar: setAmpliada,
+      verDetalle: setDetalle,
+      detalleDe: (uid, extra = {}) => {
+        const cartaId = vista.cartas[uid];
+        if (cartaId !== undefined) setDetalle({ cartaId, ...extra });
+      },
       equipando,
       setEquipando,
       objetivosEquipar: objetivos,
@@ -170,6 +177,7 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial }: Props) {
         <Dados />
         <Traspaso />
         <Victoria onRevancha={onRevancha} onInicio={onSalir} />
+        <DetalleCarta detalle={detalle} onCerrar={() => setDetalle(null)} />
 
         <Modal
           abierto={historialMovil}

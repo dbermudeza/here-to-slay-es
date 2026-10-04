@@ -9,6 +9,8 @@ import type { ContextoTirada, Emitir, GameState, Jugador, JugadorId, Tirada, Uid
 export type { Emitir };
 
 export const PA_POR_TURNO = 3;
+/** Cartas que se roban gratis al empezar cada turno (R-029). */
+export const CARTAS_ROBO_INICIO_TURNO = 1;
 export const CARTAS_MANO_INICIAL = 5;
 export const MONSTRUOS_EN_CENTRO = 3;
 

@@ -42,6 +42,8 @@ function ElegirCartas({
               seleccionada={i >= 0}
               {...(ordenado && i >= 0 ? { orden: i + 1 } : {})}
               onClick={() => alternar(uid)}
+              onDoubleClick={() => m.detalleDe(uid)}
+              titulo={t('mesa.acciones.dobleClic')}
               onZoom={m.ampliar}
             />
           );
@@ -130,7 +132,13 @@ function CuerpoPregunta({
           )}
           <div className="flex flex-wrap justify-center gap-2">
             {pregunta.cartas.map((uid) => (
-              <Carta key={uid} cartaId={m.idDe(uid)} tamano="md" onZoom={m.ampliar} />
+              <Carta
+                key={uid}
+                cartaId={m.idDe(uid)}
+                tamano="md"
+                onZoom={m.ampliar}
+                onClick={() => m.detalleDe(uid)}
+              />
             ))}
           </div>
           <div className="mt-4 text-right">

@@ -68,7 +68,12 @@ function VentanaDesafio() {
   return (
     <>
       <div className="flex items-center gap-3">
-        <Carta cartaId={carta?.id ?? null} tamano="sm" onZoom={m.ampliar} />
+        <Carta
+          cartaId={carta?.id ?? null}
+          tamano="sm"
+          onZoom={m.ampliar}
+          onClick={() => m.detalleDe(cima.jugada.uid)}
+        />
         <div>
           <div className="font-semibold">
             {t('ventana.desafioTitulo', {

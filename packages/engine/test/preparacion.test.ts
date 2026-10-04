@@ -47,11 +47,16 @@ describe('Preparación', () => {
     expect(lideres).toHaveLength(3);
   });
 
-  it('R-013: reparte 5 cartas a cada jugador y el resto forma el mazo', () => {
-    const s = nuevaPartida(motor);
-    for (const j of s.jugadores) expect(j.mano).toHaveLength(5);
-    expect(s.mazo).toHaveLength(totalMazo - 15);
+  it('R-013 / R-029: reparte 5 cartas y quien empieza roba una más al iniciar su turno', () => {
+    const { state: s, events } = motor.crearPartida({
+      jugadores: [A, B, C].map((id) => ({ id, nombre: id })),
+      semilla: 'prueba',
+    });
+    for (const j of s.jugadores) expect(j.mano).toHaveLength(j.id === s.turno.jugador ? 6 : 5);
+    expect(s.mazo).toHaveLength(totalMazo - 16);
     expect(s.descarte).toEqual([]);
+    expect(events.slice(-2).map((e) => e.tipo)).toEqual(['turnoIniciado', 'cartaRobada']);
+    expect(s.turno.pa).toBe(3);
   });
 
   it('R-014: 3 Monstruos boca arriba y el resto en el mazo de Monstruos', () => {
