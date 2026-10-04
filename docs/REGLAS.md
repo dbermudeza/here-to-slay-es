@@ -13,7 +13,7 @@ El PDF en español usa "ROBAR" para dos verbos distintos del original. El códig
 | ---------- | ---------------------- | ----------------------------------------------------------------- |
 | DRAW       | **ROBAR**              | Tomar la carta superior del mazo y añadirla a tu mano.             |
 | STEAL      | **ARREBATAR**          | Mover una carta del Grupo de otro jugador a tu Grupo.              |
-| PULL       | **SACAR**              | Tomar una carta (al azar, oculta) de la mano de otro jugador. → D-12 |
+| PULL       | **SACAR**              | Tomar una carta de la mano de otro jugador viendo solo los reversos. → D-12 |
 | DISCARD    | **DESCARTAR**          | Mover una carta de tu mano a la pila de descarte.                  |
 | DESTROY    | **DESTRUIR**           | Mover una carta del Grupo de otro jugador a la pila de descarte.   |
 | SACRIFICE  | **SACRIFICAR**         | Mover una carta de tu propio Grupo a la pila de descarte.          |
@@ -32,7 +32,7 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
 - **R-003** 15 cartas de Monstruo (p.1).
 - **R-004** 2 dados de seis caras. Toda "tirada" es la suma de 2d6 (p.1, p.2).
 - **R-005** Las cartas de referencia de reglas no participan en el juego (p.1).
-- **R-006** Número de jugadores: el reglamento no lo indica → D-01. Menciona explícitamente partidas de 2 jugadores (p.3).
+- **R-006** Número de jugadores: de **2 a 6**, uno por Líder de Grupo (D-01, decisión del usuario).
 
 ## 2. Preparación (p.1)
 
@@ -62,9 +62,9 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
 
 - **R-030** Solo se juegan en tu turno, cuestan 1 PA y van a tu Grupo (p.2).
 - **R-031** Cada Héroe tiene una clase, un efecto y un requisito de tirada "N+". Para usar el efecto hay que tirar 2d6 y obtener **≥ N** (con modificadores) (p.2).
-- **R-032** Al jugar un Héroe desde la mano puedes tirar **inmediatamente** para usar su efecto, sin coste adicional (p.2, ref, R-025).
+- **R-032** Al jugar un Héroe desde la mano puedes tirar **inmediatamente** para usar su efecto, sin coste adicional: solo se paga el PA de jugar la carta (p.2, ref, R-025, D-05).
 - **R-033** Un Héroe ya en tu Grupo: 1 PA para intentar usar su efecto (p.2).
-- **R-034** No puedes tirar para usar el efecto del **mismo Héroe más de una vez por turno**, aunque la primera tirada falle (p.2, ref). → D-05
+- **R-034** No puedes tirar para usar el efecto del **mismo Héroe más de una vez por turno**, aunque la primera tirada falle. La tirada inmediata de R-032 cuenta como ese uso (p.2, ref, D-05).
 - **R-035** Si la tirada falla, no se recupera el PA (p.2).
 - **R-036** No hay límite de Héroes en el Grupo (p.2).
 
@@ -91,6 +91,7 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
 - **R-063** En un desafío se puede esperar a que **ambos** jugadores hayan tirado antes de decidir (p.2).
 - **R-064** Se pueden jugar **varios** Modificadores sobre la misma tirada, y varios jugadores pueden hacerlo (p.2).
 - **R-065** Cuando **todos** han terminado de jugar Modificadores, se suman todos los cambios y se ajusta el total (p.2). → D-09
+- **R-067** Ventana de Modificadores: tras cada tirada empieza una **cuenta regresiva de 5 s** que se **reinicia** cada vez que alguien juega un Modificador. Si pasan 5 s sin ningún Modificador nuevo, la ventana se cierra y la tirada queda fijada (D-08, decisión del usuario).
 - **R-066** Después de usarse, el Modificador va a la pila de descarte (p.2).
 
 ## 8. Cartas de Desafío (p.2–3)
@@ -131,5 +132,6 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
 
 ## 12. Mazo y descarte
 
-- **R-095** Si hay que robar y el mazo está vacío: el reglamento no lo indica → D-16.
+- **R-095** Si hay que robar y el mazo está vacío, se **baraja la pila de descarte** y pasa a ser el nuevo mazo. El juego sigue sin penalización (D-16, decisión del usuario).
+- **R-097** SACAR una carta de la mano de otro jugador: el jugador activo ve solo los **reversos** de esa mano, en un orden barajado, y elige uno. Solo si la carta lo dice expresamente (p. ej. *Silent Shadow*: "mira la mano… elige") puede ver el contenido antes de elegir (D-12, decisión del usuario).
 - **R-096** La pila de descarte está boca arriba y es pública (p.3).

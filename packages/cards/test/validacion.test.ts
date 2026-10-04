@@ -119,6 +119,10 @@ describe.skipIf(!existsSync(RUTA_CARTAS_JSON))('Referencias/cartas.es.json', () 
     expect([...porClase.values()]).toEqual([8, 8, 8, 8, 8, 8]);
   });
 
+  it('los totales coinciden con el reglamento (115 / 6 / 15)', () => {
+    expect(problemas.filter((p) => p.donde.startsWith('total:'))).toEqual([]);
+  });
+
   it('los héroes conservan su nombre original', () => {
     for (const c of datos?.cartas ?? []) {
       if (c.tipo === 'heroe') expect(c.nombre).toBe(c.nombreOriginal);
