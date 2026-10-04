@@ -178,13 +178,12 @@ export const PasivaSchema = z.discriminatedUnion('tipo', [
    * Bono a tus tiradas. Contextos:
    * - heroe: tirada para usar el efecto de un Héroe;
    * - ataque: tirada para ATACAR;
-   * - desafiar: solo cuando eres tú quien DESAFÍA;
    * - desafio: cualquier tirada de un desafío;
    * - cualquiera: todas tus tiradas.
    */
   z.object({
     tipo: z.literal('bonoTirada'),
-    contexto: z.enum(['heroe', 'ataque', 'desafiar', 'desafio', 'cualquiera']),
+    contexto: z.enum(['heroe', 'ataque', 'desafio', 'cualquiera']),
     valor: z.number().int(),
     /** Solo para Objetos: se aplica únicamente a la tirada del Héroe que lo lleva equipado. */
     soloHeroeEquipado: z.boolean().default(false),

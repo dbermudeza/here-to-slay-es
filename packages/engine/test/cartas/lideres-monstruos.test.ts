@@ -74,6 +74,18 @@ describeReal('Líderes de Grupo', () => {
     ]);
   });
 
+  it('lider_el_puno_de_la_razon: +2 cuando te desafían (D-33)', () => {
+    const s = mesa({ [A]: 'lider_el_puno_de_la_razon' });
+    let r = desafioDeBAA(s, [3, 3, 4, 4]);
+    r = acumular(r, cerrarVentana(r.state));
+    expect(evento(r, 'tiradaFinal')[0]).toMatchObject({
+      jugador: A,
+      total: 8,
+      bonos: [{ carta: 'lider_el_puno_de_la_razon', valor: 2 }],
+    });
+    expect(evento(r, 'desafioResuelto')[0]?.ganador).toBe('desafiante');
+  });
+
   it('lider_el_puno_de_la_razon: +2 a tus tiradas cuando DESAFÍAS', () => {
     const s = mesa({ [B]: 'lider_el_puno_de_la_razon', [A]: 'lider_la_flecha_divina' });
     let r = desafioDeBAA(s, [4, 4, 3, 3]);
@@ -244,6 +256,25 @@ describeReal('Monstruos (habilidades al matarlos)', () => {
     expect(r.state.turno.pa).toBe(3);
     r = hacer(motor, r.state, B, { tipo: 'FIN_TURNO' });
     r = hacer(motor, r.state, C, { tipo: 'FIN_TURNO' });
+    expect(r.state.turno).toMatchObject({ jugador: A, pa: 4 });
+  });
+
+  it('monstruo_megababosa: matarla no da el PA extra hasta el turno siguiente (D-36)', () => {
+    const s = mesa();
+    heroe(s, A, 'heroe_peanut');
+    heroe(s, A, 'heroe_mellow_dee');
+    heroe(s, A, 'heroe_wily_red');
+    heroe(s, A, 'heroe_napping_nibbles');
+    const babosa = monstruo(s, B, 'monstruo_megababosa');
+    jugadorDe(s, B).monstruos = [];
+    s.monstruosCentro.push(babosa);
+    let r = hacer(motor, forzarDados(s, 6, 6), A, { tipo: 'ATACAR', uid: babosa });
+    r = acumular(r, cerrarVentana(r.state));
+    expect(jugadorDe(r.state, A).monstruos).toContain(babosa);
+    expect(r.state.turno).toMatchObject({ jugador: A, pa: 1 });
+    r = acumular(r, hacer(motor, r.state, A, { tipo: 'FIN_TURNO' }));
+    r = acumular(r, hacer(motor, r.state, B, { tipo: 'FIN_TURNO' }));
+    r = acumular(r, hacer(motor, r.state, C, { tipo: 'FIN_TURNO' }));
     expect(r.state.turno).toMatchObject({ jugador: A, pa: 4 });
   });
 

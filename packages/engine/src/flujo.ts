@@ -151,8 +151,8 @@ export function resolverJugada(ctx: Ctx, d: GameState, jugada: Jugada, emitir: E
       // R-051: efecto de un solo uso; la carta va a la pila de descarte.
       d.descarte.push(jugada.uid);
       emitir({ tipo: 'magiaResuelta', jugador: j.id, carta });
-      // TODO(regla) D-35 / D-37: el Sabio Encapuchado solo se activa si la Magia se resuelve, y
-      // el efecto de la carta se resuelve antes que los disparadores (se apila encima).
+      // D-35: el Sabio Encapuchado solo se activa si la Magia se resuelve.
+      // TODO(regla) D-37: el efecto de la carta se resuelve antes que los disparadores (se apila encima).
       notificar(ctx, d, [{ tipo: 'magiaJugada', jugador: j.id }], emitir);
       activarEfecto(ctx, d, j.id, jugada.uid, emitir);
       return;
@@ -170,12 +170,9 @@ function matar(
 ): void {
   const i = d.monstruosCentro.indexOf(monstruo);
   if (i === -1) throw new ErrorInterno(`El monstruo ${monstruo} no está en el centro`);
-  const paAntes = paExtra(ctx, d, j);
   d.monstruosCentro.splice(i, 1);
   j.monstruos.push(monstruo);
   emitir({ tipo: 'monstruoMatado', jugador: j.id, carta: idCarta(d, monstruo) });
-  // TODO(regla) D-36: Megababosa da su PA extra ya en el turno en que se mata.
-  if (d.turno.jugador === j.id) d.turno.pa += paExtra(ctx, d, j) - paAntes;
   // D-14: si el mazo de Monstruos está vacío, no se repone.
   const nuevo = d.mazoMonstruos.shift();
   if (nuevo !== undefined) {
@@ -213,8 +210,8 @@ function totalesFinales(
   contexto: ContextoTirada,
   emitir: Emitir,
 ): number[] {
-  return tiradas.map((t, indice) => {
-    const bonos = bonosDeTirada(ctx, d, t, contexto, indice);
+  return tiradas.map((t) => {
+    const bonos = bonosDeTirada(ctx, d, t, contexto);
     const base = totalTirada(t);
     const total = base + bonos.reduce((s, b) => s + b.valor, 0);
     emitir({
@@ -349,7 +346,7 @@ export function finTurno(ctx: Ctx, d: GameState, emitir: Emitir): void {
   d.turno = {
     jugador: siguiente.id,
     numero: d.turno.numero + 1,
-    // D-03 / D-26: 3 PA, más los extra de Megababosa.
+    // D-03 / D-26 / D-36: 3 PA, más los extra de Megababosa (desde el turno siguiente a matarla).
     pa: PA_POR_TURNO + paExtra(ctx, d, siguiente),
     heroesUsados: [],
     habilidadesUsadas: [],

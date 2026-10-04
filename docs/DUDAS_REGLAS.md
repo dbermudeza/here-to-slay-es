@@ -40,15 +40,15 @@ estado. En el código, cada punto provisional aparece como `// TODO(regla) D-xx`
 | D-30 | Fuzzy Cheeks: jugar el Héroe es opcional     | ✅     |
 | D-31 | Wiggles                                      | ✅     |
 | D-32 | Héroes movidos conservan su Objeto           | ✅     |
-| D-33 | Puño de la Razón y Guiverno Titán            | 🟡     |
-| D-34 | A qué mano vuelven los Objetos devueltos     | 🟡     |
-| D-35 | Sabio Encapuchado y Magias desafiadas        | 🟡     |
-| D-36 | Megababosa en el turno en que se mata        | 🟡     |
+| D-33 | Puño de la Razón y Guiverno Titán            | ✅     |
+| D-34 | A qué mano vuelven los Objetos devueltos     | ✅     |
+| D-35 | Sabio Encapuchado y Magias desafiadas        | ✅     |
+| D-36 | Megababosa en el turno en que se mata        | ✅     |
 | D-37 | Orden: efecto de la carta y disparadores     | 🟡     |
-| D-38 | Disparadores durante una ventana             | 🟡     |
-| D-39 | Las cartas jugadas "inmediatamente" se pueden desafiar | 🟡     |
-| D-40 | Elecciones forzosas automáticas              | 🟡     |
-| D-41 | Hook: jugar el Objeto es opcional            | 🟡     |
+| D-38 | Disparadores durante una ventana             | ✅     |
+| D-39 | Las cartas jugadas "inmediatamente" se pueden desafiar | ✅     |
+| D-40 | Elecciones forzosas automáticas              | ✅     |
+| D-41 | Hook: jugar el Objeto es obligatorio         | ✅     |
 
 ---
 
@@ -269,28 +269,32 @@ Tipsy Tootie se mueve después de arrebatar.
 Las siguientes surgieron al implementar la Fase 2 y **no estaban en el plan aprobado**. El motor
 aplica la interpretación indicada y el código las marca con `TODO(regla)`.
 
-### D-33 · Puño de la Razón y Guiverno Titán — 🟡
+### D-33 · Puño de la Razón y Guiverno Titán
 
 - *El Puño de la Razón*: "cada vez que tiras para DESAFIAR, +2". **Provisional:** solo cuando
   eres tú quien desafía.
 - *Guiverno Titán*: "cada vez que tiras por una carta de Desafío, +1". **Provisional:** en
   cualquier desafío en el que participes, como desafiante o como desafiado.
+**✅ Resuelta (usuario, 2026-10-04):** el Puño de la Razón suma +2 en **cualquier** desafío en el que participe su dueño (desafiando o desafiado), igual que el Guiverno Titán (+1).
 
-### D-34 · A qué mano vuelven los Objetos devueltos — 🟡
+### D-34 · A qué mano vuelven los Objetos devueltos
 
 *Vientos Huracanados* y *Vientos de Cambio* devuelven el Objeto "a la mano de su jugador".
 **Provisional:** a la mano del dueño del Héroe que lo llevaba, aunque lo hubiera jugado otro (por
 ejemplo, un Objeto Maldito que le pusiste a un rival vuelve a la mano de ese rival).
 *Holy Curselifter* dice "a tu mano": va a la tuya.
+**✅ Resuelta (usuario, 2026-10-04):** vuelven a la mano del dueño del Héroe.
 
-### D-35 · Sabio Encapuchado y Magias desafiadas — 🟡
+### D-35 · Sabio Encapuchado y Magias desafiadas
 
 "Cada vez que juegas una Magia, ROBA". **Provisional:** solo si la Magia se llega a resolver. Si
 la desafían con éxito, no robas.
+**✅ Resuelta (usuario, 2026-10-04):** confirmado.
 
-### D-36 · Megababosa en el turno en que se mata — 🟡
+### D-36 · Megababosa en el turno en que se mata
 
 **Provisional:** si matas a la Megababosa en tu turno, ganas su PA extra en ese mismo turno.
+**✅ Resuelta (usuario, 2026-10-04):** para simplificar, el PA extra se gana **a partir del turno siguiente** a matarla.
 
 ### D-37 · Orden: efecto de la carta y disparadores — 🟡
 
@@ -299,26 +303,30 @@ el efecto de la carta y después las habilidades que se disparan (Aries Ártico,
 Sospechosamente Brillante, Sabio Encapuchado…). Si varias se disparan a la vez, van en orden de
 turno empezando por el jugador activo.
 
-### D-38 · Disparadores durante una ventana de Modificadores — 🟡
+### D-38 · Disparadores durante una ventana de Modificadores
 
 Si una habilidad se dispara mientras hay una ventana abierta (p. ej. *Serpiente Coronada* al
 jugarse un Modificador, o *Alasangre* al desafiar), **provisional:**
 - la ventana se pausa hasta que se resuelva la habilidad;
 - después, la cuenta regresiva se reinicia.
+**✅ Resuelta (usuario, 2026-10-04):** confirmado.
 
-### D-39 · Las cartas jugadas "inmediatamente" se pueden desafiar — 🟡
+### D-39 · Las cartas jugadas "inmediatamente" se pueden desafiar
 
 **Provisional:** jugar una carta "inmediatamente" por un efecto (Lucky Bucky, Hook, Malamamut…) no
 cuesta PA, pero la carta pasa por la ventana de desafío como cualquier otra. Si es un Héroe, tiene
 su tirada inmediata.
+**✅ Resuelta (usuario, 2026-10-04):** no cuesta PA, pero se puede desafiar.
 
-### D-40 · Elecciones forzosas automáticas — 🟡
+### D-40 · Elecciones forzosas automáticas
 
 **Provisional:** cuando solo hay una opción posible y la elección no es opcional (un único
 objetivo, un único rival válido, tener que descartar todas las cartas…), el motor la aplica sin
 preguntar. Si es opcional ("puedes…"), siempre se pregunta.
+**✅ Resuelta (usuario, 2026-10-04):** confirmado.
 
-### D-41 · Hook: jugar el Objeto es opcional — 🟡
+### D-41 · Hook: jugar el Objeto es obligatorio
 
 "Juega inmediatamente un Objeto de tu mano y ROBA una carta." **Provisional:** como en *Fuzzy
 Cheeks* (D-30), jugar el Objeto es opcional y robas siempre.
+**✅ Resuelta (usuario, 2026-10-04):** un efecto solo es opcional si la carta dice "puedes". Hook no lo dice: si tienes un Objeto y hay un Héroe sin Objeto, **debes** jugarlo (y después robas). Fuzzy Cheeks se mantiene opcional por D-30.

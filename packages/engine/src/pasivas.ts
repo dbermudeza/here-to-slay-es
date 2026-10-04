@@ -146,14 +146,12 @@ export function habilidadDe(ctx: Ctx, d: GameState, j: Jugador, uid: Uid): Pasiv
 
 /**
  * Bonos de pasivas y efectos temporales que se suman a una tirada.
- * `indice` es la posición de la tirada en la ventana (en un desafío, 1 = desafiante).
  */
 export function bonosDeTirada(
   ctx: Ctx,
   d: GameState,
   tirada: Tirada,
   contexto: ContextoTirada,
-  indice: number,
 ): Bono[] {
   const j = d.jugadores.find((x) => x.id === tirada.jugador);
   if (j === undefined) return [];
@@ -167,9 +165,8 @@ export function bonosDeTirada(
         p.contexto === 'cualquiera' ||
         (p.contexto === 'heroe' && contexto.tipo === 'heroe') ||
         (p.contexto === 'ataque' && contexto.tipo === 'ataque') ||
-        (p.contexto === 'desafio' && contexto.tipo === 'desafio') ||
-        // TODO(regla) D-33: "tiras para DESAFIAR" solo cuenta para quien desafía; "tiras por un Desafío", para ambos.
-        (p.contexto === 'desafiar' && contexto.tipo === 'desafio' && indice === 1);
+        // D-33: los bonos de desafío cuentan tanto si desafías como si te desafían.
+        (p.contexto === 'desafio' && contexto.tipo === 'desafio');
       if (aplica) bonos.push({ carta: pa.carta, valor: p.valor });
     } else if (p.tipo === 'bonoPorModificadorRival') {
       const n = tirada.modificaciones.filter((m) => m.uid !== null && m.jugador !== j.id).length;

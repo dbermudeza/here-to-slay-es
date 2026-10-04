@@ -353,7 +353,7 @@ function pasoJugarInmediato(
     quitar(yo.mano, uid);
     if (p.var !== undefined) f.vars[p.var] = [uid];
     const antes = d.pila.length;
-    // TODO(regla) D-39: jugar "inmediatamente" no cuesta PA, pero la carta se puede desafiar.
+    // D-39: jugar "inmediatamente" no cuesta PA, pero la carta se puede desafiar.
     iniciarJugada(ctx, d, jugada, e.emitir);
     if (d.pila.length > antes) {
       f.sub = 3;
@@ -401,7 +401,7 @@ function pasoJugarInmediato(
   );
   if (opciones.length === 0) return 'siguiente';
   const [unica] = opciones;
-  // TODO(regla) D-40: si la elección es forzosa (una sola opción y no es opcional), no se pregunta.
+  // D-40: si la elección es forzosa (una sola opción y no es opcional), no se pregunta.
   if (!p.opcional && opciones.length === 1 && unica !== undefined) {
     return esObjeto(unica) ? elegirObjetivo(unica) : jugar(unica, undefined);
   }
@@ -427,7 +427,7 @@ function pasoDevolverObjeto(
       .find((x) => x.r.objeto === objeto);
     if (ub === undefined) return;
     ub.r.objeto = null;
-    // TODO(regla) D-34: "a la mano de su jugador" = el dueño del Héroe; Holy Curselifter, a tu mano.
+    // D-34: "a la mano de su jugador" = el dueño del Héroe; Holy Curselifter, a tu mano.
     (aMano ?? ub.j).mano.push(objeto);
     e.emitir({
       tipo: 'objetoDevuelto',
@@ -730,7 +730,7 @@ export function ejecutarEfectos(ctx: Ctx, d: GameState, emitir: Emitir): void {
     if (paso === undefined) {
       d.pila.pop();
       const debajo = cimaPila(d);
-      // TODO(regla) D-38: un disparador encima de una ventana la pausa; al terminar, la cuenta se reinicia.
+      // D-38: un disparador encima de una ventana la pausa; al terminar, la cuenta se reinicia.
       if (debajo?.tipo === 'ventanaModificadores' || debajo?.tipo === 'ventanaDesafio') {
         d.secuencia += 1;
         debajo.secuencia = d.secuencia;

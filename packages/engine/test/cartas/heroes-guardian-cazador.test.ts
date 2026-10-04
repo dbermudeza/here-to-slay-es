@@ -144,15 +144,29 @@ describeReal('Héroes Cazadores', () => {
     expect(r.state.mazo.slice(0, 2)).toEqual([mod, peanut]);
   });
 
-  it('heroe_hook: juega inmediatamente un Objeto de tu mano y ROBA una carta', () => {
+  it('heroe_hook: juega inmediatamente (obligatorio, D-41) un Objeto de tu mano y ROBA una carta', () => {
     const s = mesa();
     const [anillo] = mano(s, A, 'objeto_anillo_realmente_grande');
     const hook = heroe(s, A, 'heroe_hook');
+    // Un solo Objeto y un solo Héroe sin Objeto: se juega sin preguntar (D-40).
     let r = activar(s, 'heroe_hook');
-    r = responder(r, A, { cartas: [anillo ?? ''] });
+    expect(cima(r.state)?.tipo).toBe('ventanaDesafio');
     r = acumular(r, todosPasan(motor, r.state));
     sinPendientes(r.state);
     expect(jugadorDe(r.state, A).grupo).toEqual([{ heroe: hook, objeto: anillo }]);
+    expect(jugadorDe(r.state, A).mano).toHaveLength(1);
+  });
+
+  it('heroe_hook: con varios Objetos hay que elegir uno, sin opción de no jugar', () => {
+    const s = mesa();
+    mano(s, A, 'objeto_anillo_realmente_grande', 'objeto_muneco_senuelo');
+    const r = activar(s, 'heroe_hook');
+    expect(decision(r.state).pregunta).toMatchObject({ min: 1, max: 1 });
+  });
+
+  it('heroe_hook: sin Objetos en la mano, solo ROBA', () => {
+    const r = activar(mesa(), 'heroe_hook');
+    sinPendientes(r.state);
     expect(jugadorDe(r.state, A).mano).toHaveLength(1);
   });
 

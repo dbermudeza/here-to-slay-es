@@ -114,7 +114,7 @@
   "heroe_bullseye": { "programa": [{ "paso": "custom", "nombre": "bullseye" }] },
   "heroe_hook": {
     "programa": [
-      { "paso": "jugarInmediato", "tipos": ["objeto"], "opcional": true },
+      { "paso": "jugarInmediato", "tipos": ["objeto"], "opcional": false },
       { "paso": "robar", "cantidad": 1 }
     ]
   },
@@ -317,7 +317,7 @@
     "pasivas": [{ "tipo": "bonoTirada", "contexto": "ataque", "valor": 1 }]
   },
   "lider_el_puno_de_la_razon": {
-    "pasivas": [{ "tipo": "bonoTirada", "contexto": "desafiar", "valor": 2 }]
+    "pasivas": [{ "tipo": "bonoTirada", "contexto": "desafio", "valor": 2 }]
   },
   "lider_el_cuerno_protector": {
     "pasivas": [
