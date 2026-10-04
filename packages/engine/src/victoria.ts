@@ -17,7 +17,7 @@ const TODAS = CLASES.length;
  * - Normal: 3 Monstruos, o un Grupo completo (6 clases).
  * - Difícil: 6 clases + 1 Monstruo, o 4 Monstruos + 3 clases.
  */
-// TODO(regla) D-20: momento en que se comprueban las condiciones del modo difícil.
+// D-20: las condiciones con Monstruos se comprueban también al matar; las de clases, al terminar el turno.
 const CONDICIONES: Record<Modo, Condicion[]> = {
   normal: [
     { motivo: 'tresMonstruos', alMatar: true, cumple: (m) => m >= 3 },

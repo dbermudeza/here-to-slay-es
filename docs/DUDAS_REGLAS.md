@@ -26,8 +26,8 @@ estado. En el código, cada punto provisional aparece como `// TODO(regla) D-xx`
 | D-16 | Mazo principal vacío                         | ✅     |
 | D-17 | Composición del mazo: 112 frente a 115       | ✅     |
 | D-18 | Empates en la tirada de desafío              | ✅     |
-| D-19 | Objetivos declarados antes de tirar          | 🟡     |
-| D-20 | Momento de la victoria en modo difícil       | 🟡     |
+| D-19 | Momento de elegir los objetivos de un efecto | ✅     |
+| D-20 | Momento de la victoria en modo difícil       | ✅     |
 
 ---
 
@@ -164,21 +164,18 @@ Realmente Grande tienen **2 copias**. Las máscaras y los Objetos Malditos tiene
 "Si tu tirada es mayor o igual…": el empate lo gana quien desafía. Se anota para que no se
 reinterprete.
 
-### D-19 · Objetivos declarados antes de tirar (p.2, R-062) — 🟡
+### D-19 · Momento de elegir los objetivos de un efecto (p.2, R-062)
 
 R-062 dice que, para modificar la tirada de otro jugador, se puede esperar a que ese jugador
-**elija sus objetivos**. Eso implica que los objetivos se conocen antes de cerrar la ventana de
-Modificadores.
-**Provisional (afecta sobre todo a la Fase 2):**
-- Si el efecto de un Héroe elige un objetivo inicial ("destruye un Héroe", "elige un jugador"),
-  ese objetivo se declara **junto con la tirada**.
-- Las elecciones que dependen de lo que pase después (p. ej. "roba 2 y, si una es…") se hacen
-  tras la tirada.
+**elija sus objetivos**.
+**✅ Resuelta (usuario, 2026-10-04):** los objetivos **no** se declaran antes de tirar. Se eligen
+cuando el efecto se activa, después de cerrarse la ventana de Modificadores. Así todos los
+jugadores tienen motivos para intervenir en cualquier tirada, en lugar de un enfrentamiento 1 contra 1.
 
-### D-20 · Momento de la victoria en modo difícil — 🟡
+### D-20 · Momento de la victoria en modo difícil
 
 No se indicó cuándo se comprueban las condiciones difíciles.
-**Provisional (por analogía con el modo normal):**
+**✅ Resuelta (usuario, 2026-10-04), por analogía con el modo normal:**
 - "**4 Monstruos + 3 clases**" se comprueba **al matar un Monstruo** (como los 3 Monstruos del
   modo normal) y también al terminar el turno.
 - "**6 clases + 1 Monstruo**" solo se comprueba **al terminar el turno** (como el Grupo completo

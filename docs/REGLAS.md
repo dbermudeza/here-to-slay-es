@@ -87,7 +87,7 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
 
 - **R-060** Se pueden jugar desde la mano **cuando cualquier jugador tira los dados** (incluido uno mismo), en cualquier turno, sin coste de PA (p.2).
 - **R-061** Modifican la tirada en la cantidad indicada. Si la carta tiene dos opciones (p. ej. +1/−3), quien la juega declara una (p.2).
-- **R-062** Para modificar la tirada de otro jugador se puede esperar a que ese jugador elija sus objetivos (p.2). → D-08
+- **R-062** Los objetivos de un efecto se eligen al activarse, después de cerrarse la ventana de Modificadores, no antes de tirar (p.2, D-19).
 - **R-063** En un desafío se puede esperar a que **ambos** jugadores hayan tirado antes de decidir (p.2).
 - **R-064** Se pueden jugar **varios** Modificadores sobre la misma tirada, y varios jugadores pueden hacerlo (p.2).
 - **R-065** Cuando **todos** han terminado de jugar Modificadores, se suman todos los cambios y se ajusta el total (p.2).
