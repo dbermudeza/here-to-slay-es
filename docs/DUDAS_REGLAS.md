@@ -37,14 +37,14 @@ estado. En el código, cada punto provisional aparece como `// TODO(regla) D-xx`
 | D-27 | La Garra Sombría                             | ✅     |
 | D-28 | El Cuerno Protector                          | ✅     |
 | D-29 | Caldero Anuro                                | ✅     |
-| D-30 | Fuzzy Cheeks: jugar el Héroe es opcional     | ✅     |
+| D-30 | Fuzzy Cheeks: jugar un Héroe es obligatorio  | ✅     |
 | D-31 | Wiggles                                      | ✅     |
 | D-32 | Héroes movidos conservan su Objeto           | ✅     |
 | D-33 | Puño de la Razón y Guiverno Titán            | ✅     |
 | D-34 | A qué mano vuelven los Objetos devueltos     | ✅     |
 | D-35 | Sabio Encapuchado y Magias desafiadas        | ✅     |
 | D-36 | Megababosa en el turno en que se mata        | ✅     |
-| D-37 | Orden: efecto de la carta y disparadores     | 🟡     |
+| D-37 | Orden: efecto de la carta y disparadores     | ✅     |
 | D-38 | Disparadores durante una ventana             | ✅     |
 | D-39 | Las cartas jugadas "inmediatamente" se pueden desafiar | ✅     |
 | D-40 | Elecciones forzosas automáticas              | ✅     |
@@ -250,9 +250,11 @@ adicional sobre esa misma tirada (es obligatorio elegir uno de los dos).
 **✅ Resuelta (usuario, 2026-10-04):** +1 a **todas** tus tiradas (Héroe, ataque y desafío);
 se suma a otros bonos.
 
-### D-30 · Fuzzy Cheeks: jugar el Héroe es opcional
+### D-30 · Fuzzy Cheeks: jugar un Héroe es obligatorio
 
-**✅ Resuelta (usuario, 2026-10-04):** robas siempre; jugar un Héroe de la mano es opcional.
+**✅ Resuelta (usuario, 2026-10-04; corregida):** robas siempre y, si tienes algún Héroe en la mano
+(incluido el que acabas de robar), **debes** jugar uno. Solo si no tienes Héroes no se juega
+nada. Es la misma regla que Hook (D-41): un efecto solo es opcional si la carta dice "puedes".
 
 ### D-31 · Wiggles
 
@@ -296,12 +298,13 @@ la desafían con éxito, no robas.
 **Provisional:** si matas a la Megababosa en tu turno, ganas su PA extra en ese mismo turno.
 **✅ Resuelta (usuario, 2026-10-04):** para simplificar, el PA extra se gana **a partir del turno siguiente** a matarla.
 
-### D-37 · Orden: efecto de la carta y disparadores — 🟡
+### D-37 · Orden: efecto de la carta y disparadores
 
-**Provisional:** cuando un Héroe supera su tirada o se resuelve una Magia, primero se resuelve
+**✅ Resuelta (usuario, 2026-10-04), opción A:** cuando un Héroe supera su tirada o se resuelve una Magia, primero se resuelve
 el efecto de la carta y después las habilidades que se disparan (Aries Ártico, Moneda
 Sospechosamente Brillante, Sabio Encapuchado…). Si varias se disparan a la vez, van en orden de
-turno empezando por el jugador activo.
+turno empezando por el jugador activo. Ejemplo: Peanut con la Moneda Sospechosamente Brillante
+roba 2 y después descarta 1 (puede descartar una de las recién robadas).
 
 ### D-38 · Disparadores durante una ventana de Modificadores
 

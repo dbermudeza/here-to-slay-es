@@ -173,15 +173,11 @@ describeReal('Héroes Bardos', () => {
     expect(jugadorDe(r.state, B).mano).toEqual(manoA);
   });
 
-  it('heroe_fuzzy_cheeks: ROBA y puede jugar inmediatamente un Héroe de la mano (sin PA)', () => {
+  it('heroe_fuzzy_cheeks: ROBA y juega inmediatamente un Héroe de la mano (sin PA)', () => {
     const s = mesa();
     const [peanut] = arriba(s, 'heroe_peanut');
+    // Un solo Héroe en la mano: se juega sin preguntar (D-30, D-40).
     let r = activar(s, 'heroe_fuzzy_cheeks');
-    expect(decision(r.state)).toMatchObject({
-      motivo: 'jugarInmediato',
-      pregunta: { min: 0, max: 1 },
-    });
-    r = responder(r, A, { cartas: [peanut ?? ''] });
     expect(cima(r.state)?.tipo).toBe('ventanaDesafio');
     r = acumular(r, todosPasan(motor, r.state));
     expect(jugadorDe(r.state, A).grupo.map((x) => x.heroe)).toContain(peanut);
@@ -189,11 +185,21 @@ describeReal('Héroes Bardos', () => {
     expect(r.state.turno.pa).toBe(2);
   });
 
-  it('heroe_fuzzy_cheeks: jugar el Héroe es opcional', () => {
+  it('heroe_fuzzy_cheeks: con varios Héroes en la mano hay que jugar uno (D-30)', () => {
     const s = mesa();
+    mano(s, A, 'heroe_mellow_dee');
     arriba(s, 'heroe_peanut');
-    let r = activar(s, 'heroe_fuzzy_cheeks');
-    r = responder(r, A, { cartas: [] });
+    const r = activar(s, 'heroe_fuzzy_cheeks');
+    expect(decision(r.state)).toMatchObject({
+      motivo: 'jugarInmediato',
+      pregunta: { min: 1, max: 1 },
+    });
+  });
+
+  it('heroe_fuzzy_cheeks: sin Héroes en la mano, solo ROBA (D-30)', () => {
+    const s = mesa();
+    arriba(s, 'desafio');
+    const r = activar(s, 'heroe_fuzzy_cheeks');
     sinPendientes(r.state);
     expect(jugadorDe(r.state, A).mano).toHaveLength(1);
   });

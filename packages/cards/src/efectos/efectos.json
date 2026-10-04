@@ -67,7 +67,7 @@
   "heroe_fuzzy_cheeks": {
     "programa": [
       { "paso": "robar", "cantidad": 1 },
-      { "paso": "jugarInmediato", "tipos": ["heroe"], "opcional": true }
+      { "paso": "jugarInmediato", "tipos": ["heroe"], "opcional": false }
     ]
   },
   "heroe_greedy_cheeks": {

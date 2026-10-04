@@ -152,7 +152,7 @@ export function resolverJugada(ctx: Ctx, d: GameState, jugada: Jugada, emitir: E
       d.descarte.push(jugada.uid);
       emitir({ tipo: 'magiaResuelta', jugador: j.id, carta });
       // D-35: el Sabio Encapuchado solo se activa si la Magia se resuelve.
-      // TODO(regla) D-37: el efecto de la carta se resuelve antes que los disparadores (se apila encima).
+      // D-37: el efecto de la carta se resuelve antes que los disparadores (se apila encima).
       notificar(ctx, d, [{ tipo: 'magiaJugada', jugador: j.id }], emitir);
       activarEfecto(ctx, d, j.id, jugada.uid, emitir);
       return;
@@ -244,7 +244,7 @@ function resolverTiradas(
       if (heroe.tipo !== 'heroe') throw new ErrorInterno(`${contexto.heroe} no es un Héroe`);
       const exito = total >= heroe.tirada;
       emitir({ tipo: 'tiradaHeroe', jugador: primera.jugador, heroe: heroe.id, total, exito });
-      // TODO(regla) D-37: los disparadores (Aries Ártico, monedas) se resuelven después del efecto del Héroe.
+      // D-37: los disparadores (Aries Ártico, monedas) se resuelven después del efecto del Héroe.
       notificar(
         ctx,
         d,
