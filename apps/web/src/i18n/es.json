@@ -25,13 +25,15 @@
     "jugarBots": "Jugar contra bots",
     "jugarBotsDesc": "Tú contra 1–5 bots.",
     "enLinea": "Jugar en línea",
-    "enLineaDesc": "Disponible próximamente.",
+    "enLineaDesc": "Crea una sala o únete con un código; cada uno juega en su dispositivo.",
     "continuar": "Continuar partida",
     "continuarDesc": "Retoma la última partida guardada automáticamente.",
     "cargar": "Cargar partida desde archivo",
     "reglas": "Reglas",
     "tutorial": "Tutorial",
-    "errorCarga": "No se pudo cargar la partida: {motivo}"
+    "errorCarga": "No se pudo cargar la partida: {motivo}",
+    "volverASala": "Volver a tu sala en línea ({codigo})",
+    "volverASalaDesc": "Recupera tu asiento en la partida en línea."
   },
   "config": {
     "titulo": "Nueva partida",
@@ -126,7 +128,14 @@
     "log": "Historial",
     "verLog": "Ver historial",
     "pilaDescarte": "Pila de descarte ({n})",
-    "vacia": "Vacía"
+    "vacia": "Vacía",
+    "conexion": {
+      "conectado": "Conectado",
+      "desconectado": "Reconectando…",
+      "sustituido": "Ausente: juega un bot"
+    },
+    "tiempoTuyo": "Te quedan {s} s",
+    "tiempoDe": "{nombre}: {s} s"
   },
   "ventana": {
     "desafioTitulo": "{nombre} intenta jugar {carta}",
@@ -381,5 +390,63 @@
     "mover": "{carta} pasa del Grupo de {de} al de {a}",
     "unaCarta": "una carta",
     "variasCartas": "{n} cartas"
+  },
+  "enLinea": {
+    "titulo": "Jugar en línea",
+    "tuNombre": "Tu nombre",
+    "crear": "Crear sala",
+    "crearDesc": "Crea una sala nueva y comparte su código con los demás.",
+    "codigo": "Código de la sala",
+    "unirse": "Unirse",
+    "unirseDesc": "Escribe el código que te han pasado.",
+    "conectando": "Conectando con el servidor…",
+    "sinServidor": "No se puede conectar con el servidor. Comprueba que está en marcha (pnpm servidor) y que estás en la misma red.",
+    "reconectando": "Se ha perdido la conexión. Reconectando…",
+    "errores": {
+      "DATOS_INVALIDOS": "Revisa los datos: el nombre no puede estar vacío y el código tiene 5 caracteres.",
+      "SALA_NO_EXISTE": "No existe ninguna sala con ese código.",
+      "SALA_LLENA": "La sala ya tiene 6 jugadores.",
+      "PARTIDA_EMPEZADA": "La partida de esa sala ya ha empezado.",
+      "NOMBRE_REPETIDO": "Ya hay alguien con ese nombre en la sala.",
+      "SESION_INVALIDA": "Tu sesión ha caducado: vuelve a unirte a la sala.",
+      "SOLO_CREADOR": "Solo quien creó la sala puede hacer esto.",
+      "NO_ESTAN_LISTOS": "Aún hay jugadores que no están listos.",
+      "POCOS_JUGADORES": "Hacen falta al menos 2 jugadores (puedes añadir bots).",
+      "SIN_SALA": "No estás en ninguna sala.",
+      "SIN_PARTIDA": "La partida no ha empezado.",
+      "SIN_CONEXION": "Sin conexión con el servidor.",
+      "DEMASIADOS_MENSAJES": "Demasiadas acciones seguidas; espera un momento.",
+      "ERROR_INTERNO": "Error del servidor. Inténtalo de nuevo."
+    },
+    "sala": {
+      "titulo": "Sala {codigo}",
+      "codigo": "Código de la sala",
+      "copiar": "Copiar",
+      "copiado": "¡Copiado!",
+      "compartir": "Pásales este código a los demás jugadores.",
+      "jugadores": "Jugadores ({n}/6)",
+      "tu": "(tú)",
+      "creador": "Anfitrión",
+      "listo": "Listo",
+      "noListo": "No está listo",
+      "desconectado": "Desconectado",
+      "estoyListo": "Estoy listo",
+      "noEstoyListo": "Aún no estoy listo",
+      "quitar": "Quitar",
+      "opciones": "Opciones de la partida",
+      "limite": "Tiempo máximo por decisión",
+      "sinLimite": "Sin límite",
+      "limiteSegundos": "{s} segundos",
+      "limiteNota": "Si alguien agota su tiempo, un bot decide por él esa vez.",
+      "anadirBot": "Añadir bot",
+      "anadirFacil": "Bot fácil",
+      "anadirNormal": "Bot normal",
+      "empezar": "Empezar partida",
+      "esperandoAnfitrion": "Esperando a que {nombre} empiece la partida…",
+      "salir": "Salir de la sala",
+      "volverALaSala": "Volver a la sala",
+      "esperandoCreador": "Esperando al anfitrión…",
+      "soloAnfitrion": "Solo el anfitrión puede cambiar las opciones."
+    }
   }
 }

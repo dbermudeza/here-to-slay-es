@@ -1,10 +1,10 @@
 import type { Accion, JugadorId, Uid, VistaJugador } from '@hts/engine';
 import { createContext, useContext } from 'react';
-import type { DirectorVivo } from '../../juego/director-vivo';
+import type { FuenteMesa } from '../../juego/fuente';
 import type { Detalle } from '../../ui/DetalleCarta';
 
 export interface ValorMesa {
-  director: DirectorVivo;
+  director: FuenteMesa;
   vista: VistaJugador;
   legales: Accion[];
   /** Jugador cuya vista se muestra. */

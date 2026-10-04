@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "pnpm --filter @hts/web dev",
     "build": "pnpm --filter @hts/web build",
+    "servidor": "pnpm build && pnpm --filter @hts/server start",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "pnpm -r --parallel typecheck",

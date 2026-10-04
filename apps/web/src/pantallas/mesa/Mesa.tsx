@@ -1,7 +1,8 @@
 import type { Accion, JugadorId, Uid } from '@hts/engine';
 import { useEffect, useMemo, useState } from 'react';
 import { useCatalogo, useDirector } from '../../estado/contexto';
-import type { DirectorVivo } from '../../juego/director-vivo';
+import { DirectorVivo } from '../../juego/director-vivo';
+import type { FuenteMesa } from '../../juego/fuente';
 import { descargar, guardarAuto } from '../../juego/guardado';
 import { t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
@@ -14,6 +15,7 @@ import { AccionesTurno } from './AccionesTurno';
 import { Centro } from './Centro';
 import { MesaContexto, mismaAccion, type ValorMesa } from './contexto';
 import { Dados } from './Dados';
+import { TiempoDecision } from './TiempoDecision';
 import { Vuelos } from './Vuelos';
 import { DialogoDecision } from './DialogoDecision';
 import { Historial } from './Historial';
@@ -23,13 +25,15 @@ import { VentanaRespuesta } from './VentanaRespuesta';
 import { ZonaJugador } from './ZonaJugador';
 
 interface Props {
-  director: DirectorVivo;
+  director: FuenteMesa;
+  /** Texto del botón de revancha (en línea: "Volver a la sala"). */
+  textoRevancha?: string;
   onSalir: () => void;
   onRevancha: () => void;
   onTutorial: () => void;
 }
 
-export function Mesa({ director, onSalir, onRevancha, onTutorial }: Props) {
+export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha }: Props) {
   const version = useDirector(director);
   const { motor } = useCatalogo();
   const [ampliada, setAmpliada] = useState<string | null>(null);
@@ -39,10 +43,11 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial }: Props) {
   const [reglas, setReglas] = useState(false);
   const [historialMovil, setHistorialMovil] = useState(false);
 
-  // Guardado automático tras cada cambio.
+  // Guardado automático tras cada cambio (solo partidas locales).
+  const local = director instanceof DirectorVivo ? director : null;
   useEffect(() => {
-    guardarAuto(director);
-  }, [director, version]);
+    if (local !== null) guardarAuto(local);
+  }, [local, version]);
 
   const valor = useMemo((): ValorMesa => {
     const vista = director.vista();
@@ -67,11 +72,11 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial }: Props) {
         vista.ganador === null &&
         director.traspaso === null,
       enviar: (a) => {
-        director.enviar(yo, a);
+        director.actuar(a);
       },
       motivo: (a) => {
         if (esLegal(a)) return null;
-        const codigo = director.validar(a);
+        const codigo = director.motivo(a);
         return t(`errores.${codigo ?? 'NO_ES_MOMENTO'}`);
       },
       nombreJugador: (id: JugadorId) => nombres.get(id) ?? id,
@@ -129,6 +134,7 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial }: Props) {
           <span className="text-sm text-stone-500">
             {t(`mesa.reglasModo.${vista.opciones.modo}`)}
           </span>
+          <TiempoDecision />
           <div className="ml-auto flex gap-2">
             <Boton
               pequeno
@@ -178,7 +184,7 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial }: Props) {
         <Dados />
         <Vuelos />
         <Traspaso />
-        <Victoria onRevancha={onRevancha} onInicio={onSalir} />
+        <Victoria onRevancha={onRevancha} onInicio={onSalir} textoRevancha={textoRevancha} />
         <DetalleCarta detalle={detalle} onCerrar={() => setDetalle(null)} />
 
         <Modal
@@ -198,7 +204,9 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial }: Props) {
           ancho="sm"
         >
           <div className="flex flex-col gap-2">
-            <Boton onClick={() => descargar(director)}>{t('mesa.menu.exportar')}</Boton>
+            {local !== null && (
+              <Boton onClick={() => descargar(local)}>{t('mesa.menu.exportar')}</Boton>
+            )}
             <Boton
               onClick={() => {
                 setMenu(false);

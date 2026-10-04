@@ -6,46 +6,14 @@ import {
   type ConfigLocal,
   type Control,
 } from '../src/juego/config';
-import { DirectorVivo, type Reloj } from '../src/juego/director-vivo';
+import { RelojManual } from '@hts/anfitrion';
+import { DirectorVivo } from '../src/juego/director-vivo';
 
 export { CATALOGO };
 export const motor = nuevoMotor();
 
-/** Reloj controlable para los tests: el tiempo solo avanza con `avanzar`. */
-export class RelojFalso implements Reloj {
-  t = 0;
-  private siguienteId = 1;
-  private tareas: { id: number; en: number; fn: () => void }[] = [];
-
-  ahora = (): number => this.t;
-
-  programar = (fn: () => void, ms: number): number => {
-    const id = this.siguienteId++;
-    this.tareas.push({ id, en: this.t + ms, fn });
-    return id;
-  };
-
-  cancelar = (id: number): void => {
-    this.tareas = this.tareas.filter((x) => x.id !== id);
-  };
-
-  /** Avanza el tiempo ejecutando las tareas que vencen, en orden. */
-  avanzar(ms: number): void {
-    const fin = this.t + ms;
-    for (;;) {
-      const proxima = [...this.tareas].sort((a, b) => a.en - b.en)[0];
-      if (proxima === undefined || proxima.en > fin) break;
-      this.tareas = this.tareas.filter((x) => x !== proxima);
-      this.t = proxima.en;
-      proxima.fn();
-    }
-    this.t = fin;
-  }
-
-  get pendientes(): number {
-    return this.tareas.length;
-  }
-}
+/** Reloj controlable para los tests (el del paquete compartido). */
+export { RelojManual as RelojFalso };
 
 export function config(
   modo: ConfigLocal['modo'],
@@ -65,7 +33,7 @@ export function config(
 export function directorEn(
   c: ConfigLocal,
   preparar?: (s: GameState) => void,
-  reloj = new RelojFalso(),
+  reloj = new RelojManual(),
 ) {
   const s = escenario(motor.crearPartida(aConfigPartida(c)).state, { turnoDe: 'j1' });
   preparar?.(s);

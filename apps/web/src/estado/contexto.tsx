@@ -8,7 +8,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
-import type { DirectorVivo } from '../juego/director-vivo';
+import type { FuenteMesa } from '../juego/fuente';
 
 interface ValorCatalogo {
   motor: Motor;
@@ -40,7 +40,7 @@ export function useCarta(id: string | null | undefined): Carta | undefined {
 }
 
 /** Re-renderiza el componente cada vez que el director cambia. */
-export function useDirector(director: DirectorVivo): number {
+export function useDirector(director: Pick<FuenteMesa, 'suscribir' | 'version'>): number {
   return useSyncExternalStore(
     (fn) => director.suscribir(fn),
     () => director.version,

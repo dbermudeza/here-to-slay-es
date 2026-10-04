@@ -16,7 +16,7 @@ _Here to Slay_ (Unstable Games), en español y fiel a las reglas del juego base.
 | 2    | Efectos de las 95 cartas (DSL en JSON), cada una con su test               | ✅     |
 | 3    | Bots (fácil y normal) y simulación de 1.000 partidas                       | ✅     |
 | 4    | Interfaz local: partidas en el mismo dispositivo y contra bots             | ✅     |
-| 5    | Multijugador en línea (servidor autoritativo)                              | ⏳     |
+| 5    | Multijugador en línea (servidor autoritativo)                              | ✅     |
 | 6    | Pulido, tests e2e y documentación de uso                                   | ⏳     |
 
 ## Requisitos
@@ -52,6 +52,7 @@ Sin `Referencias/cartas.es.json`, los tests que usan el catálogo real se saltan
 | ------------------------ | ----------------------------------------------------------------- |
 | `pnpm dev`               | Arranca la aplicación en http://localhost:5173                    |
 | `pnpm build`             | Compila la aplicación web para producción (`apps/web/dist`)       |
+| `pnpm servidor`          | Compila la web y arranca el servidor en línea en el puerto 3000   |
 | `pnpm lint`              | ESLint con TypeScript estricto                                    |
 | `pnpm typecheck`         | Comprobación de tipos en todos los paquetes                       |
 | `pnpm test`              | Tests (Vitest) de todos los paquetes                              |
@@ -65,14 +66,18 @@ Sin `Referencias/cartas.es.json`, los tests que usan el catálogo real se saltan
 packages/
   cards/    Esquema Zod de las cartas, DSL de efectos (efectos.json) y validador
   engine/   Motor de reglas puro y determinista (reducer, vistas filtradas, efectos)
-  bots/     Bots fácil y normal, director de partidas y simulador
+  bots/       Bots fácil y normal, director de partidas y simulador
+  anfitrion/  Host de partida (temporizadores, bots, conexiones) y protocolo de red
 apps/
-  server/   Servidor autoritativo Fastify + Socket.IO (Fase 5)
-  web/      Aplicación React + Vite: modos en este dispositivo y contra bots
+  server/   Servidor autoritativo Fastify + Socket.IO
+  web/      Aplicación React + Vite: en este dispositivo, contra bots y en línea
 docs/
   REGLAS.md         Reglas como especificación (R-xxx)
   DUDAS_REGLAS.md   Ambigüedades del reglamento y decisiones tomadas (D-xx)
+  EN_LINEA.md       Cómo jugar en línea (red local o por internet)
 ```
+
+Para jugar en línea con amigos, consulta [docs/EN_LINEA.md](docs/EN_LINEA.md).
 
 Las convenciones de código y del proyecto están en [CLAUDE.md](CLAUDE.md).
 

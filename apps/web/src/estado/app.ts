@@ -1,7 +1,8 @@
 import { create } from 'zustand';
+import type { ClienteEnLinea } from '../enlinea/cliente';
 import type { DirectorVivo } from '../juego/director-vivo';
 
-export type Pantalla = 'inicio' | 'configurar' | 'mesa' | 'reglas';
+export type Pantalla = 'inicio' | 'configurar' | 'mesa' | 'reglas' | 'enLinea' | 'sala';
 export type Tema = 'sistema' | 'claro' | 'oscuro';
 
 const CLAVE_TEMA = 'hts:tema';
@@ -22,12 +23,16 @@ interface EstadoApp {
   tema: Tema;
   tutorial: boolean;
   director: DirectorVivo | null;
+  /** Conexión con el servidor (pantallas en línea). */
+  cliente: ClienteEnLinea | null;
   irA: (p: Pantalla) => void;
   volver: () => void;
   cambiarTema: (t: Tema) => void;
   mostrarTutorial: (visible: boolean) => void;
   empezar: (d: DirectorVivo) => void;
   salir: () => void;
+  abrirEnLinea: (cliente: ClienteEnLinea, pantalla: 'enLinea' | 'sala') => void;
+  cerrarEnLinea: () => void;
 }
 
 export const useApp = create<EstadoApp>()((set, get) => ({
@@ -36,6 +41,7 @@ export const useApp = create<EstadoApp>()((set, get) => ({
   tema: temaGuardado(),
   tutorial: false,
   director: null,
+  cliente: null,
   irA: (p) => set({ pantalla: p, anterior: get().pantalla }),
   volver: () => set({ pantalla: get().anterior }),
   cambiarTema: (tema) => {
@@ -54,5 +60,14 @@ export const useApp = create<EstadoApp>()((set, get) => ({
   salir: () => {
     get().director?.destruir();
     set({ director: null, pantalla: 'inicio', anterior: 'inicio' });
+  },
+  abrirEnLinea: (cliente, pantalla) => {
+    const previo = get().cliente;
+    if (previo !== null && previo !== cliente) previo.cerrar();
+    set({ cliente, pantalla, anterior: 'inicio' });
+  },
+  cerrarEnLinea: () => {
+    get().cliente?.cerrar();
+    set({ cliente: null, pantalla: 'inicio', anterior: 'inicio' });
   },
 }));

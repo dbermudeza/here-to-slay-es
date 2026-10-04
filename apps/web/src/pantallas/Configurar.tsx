@@ -17,7 +17,7 @@ interface Props {
   onVolver: () => void;
 }
 
-function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
+export function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
     <fieldset className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-stone-200 dark:bg-stone-900 dark:ring-stone-700">
       <legend className="px-1 font-titulo text-lg font-semibold">{titulo}</legend>
@@ -26,7 +26,7 @@ function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) 
   );
 }
 
-function Eleccion<T extends string>({
+export function Eleccion<T extends string>({
   nombre,
   valor,
   opciones,
@@ -64,7 +64,7 @@ function Eleccion<T extends string>({
   );
 }
 
-const campo =
+export const campo =
   'w-full rounded-lg bg-stone-50 px-3 py-2 ring-1 ring-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-stone-800 dark:ring-stone-600';
 
 export function Configurar({ modoInicial, onEmpezar, onVolver }: Props) {

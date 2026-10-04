@@ -10,7 +10,7 @@ por sesión**. Antes de escribir código, presenta el plan de la fase y espera l
 - [x] Fase 2 — Cartas (DSL + todos los efectos con test)
 - [x] Fase 3 — Bots + simulación de 1.000 partidas
 - [x] Fase 4 — UI local (hot-seat y contra bots)
-- [ ] Fase 5 — Multijugador en línea
+- [x] Fase 5 — Multijugador en línea
 - [ ] Fase 6 — Pulido, e2e con Playwright y README
 
 ## Fuentes de verdad
@@ -26,9 +26,10 @@ por sesión**. Antes de escribir código, presenta el plan de la fase y espera l
 packages/engine   Motor de reglas puro y determinista (sin UI ni red)       — Fase 1
 packages/cards    Esquema Zod, validación, scripts de datos; registro de efectos — Fase 0/2
 packages/bots     IA fácil/normal (misma API de acciones que un humano)     — Fase 3
+packages/anfitrion Host de partida (temporizadores, bots, conexiones) y protocolo de red — Fase 4/5
 apps/server       Fastify + Socket.IO, servidor autoritativo                — Fase 5
-apps/web          React + Vite + Zustand + Tailwind + Framer Motion         — Fase 4
-docs/             REGLAS.md, DUDAS_REGLAS.md
+apps/web          React + Vite + Zustand + Tailwind + Framer Motion         — Fase 4/5
+docs/             REGLAS.md, DUDAS_REGLAS.md, EN_LINEA.md
 ```
 
 ## Comandos
@@ -36,6 +37,7 @@ docs/             REGLAS.md, DUDAS_REGLAS.md
 ```sh
 pnpm install          # dependencias (pnpm 9; si falta: npm i -g pnpm@9)
 pnpm dev              # aplicación web en http://localhost:5173
+pnpm servidor         # compila la web y arranca el servidor en línea en :3000 (docs/EN_LINEA.md)
 pnpm lint             # ESLint (TS estricto)
 pnpm typecheck        # tsc en todos los paquetes
 pnpm test             # Vitest en todos los paquetes
@@ -97,8 +99,15 @@ un commit descriptivo.
 - **Web** (`apps/web`):
   - React + Zustand + Tailwind 4 + Framer Motion.
   - Las cartas llegan por el módulo virtual `virtual:cartas` (lee `Referencias/cartas.es.json` al compilar) y las imágenes se sirven desde `assets/` en `/cartas/<archivo>`.
-  - `DirectorVivo` (`src/juego/director-vivo.ts`) es el host local: temporizadores reales, bots y traspaso del dispositivo. Se prueba con un reloj falso.
+  - La mesa lee de una `FuenteMesa` (`src/juego/fuente.ts`): en local es el `Anfitrion` (reexportado como `DirectorVivo`); en línea, `ClienteEnLinea` (`src/enlinea/cliente.ts`), que guarda la sesión en localStorage (`hts:sesion`) para reconectar.
   - Todos los textos están en `src/i18n/es.json` (función `t`).
   - Tests con Vitest + Testing Library (jsdom); los del director usan el entorno node.
+- **Anfitrion** (`packages/anfitrion`):
+  - `Anfitrion` es el host de una partida, compartido por la web (local) y el servidor: temporizadores con la interfaz `Reloj` (en tests, `RelojManual`), bots, traspaso del dispositivo y, en línea, desconexión (60 s de espera, luego juega un bot normal), reconexión y límite opcional por decisión.
+  - `protocolo.ts` define los mensajes Socket.IO y los esquemas Zod con los que el servidor valida todo lo que llega de un cliente.
+- **Servidor** (`apps/server`):
+  - `crearServidor` (Fastify + Socket.IO) gestiona salas en memoria (código de 5 caracteres, token por asiento) y sirve `apps/web/dist`.
+  - El actor de una acción es siempre el jugador de la conexión; cada cliente recibe solo su vista filtrada.
+  - Tests con clientes reales de socket.io-client contra un servidor en un puerto aleatorio.
 - **Tests:** Vitest junto a cada paquete (`test/*.test.ts`). Los tests que leen `Referencias/` usan `describe.skipIf` cuando el archivo no existe.
 - Prettier: comillas simples, `;`, `printWidth` 100.

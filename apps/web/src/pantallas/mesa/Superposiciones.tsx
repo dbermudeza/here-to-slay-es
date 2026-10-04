@@ -25,9 +25,11 @@ export function Traspaso() {
 export function Victoria({
   onRevancha,
   onInicio,
+  textoRevancha,
 }: {
   onRevancha: () => void;
   onInicio: () => void;
+  textoRevancha?: string | undefined;
 }) {
   const m = useMesa();
   const g = m.vista.ganador;
@@ -47,7 +49,7 @@ export function Victoria({
         </p>
         <div className="flex justify-center gap-2 pt-2">
           <Boton variante="primario" onClick={onRevancha}>
-            {t('victoria.revancha')}
+            {textoRevancha ?? t('victoria.revancha')}
           </Boton>
           <Boton onClick={onInicio}>{t('victoria.inicio')}</Boton>
         </div>

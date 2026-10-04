@@ -10,7 +10,9 @@ import { Configurar } from './pantallas/Configurar';
 import { ErrorCatalogo } from './pantallas/ErrorCatalogo';
 import { Inicio } from './pantallas/Inicio';
 import { Mesa } from './pantallas/mesa/Mesa';
+import { EnLinea } from './pantallas/EnLinea';
 import { Reglas } from './pantallas/Reglas';
+import { Sala } from './pantallas/Sala';
 import { Tutorial } from './pantallas/Tutorial';
 
 const catalogo = prepararCatalogo(cartasCrudas);
@@ -32,7 +34,19 @@ function useTema(): void {
 
 export function App() {
   useTema();
-  const { pantalla, director, tutorial, irA, volver, empezar, salir, mostrarTutorial } = useApp();
+  const {
+    pantalla,
+    director,
+    cliente,
+    tutorial,
+    irA,
+    volver,
+    empezar,
+    salir,
+    mostrarTutorial,
+    abrirEnLinea,
+    cerrarEnLinea,
+  } = useApp();
   const [modoNuevo, setModoNuevo] = useState<ModoJuego>('bots');
 
   if (!catalogo.ok) return <ErrorCatalogo motivo={catalogo.motivo} detalle={catalogo.detalle} />;
@@ -56,6 +70,16 @@ export function App() {
         />
       )}
       {pantalla === 'reglas' && <Reglas onVolver={volver} />}
+      {pantalla === 'enLinea' && cliente !== null && (
+        <EnLinea
+          cliente={cliente}
+          onDentro={() => abrirEnLinea(cliente, 'sala')}
+          onVolver={cerrarEnLinea}
+        />
+      )}
+      {pantalla === 'sala' && cliente !== null && (
+        <Sala cliente={cliente} onSalir={cerrarEnLinea} onTutorial={() => mostrarTutorial(true)} />
+      )}
       {pantalla === 'mesa' && director !== null && (
         <Mesa
           key={director.config.semilla}

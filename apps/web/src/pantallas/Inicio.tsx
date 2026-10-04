@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useApp } from '../estado/app';
 import { useCatalogo } from '../estado/contexto';
+import { ClienteEnLinea, leerSesion } from '../enlinea/cliente';
 import { leerAuto, restaurarGuardado } from '../juego/guardado';
 import { t } from '../i18n';
 import { Boton } from '../ui/Boton';
@@ -32,7 +33,8 @@ function Opcion({
 
 export function Inicio({ onNueva }: { onNueva: (modo: 'local' | 'bots') => void }) {
   const { motor } = useCatalogo();
-  const { irA, empezar, mostrarTutorial } = useApp();
+  const { irA, empezar, mostrarTutorial, abrirEnLinea } = useApp();
+  const sesion = leerSesion();
   const archivo = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const guardada = leerAuto();
@@ -72,7 +74,18 @@ export function Inicio({ onNueva }: { onNueva: (modo: 'local' | 'bots') => void 
           descripcion={t('inicio.jugarBotsDesc')}
           onClick={() => onNueva('bots')}
         />
-        <Opcion titulo={t('inicio.enLinea')} descripcion={t('inicio.enLineaDesc')} desactivada />
+        {sesion !== null && (
+          <Opcion
+            titulo={t('inicio.volverASala', { codigo: sesion.codigo })}
+            descripcion={t('inicio.volverASalaDesc')}
+            onClick={() => abrirEnLinea(new ClienteEnLinea(undefined, sesion), 'sala')}
+          />
+        )}
+        <Opcion
+          titulo={t('inicio.enLinea')}
+          descripcion={t('inicio.enLineaDesc')}
+          onClick={() => abrirEnLinea(new ClienteEnLinea(undefined, null), 'enLinea')}
+        />
       </div>
 
       {error !== null && (

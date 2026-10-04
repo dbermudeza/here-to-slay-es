@@ -31,5 +31,9 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), cartasPlugin()],
   // Las imágenes de las cartas (assets/cartas/<id>.png) se sirven en /cartas/<id>.png.
   publicDir: resolve(RAIZ, 'assets'),
-  server: { port: 5173 },
+  server: {
+    port: 5173,
+    // En desarrollo, la conexión en línea va al servidor (pnpm --filter @hts/server start).
+    proxy: { '/socket.io': { target: 'http://localhost:3000', ws: true } },
+  },
 });
