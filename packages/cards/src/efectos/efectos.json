@@ -1,0 +1,455 @@
+{
+  "heroe_bad_axe": { "programa": [{ "paso": "destruir", "cantidad": 1 }] },
+  "heroe_bear_claw": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otroConMano" },
+      { "paso": "sacar", "de": "j", "var": "s" },
+      { "paso": "sacar", "de": "j", "si": { "var": "s", "tipos": ["heroe"] } }
+    ]
+  },
+  "heroe_beary_wise": {
+    "programa": [
+      {
+        "paso": "jugadorDebe",
+        "quien": "cadaOtro",
+        "accion": "descartar",
+        "cantidad": 1,
+        "var": "d"
+      },
+      { "paso": "tomarDeDescarte", "deVar": "d" }
+    ]
+  },
+  "heroe_fury_knuckle": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otroConMano" },
+      { "paso": "sacar", "de": "j", "var": "s" },
+      { "paso": "sacar", "de": "j", "si": { "var": "s", "tipos": ["desafio"] } }
+    ]
+  },
+  "heroe_heavy_bear": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otro" },
+      { "paso": "jugadorDebe", "quien": "j", "accion": "descartar", "cantidad": 2 }
+    ]
+  },
+  "heroe_pan_chucks": {
+    "programa": [
+      { "paso": "robar", "cantidad": 2, "var": "r" },
+      { "paso": "confirmar", "var": "ok", "si": { "var": "r", "tipos": ["desafio"] } },
+      { "paso": "revelar", "deVar": "r", "tipos": ["desafio"], "si": { "var": "ok" } },
+      { "paso": "destruir", "cantidad": 1, "si": { "var": "ok" } }
+    ]
+  },
+  "heroe_qi_bear": {
+    "programa": [
+      { "paso": "descartar", "min": 0, "max": 3, "var": "d" },
+      { "paso": "destruir", "cantidad": { "contar": "d" }, "si": { "var": "d" } }
+    ]
+  },
+  "heroe_tough_teddy": {
+    "programa": [
+      {
+        "paso": "jugadorDebe",
+        "quien": "cadaOtro",
+        "accion": "descartar",
+        "cantidad": 1,
+        "conClase": "luchador"
+      }
+    ]
+  },
+
+  "heroe_dodgy_dealer": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otro" },
+      { "paso": "intercambiarManos", "con": "j" }
+    ]
+  },
+  "heroe_fuzzy_cheeks": {
+    "programa": [
+      { "paso": "robar", "cantidad": 1 },
+      { "paso": "jugarInmediato", "tipos": ["heroe"], "opcional": true }
+    ]
+  },
+  "heroe_greedy_cheeks": {
+    "programa": [{ "paso": "jugadorDebe", "quien": "cadaOtro", "accion": "dar", "cantidad": 1 }]
+  },
+  "heroe_lucky_bucky": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otroConMano" },
+      { "paso": "sacar", "de": "j", "var": "s" },
+      { "paso": "jugarInmediato", "deVar": "s", "tipos": ["heroe"], "opcional": true }
+    ]
+  },
+  "heroe_mellow_dee": {
+    "programa": [
+      { "paso": "robar", "cantidad": 1, "var": "r" },
+      { "paso": "jugarInmediato", "deVar": "r", "tipos": ["heroe"], "opcional": true }
+    ]
+  },
+  "heroe_napping_nibbles": { "programa": [] },
+  "heroe_peanut": { "programa": [{ "paso": "robar", "cantidad": 2 }] },
+  "heroe_tipsy_tootie": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otroConHeroeArrebatable" },
+      { "paso": "arrebatar", "de": "j" },
+      { "paso": "moverFuente", "a": "j" }
+    ]
+  },
+
+  "heroe_calming_voice": {
+    "programa": [{ "paso": "proteccion", "tipo": "noArrebatable", "hasta": "inicioTurnoPropio" }]
+  },
+  "heroe_guiding_light": { "programa": [{ "paso": "buscarDescarte", "tipos": ["heroe"] }] },
+  "heroe_holy_curselifter": { "programa": [{ "paso": "devolverObjeto", "modo": "malditoPropio" }] },
+  "heroe_iron_resolve": {
+    "programa": [{ "paso": "proteccion", "tipo": "noDesafiable", "hasta": "finTurno" }]
+  },
+  "heroe_mighty_blade": {
+    "programa": [{ "paso": "proteccion", "tipo": "noDestruible", "hasta": "inicioTurnoPropio" }]
+  },
+  "heroe_radiant_horn": { "programa": [{ "paso": "buscarDescarte", "tipos": ["modificador"] }] },
+  "heroe_vibrant_glow": { "programa": [{ "paso": "bonoTurno", "valor": 5 }] },
+  "heroe_wise_shield": { "programa": [{ "paso": "bonoTurno", "valor": 3 }] },
+
+  "heroe_bullseye": { "programa": [{ "paso": "custom", "nombre": "bullseye" }] },
+  "heroe_hook": {
+    "programa": [
+      { "paso": "jugarInmediato", "tipos": ["objeto"], "opcional": true },
+      { "paso": "robar", "cantidad": 1 }
+    ]
+  },
+  "heroe_lookie_rookie": { "programa": [{ "paso": "buscarDescarte", "tipos": ["objeto"] }] },
+  "heroe_quick_draw": {
+    "programa": [
+      { "paso": "robar", "cantidad": 2, "var": "r" },
+      { "paso": "jugarInmediato", "deVar": "r", "tipos": ["objeto"], "opcional": true }
+    ]
+  },
+  "heroe_serious_grey": {
+    "programa": [
+      { "paso": "destruir", "cantidad": 1 },
+      { "paso": "robar", "cantidad": 1 }
+    ]
+  },
+  "heroe_sharp_fox": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otroConMano" },
+      { "paso": "mirarMano", "de": "j" }
+    ]
+  },
+  "heroe_wildshot": {
+    "programa": [
+      { "paso": "robar", "cantidad": 3 },
+      { "paso": "descartar", "min": 1, "max": 1 }
+    ]
+  },
+  "heroe_wily_red": { "programa": [{ "paso": "robarHasta", "total": 7 }] },
+
+  "heroe_kit_napper": { "programa": [{ "paso": "arrebatar" }] },
+  "heroe_meowzio": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otro" },
+      { "paso": "arrebatar", "de": "j" },
+      { "paso": "sacar", "de": "j" }
+    ]
+  },
+  "heroe_plundering_puma": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otroConMano" },
+      { "paso": "sacar", "de": "j" },
+      { "paso": "sacar", "de": "j" },
+      { "paso": "jugadorPuedeRobar", "quien": "j", "cantidad": 1 }
+    ]
+  },
+  "heroe_shurikitty": {
+    "programa": [{ "paso": "destruir", "cantidad": 1, "objetoAMano": true }]
+  },
+  "heroe_silent_shadow": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otroConMano" },
+      { "paso": "tomarDeManoVista", "de": "j" }
+    ]
+  },
+  "heroe_slippery_paws": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otroConMano" },
+      { "paso": "sacar", "de": "j", "var": "s" },
+      { "paso": "sacar", "de": "j", "var": "s" },
+      { "paso": "descartar", "min": 1, "max": 1, "deVar": "s" }
+    ]
+  },
+  "heroe_sly_pickings": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otroConMano" },
+      { "paso": "sacar", "de": "j", "var": "s" },
+      { "paso": "jugarInmediato", "deVar": "s", "tipos": ["objeto"], "opcional": true }
+    ]
+  },
+  "heroe_smooth_mimimeow": { "programa": [{ "paso": "sacarDeCada", "conClase": "ladron" }] },
+
+  "heroe_bun_bun": { "programa": [{ "paso": "buscarDescarte", "tipos": ["magia"] }] },
+  "heroe_buttons": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otroConMano" },
+      { "paso": "sacar", "de": "j", "var": "s" },
+      { "paso": "jugarInmediato", "deVar": "s", "tipos": ["magia"], "opcional": true }
+    ]
+  },
+  "heroe_fluffy": { "programa": [{ "paso": "destruir", "cantidad": 2 }] },
+  "heroe_hopper": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otro" },
+      { "paso": "jugadorDebe", "quien": "j", "accion": "sacrificar", "cantidad": 1 }
+    ]
+  },
+  "heroe_snowball": {
+    "programa": [
+      { "paso": "robar", "cantidad": 1, "var": "r" },
+      {
+        "paso": "jugarInmediato",
+        "deVar": "r",
+        "tipos": ["magia"],
+        "opcional": true,
+        "var": "jugada"
+      },
+      { "paso": "robar", "cantidad": 1, "si": { "var": "jugada" } }
+    ]
+  },
+  "heroe_spooky": {
+    "programa": [
+      { "paso": "jugadorDebe", "quien": "cadaOtro", "accion": "sacrificar", "cantidad": 1 }
+    ]
+  },
+  "heroe_whiskers": {
+    "programa": [{ "paso": "arrebatar" }, { "paso": "destruir", "cantidad": 1 }]
+  },
+  "heroe_wiggles": {
+    "programa": [
+      { "paso": "arrebatar", "var": "a" },
+      { "paso": "tirarPorHeroe", "var": "a", "si": { "var": "a" } }
+    ]
+  },
+
+  "magia_llamada_a_los_caidos": { "programa": [{ "paso": "buscarDescarte", "tipos": ["heroe"] }] },
+  "magia_impulso_critico": {
+    "programa": [
+      { "paso": "robar", "cantidad": 3 },
+      { "paso": "descartar", "min": 1, "max": 1 }
+    ]
+  },
+  "magia_hechizo_destructivo": {
+    "programa": [
+      { "paso": "descartar", "min": 1, "max": 1 },
+      { "paso": "destruir", "cantidad": 1 }
+    ]
+  },
+  "magia_hechizo_encantado": { "programa": [{ "paso": "bonoTurno", "valor": 2 }] },
+  "magia_trampa_enredadora": {
+    "programa": [{ "paso": "descartar", "min": 2, "max": 2 }, { "paso": "arrebatar" }]
+  },
+  "magia_intercambio_forzado": {
+    "programa": [
+      { "paso": "elegirJugador", "var": "j", "filtro": "otroConHeroeArrebatable" },
+      { "paso": "arrebatar", "de": "j" },
+      { "paso": "darHeroe", "a": "j" }
+    ]
+  },
+  "magia_vientos_huracanados": { "programa": [{ "paso": "devolverObjeto", "modo": "todos" }] },
+  "magia_vientos_de_cambio": {
+    "programa": [
+      { "paso": "devolverObjeto", "modo": "cualquiera" },
+      { "paso": "robar", "cantidad": 1 }
+    ]
+  },
+
+  "objeto_mascara_de_bardo": { "nucleo": "mascara" },
+  "objeto_mascara_de_luchador": { "nucleo": "mascara" },
+  "objeto_mascara_de_guardian": { "nucleo": "mascara" },
+  "objeto_mascara_de_cazador": { "nucleo": "mascara" },
+  "objeto_mascara_de_ladron": { "nucleo": "mascara" },
+  "objeto_mascara_de_mago": { "nucleo": "mascara" },
+  "objeto_muneco_senuelo": { "pasivas": [{ "tipo": "reemplazo", "regla": "senuelo" }] },
+  "objeto_moneda_particularmente_oxidada": {
+    "pasivas": [
+      {
+        "tipo": "disparador",
+        "evento": "falloTiradaEquipado",
+        "programa": [{ "paso": "robar", "cantidad": 1 }]
+      }
+    ]
+  },
+  "objeto_anillo_realmente_grande": {
+    "pasivas": [
+      { "tipo": "bonoTirada", "contexto": "heroe", "valor": 2, "soloHeroeEquipado": true }
+    ]
+  },
+  "objeto_maldito_maldicion_de_los_ojos_de_serpiente": {
+    "pasivas": [
+      { "tipo": "bonoTirada", "contexto": "heroe", "valor": -2, "soloHeroeEquipado": true }
+    ]
+  },
+  "objeto_maldito_llave_selladora": {
+    "pasivas": [{ "tipo": "restriccion", "regla": "sinEfectoEquipado" }]
+  },
+  "objeto_maldito_moneda_sospechosamente_brillante": {
+    "pasivas": [
+      {
+        "tipo": "disparador",
+        "evento": "exitoTiradaEquipado",
+        "programa": [{ "paso": "descartar", "min": 1, "max": 1 }]
+      }
+    ]
+  },
+
+  "lider_la_cancion_carismatica": {
+    "pasivas": [{ "tipo": "bonoTirada", "contexto": "heroe", "valor": 1 }]
+  },
+  "lider_el_sabio_encapuchado": {
+    "pasivas": [
+      {
+        "tipo": "disparador",
+        "evento": "juegasMagia",
+        "programa": [{ "paso": "robar", "cantidad": 1 }]
+      }
+    ]
+  },
+  "lider_la_flecha_divina": {
+    "pasivas": [{ "tipo": "bonoTirada", "contexto": "ataque", "valor": 1 }]
+  },
+  "lider_el_puno_de_la_razon": {
+    "pasivas": [{ "tipo": "bonoTirada", "contexto": "desafiar", "valor": 2 }]
+  },
+  "lider_el_cuerno_protector": {
+    "pasivas": [
+      {
+        "tipo": "disparador",
+        "evento": "juegasModificador",
+        "programa": [{ "paso": "custom", "nombre": "cuernoProtector" }]
+      }
+    ]
+  },
+  "lider_la_garra_sombria": {
+    "pasivas": [
+      {
+        "tipo": "habilidad",
+        "costePa": 1,
+        "unaVezPorTurno": true,
+        "programa": [
+          { "paso": "elegirJugador", "var": "j", "filtro": "otroConMano" },
+          { "paso": "sacar", "de": "j" }
+        ]
+      }
+    ]
+  },
+
+  "monstruo_reina_del_abismo": { "pasivas": [{ "tipo": "bonoPorModificadorRival", "valor": 1 }] },
+  "monstruo_caldero_anuro": {
+    "pasivas": [{ "tipo": "bonoTirada", "contexto": "cualquiera", "valor": 1 }]
+  },
+  "monstruo_aries_artico": {
+    "pasivas": [
+      {
+        "tipo": "disparador",
+        "evento": "exitoTiradaHeroe",
+        "programa": [
+          { "paso": "confirmar", "var": "ok" },
+          { "paso": "robar", "cantidad": 1, "si": { "var": "ok" } }
+        ]
+      }
+    ]
+  },
+  "monstruo_alasangre": {
+    "pasivas": [
+      {
+        "tipo": "disparador",
+        "evento": "teDesafian",
+        "programa": [
+          { "paso": "jugadorDebe", "quien": "desafiante", "accion": "descartar", "cantidad": 1 }
+        ]
+      }
+    ]
+  },
+  "monstruo_dientes_de_sable_corrupto": {
+    "pasivas": [{ "tipo": "reemplazo", "regla": "destruirPorArrebatar" }]
+  },
+  "monstruo_serpiente_coronada": {
+    "pasivas": [
+      {
+        "tipo": "disparador",
+        "evento": "cualquieraJuegaModificador",
+        "programa": [
+          { "paso": "confirmar", "var": "ok" },
+          { "paso": "robar", "cantidad": 1, "si": { "var": "ok" } }
+        ]
+      }
+    ]
+  },
+  "monstruo_rey_dragon_oscuro": {
+    "pasivas": [{ "tipo": "bonoTirada", "contexto": "heroe", "valor": 1 }]
+  },
+  "monstruo_dracos": {
+    "pasivas": [
+      {
+        "tipo": "disparador",
+        "evento": "heroePropioDestruido",
+        "programa": [
+          { "paso": "confirmar", "var": "ok" },
+          { "paso": "robar", "cantidad": 1, "si": { "var": "ok" } }
+        ]
+      }
+    ]
+  },
+  "monstruo_malamamut": {
+    "pasivas": [
+      {
+        "tipo": "disparador",
+        "evento": "robas",
+        "tipos": ["objeto"],
+        "programa": [
+          { "paso": "jugarInmediato", "deVar": "carta", "tipos": ["objeto"], "opcional": true }
+        ]
+      }
+    ]
+  },
+  "monstruo_megababosa": { "pasivas": [{ "tipo": "paExtra", "valor": 1 }] },
+  "monstruo_orthus": {
+    "pasivas": [
+      {
+        "tipo": "disparador",
+        "evento": "robas",
+        "tipos": ["magia"],
+        "programa": [
+          { "paso": "jugarInmediato", "deVar": "carta", "tipos": ["magia"], "opcional": true }
+        ]
+      }
+    ]
+  },
+  "monstruo_rex_mayor": {
+    "pasivas": [
+      {
+        "tipo": "disparador",
+        "evento": "robas",
+        "tipos": ["modificador"],
+        "programa": [
+          { "paso": "confirmar", "var": "ok" },
+          { "paso": "revelar", "deVar": "carta", "tipos": ["modificador"], "si": { "var": "ok" } },
+          { "paso": "robar", "cantidad": 1, "si": { "var": "ok" } }
+        ]
+      }
+    ]
+  },
+  "monstruo_terratuga": { "pasivas": [{ "tipo": "restriccion", "regla": "heroesNoDestruibles" }] },
+  "monstruo_guiverno_titan": {
+    "pasivas": [{ "tipo": "bonoTirada", "contexto": "desafio", "valor": 1 }]
+  },
+  "monstruo_osolechuza_veterano": {
+    "pasivas": [{ "tipo": "restriccion", "regla": "objetosNoDesafiables" }]
+  },
+
+  "modificador_mas1_menos3": { "nucleo": "modificador" },
+  "modificador_mas2_menos2": { "nucleo": "modificador" },
+  "modificador_mas3_menos1": { "nucleo": "modificador" },
+  "modificador_mas4": { "nucleo": "modificador" },
+  "modificador_menos4": { "nucleo": "modificador" },
+  "desafio": { "nucleo": "desafio" }
+}

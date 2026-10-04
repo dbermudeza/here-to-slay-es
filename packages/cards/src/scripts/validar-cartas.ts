@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { RUTA_ASSETS_CARTAS, RUTA_CARTAS_JSON } from '../rutas';
+import { DEFINICIONES_EFECTOS } from '../efectos';
 import { validarCartas, type Problema } from '../validacion';
 
 if (!existsSync(RUTA_CARTAS_JSON)) {
@@ -18,9 +19,10 @@ try {
 
 const { datos, problemas } = validarCartas(crudo, {
   existeImagen: (archivo) => existsSync(resolve(RUTA_ASSETS_CARTAS, archivo)),
-  // Los efectos se registran en la Fase 2; hasta entonces solo se avisan.
-  efectosRegistrados: new Set(),
-  efectosObligatorios: false,
+  // Desde la Fase 2, cada carta debe tener un efecto definido en src/efectos/efectos.json.
+  efectosRegistrados: new Set(Object.keys(DEFINICIONES_EFECTOS)),
+  efectosObligatorios: true,
+  definiciones: DEFINICIONES_EFECTOS,
 });
 
 const errores = problemas.filter((p) => p.severidad === 'error');
