@@ -165,7 +165,7 @@
     "yaPasaste": "Has pasado.",
     "contexto": {
       "heroe": "{nombre} tira por {carta} (necesita {n}+)",
-      "ataque": "{nombre} ataca a {carta}",
+      "ataque": "{nombre} ataca a {carta} (lo mata con {exito}, fracasa con {fracaso})",
       "desafio": "Desafío: {desafiante} contra {desafiado}"
     },
     "tiradaDe": "{nombre}",

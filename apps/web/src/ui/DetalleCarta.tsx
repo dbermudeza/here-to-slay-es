@@ -1,10 +1,11 @@
-import type { Carta as DatosCarta, RangoTirada } from '@hts/cards';
+import type { Carta as DatosCarta } from '@hts/cards';
 import type { ReactNode } from 'react';
 import { useCarta } from '../estado/contexto';
 import { conSigno, t } from '../i18n';
 import { Boton } from './Boton';
 import { Carta } from './Carta';
 import { Modal } from './Modal';
+import { rango } from './rango';
 
 export interface Detalle {
   cartaId: string;
@@ -13,8 +14,6 @@ export interface Detalle {
   /** Si es un Objeto equipado, el Héroe que lo lleva. */
   heroeId?: string | undefined;
 }
-
-const rango = (r: RangoTirada): string => (r.tipo === 'min' ? `${r.valor}+` : `${r.valor}−`);
 
 function Apartado({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (

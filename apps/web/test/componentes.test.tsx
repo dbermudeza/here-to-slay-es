@@ -112,6 +112,27 @@ describe('Mesa', () => {
     expect(director.estado.pila).toEqual([]);
   });
 
+  it('la ventana de Modificadores de un ataque muestra los rangos de éxito y fracaso del Monstruo', () => {
+    let uidMonstruo = '';
+    const { director } = directorEn(config('bots', ['humano', 'facil']), (s) => {
+      ponerHeroe(s, 'j1', 'mago');
+      s.mazoMonstruos.push(...s.monstruosCentro);
+      uidMonstruo = s.mazoMonstruos.find((u) => s.instancias[u] === 'monstruo_h') ?? '';
+      s.mazoMonstruos.splice(s.mazoMonstruos.indexOf(uidMonstruo), 1);
+      s.monstruosCentro = [uidMonstruo];
+    });
+    montar(director);
+    fireEvent.click(screen.getByRole('button', { name: /^Atacar/ }));
+    const cima = director.estado.pila[director.estado.pila.length - 1];
+    expect(cima).toMatchObject({
+      tipo: 'ventanaModificadores',
+      contexto: { tipo: 'ataque', monstruo: uidMonstruo },
+    });
+    expect(
+      screen.getByText('J1 ataca a Monstruo h (lo mata con 8+, fracasa con 5−)'),
+    ).toBeInTheDocument();
+  });
+
   it('un Objeto se equipa eligiendo el Héroe en la mesa', () => {
     let heroe = '';
     let anillo = '';

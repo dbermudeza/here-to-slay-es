@@ -3,6 +3,7 @@ import { useCarta, useAhora } from '../../estado/contexto';
 import { conSigno, t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
 import { Carta } from '../../ui/Carta';
+import { rango } from '../../ui/rango';
 import { clave, useMesa } from './contexto';
 
 function CuentaAtras() {
@@ -185,6 +186,11 @@ function VentanaModificadores() {
       ? m.idDe(cima.contexto.heroe)
       : null;
   const heroe = useCarta(idHeroe);
+  const idMonstruo =
+    cima?.tipo === 'ventanaModificadores' && cima.contexto.tipo === 'ataque'
+      ? m.idDe(cima.contexto.monstruo)
+      : null;
+  const monstruo = useCarta(idMonstruo);
   if (cima?.tipo !== 'ventanaModificadores') return null;
   const ctx = cima.contexto;
   const roller = cima.tiradas[0]?.jugador ?? '';
@@ -199,6 +205,8 @@ function VentanaModificadores() {
         ? t('ventana.contexto.ataque', {
             nombre: m.nombreJugador(roller),
             carta: m.nombreCarta(m.idDe(ctx.monstruo) ?? ''),
+            exito: monstruo?.tipo === 'monstruo' ? rango(monstruo.exito.rango) : '?',
+            fracaso: monstruo?.tipo === 'monstruo' ? rango(monstruo.fracaso.rango) : '?',
           })
         : t('ventana.contexto.desafio', {
             desafiante: m.nombreJugador(ctx.desafiante),
