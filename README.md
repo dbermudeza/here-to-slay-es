@@ -173,9 +173,9 @@ router). Los detalles están en **[docs/EN_LINEA.md](docs/EN_LINEA.md)**.
 pnpm empaquetar
 ```
 
-Genera `dist-app/HereToSlay/` con `HereToSlay.exe`, la web compilada y las cartas. Al abrir
-`HereToSlay.exe` arranca el servidor y abre el navegador; cerrar su ventana lo detiene. No necesita
-Node ni pnpm, así que la carpeta se puede copiar a otro equipo. Vuelve a ejecutar `pnpm empaquetar`
+Genera `dist-app/HereToSlay/` con `HereToSlay.exe` (con el logo del juego como icono), la web
+compilada y las cartas. Al abrir `HereToSlay.exe` arranca el servidor y abre el navegador; cerrar su
+ventana lo detiene. No necesita Node ni pnpm, así que la carpeta se puede copiar a otro equipo. Vuelve a ejecutar `pnpm empaquetar`
 cuando cambie el código. La carpeta contiene el arte y los textos de las cartas: es personal y no se
 versiona.
 

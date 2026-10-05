@@ -23,7 +23,9 @@
   "devDependencies": {
     "@hts/bots": "workspace:^",
     "esbuild": "^0.25",
+    "png-to-ico": "^3.0.2",
     "postject": "1.0.0-alpha.6",
+    "rcedit": "^5.0.2",
     "socket.io-client": "^4"
   }
 }

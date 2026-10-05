@@ -1,7 +1,8 @@
 /**
  * `pnpm empaquetar`: genera dist-app/HereToSlay/, una carpeta para jugar sin Node ni pnpm:
  *
- *   HereToSlay.exe   el servidor (src/principal-escritorio.ts) como ejecutable único de Node (SEA)
+ *   HereToSlay.exe   el servidor (src/principal-escritorio.ts) como ejecutable único de Node (SEA),
+ *                    con el logo del juego como icono en Windows
  *   web/             la aplicación compilada (apps/web/dist, con las imágenes en web/cartas)
  *   cartas.es.json   copia de Referencias/
  *
@@ -21,7 +22,10 @@ import {
 } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
+import { IMAGEN_LOGO } from '@hts/cards';
 import { build } from 'esbuild';
+import pngToIco from 'png-to-ico';
+import { rcedit } from 'rcedit';
 import { RAIZ, RUTA_CARTAS_JSON } from '../../../packages/cards/src/rutas';
 
 const DIR_WEB = resolve(RAIZ, 'apps/web/dist');
@@ -83,6 +87,21 @@ writeFileSync(
 execFileSync(process.execPath, ['--experimental-sea-config', config], { stdio: 'inherit' });
 
 copyFileSync(process.execPath, ejecutable);
+// Icono y datos del ejecutable, antes de inyectar el código (rcedit reescribe los recursos).
+if (process.platform === 'win32') {
+  const logo = join(DIR_WEB, 'cartas', IMAGEN_LOGO);
+  const datos = {
+    'version-string': { ProductName: 'Here to Slay', FileDescription: 'Here to Slay' },
+  };
+  if (existsSync(logo)) {
+    const icono = join(TEMPORAL, 'logo.ico');
+    writeFileSync(icono, await pngToIco(logo));
+    await rcedit(ejecutable, { ...datos, icon: icono });
+  } else {
+    console.warn(`Sin ${logo}: el ejecutable llevará el icono de Node (instala los recursos).`);
+    await rcedit(ejecutable, datos);
+  }
+}
 const postject = createRequire(import.meta.url).resolve('postject/dist/cli.js');
 execFileSync(
   process.execPath,
