@@ -17,6 +17,7 @@ import {
   existsSync,
   mkdirSync,
   openSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -27,6 +28,7 @@ import { build } from 'esbuild';
 import pngToIco from 'png-to-ico';
 import { rcedit } from 'rcedit';
 import { RAIZ, RUTA_CARTAS_JSON } from '../../../packages/cards/src/rutas';
+import { iconoDesdeLogo } from './icono';
 
 const DIR_WEB = resolve(RAIZ, 'apps/web/dist');
 const DESTINO = resolve(RAIZ, 'dist-app/HereToSlay');
@@ -95,7 +97,7 @@ if (process.platform === 'win32') {
   };
   if (existsSync(logo)) {
     const icono = join(TEMPORAL, 'logo.ico');
-    writeFileSync(icono, await pngToIco(logo));
+    writeFileSync(icono, await pngToIco(iconoDesdeLogo(readFileSync(logo))));
     await rcedit(ejecutable, { ...datos, icon: icono });
   } else {
     console.warn(`Sin ${logo}: el ejecutable llevará el icono de Node (instala los recursos).`);
@@ -122,6 +124,17 @@ console.log('Copiando la web y las cartas…');
 cpSync(DIR_WEB, join(DESTINO, 'web'), { recursive: true });
 copyFileSync(RUTA_CARTAS_JSON, join(DESTINO, 'cartas.es.json'));
 rmSync(TEMPORAL, { recursive: true, force: true });
+
+// El Explorador guarda los iconos en caché: sin esto seguiría mostrando el icono anterior.
+if (process.platform === 'win32') {
+  try {
+    execFileSync(join(process.env['SystemRoot'] ?? 'C:\\Windows', 'System32', 'ie4uinit.exe'), [
+      '-show',
+    ]);
+  } catch {
+    console.warn('No se pudo refrescar la caché de iconos: el icono nuevo puede tardar en verse.');
+  }
+}
 
 console.log(`\nListo: ${ejecutable}`);
 console.log('Ábrelo con doble clic (puedes crear un acceso directo en el escritorio).');

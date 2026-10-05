@@ -22,8 +22,10 @@
   },
   "devDependencies": {
     "@hts/bots": "workspace:^",
+    "@types/pngjs": "^6.0.5",
     "esbuild": "^0.25",
     "png-to-ico": "^3.0.2",
+    "pngjs": "^7.0.0",
     "postject": "1.0.0-alpha.6",
     "rcedit": "^5.0.2",
     "socket.io-client": "^4"
