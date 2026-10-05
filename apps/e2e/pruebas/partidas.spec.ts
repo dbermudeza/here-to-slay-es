@@ -62,7 +62,7 @@ test('contra bots: reglas difíciles, guardar y continuar, y revancha', async ({
   test.info().annotations.push({ type: 'partida', description: JSON.stringify(r) });
   await page.getByRole('button', { name: 'Revancha' }).click();
   await expect(page.getByRole('heading', { name: /gana/i })).toBeHidden();
-  await expect(page.getByText('Turno 1', { exact: true })).toBeVisible();
+  await expect(page.getByRole('banner').getByText('Turno 1', { exact: true })).toBeVisible();
   expect(errores).toEqual([]);
 });
 
