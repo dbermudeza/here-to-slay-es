@@ -154,6 +154,23 @@ export const CATALOGO: Carta[] = crudas.map((c) => CartaSchema.parse(c));
 
 export const nuevoMotor = (opciones?: OpcionesMotor): Motor => crearMotor(CATALOGO, opciones);
 
+/**
+ * CATALOGO más una máscara de Cazador. Va aparte porque otros paquetes (web, servidor, anfitrión)
+ * juegan partidas con semilla sobre CATALOGO: añadirle cartas cambiaría su mazo.
+ */
+export const CATALOGO_CON_MASCARA_CAZADOR: Carta[] = [
+  ...CATALOGO,
+  CartaSchema.parse({
+    id: 'objeto_mascara_cazador',
+    tipo: 'objeto',
+    nombre: 'Máscara de Cazador',
+    nombreOriginal: 'Ranger Mask',
+    copias: 1,
+    otorgaClase: 'cazador',
+    ...t,
+  }),
+];
+
 /** Motor cuyo efecto para `cartaId` es un espía: registra cada activación y no hace nada más. */
 export function motorConEspia(cartaId: string) {
   const espia = vi.fn<(e: EntornoPaso) => void>();

@@ -3,13 +3,21 @@
  * probabilidades de 2d6 y bonos de tirada estimados a partir de la información pública.
  */
 import {
+  CLASES,
   DEFINICIONES_EFECTOS,
   type Carta,
   type Clase,
   type Programa,
   type RangoTirada,
 } from '@hts/cards';
-import type { JugadorVista, PendienteVista, Tirada, Uid, VistaJugador } from '@hts/engine';
+import {
+  desgloseClases,
+  type JugadorVista,
+  type PendienteVista,
+  type Tirada,
+  type Uid,
+  type VistaJugador,
+} from '@hts/engine';
 import type { EntradaBot } from './tipos';
 
 /** P(2d6 = s) para s = 2..12. */
@@ -70,14 +78,13 @@ export class Analisis {
   }
 
   clases(j: JugadorVista): Set<Clase> {
-    const s = new Set<Clase>();
-    const l = this.carta(j.lider);
-    if (l?.tipo === 'lider') s.add(l.clase);
-    for (const r of j.grupo) {
-      const c = this.claseDeHeroe(r.heroe, r.objeto);
-      if (c !== undefined) s.add(c);
-    }
-    return s;
+    const { porClase } = desgloseClases(
+      this.entrada.catalogo,
+      (uid) => this.vista.cartas[uid],
+      j.lider,
+      j.grupo,
+    );
+    return new Set(CLASES.filter((c) => porClase[c].length > 0));
   }
 
   /** Lo cerca que está un jugador de ganar (más alto = más peligroso). */

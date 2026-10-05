@@ -1,9 +1,10 @@
 import type { Clase } from '@hts/cards';
 import { describe, expect, it } from 'vitest';
-import type { GameState, Modo } from '../src';
+import { crearMotor, type GameState, type Modo } from '../src';
 import {
   A,
   B,
+  CATALOGO_CON_MASCARA_CAZADOR,
   cerrar,
   escenario,
   forzarDados,
@@ -62,6 +63,18 @@ describe('Victoria — reglas normales', () => {
     const s = preparado('normal', 0, ['luchador', 'guardian', 'cazador', 'ladron']);
     ponerHeroe(s, A, 'bardo', 'objeto_mascara_mago');
     expect(hacer(motor, s, A, { tipo: 'FIN_TURNO' }).state.ganador?.motivo).toBe('grupoCompleto');
+  });
+
+  it('R-046/R-091: Guardián con máscara de Cazador y Líder Guardián gana; con otro Líder, no', () => {
+    const conMascara = crearMotor(CATALOGO_CON_MASCARA_CAZADOR);
+    const grupo = (lider: Clase) => {
+      const s = escenario(nuevaPartida(conMascara), { turnoDe: A, lideres: { [A]: lider } });
+      ponerHeroe(s, A, 'guardian', 'objeto_mascara_cazador');
+      for (const c of ['luchador', 'ladron', 'mago', 'bardo'] as const) ponerHeroe(s, A, c);
+      return hacer(conMascara, s, A, { tipo: 'FIN_TURNO' }).state.ganador;
+    };
+    expect(grupo('guardian')).toEqual({ jugador: A, motivo: 'grupoCompleto' });
+    expect(grupo('bardo')).toBeNull();
   });
 
   it('con 5 clases no se gana', () => {

@@ -1,7 +1,9 @@
-import type { JugadorVista } from '@hts/engine';
+import { desgloseClases, type JugadorVista } from '@hts/engine';
+import { useCatalogo } from '../../estado/contexto';
 import { t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
 import { Carta, type Tamano } from '../../ui/Carta';
+import { ContadorClases } from './ContadorClases';
 import { clave, useMesa } from './contexto';
 
 /** Grupo de un jugador: Líder, Héroes (con su Objeto) y Monstruos matados. */
@@ -11,6 +13,13 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
   const enTurno = vista.turno.jugador === jugador.id;
   const control = director.config.jugadores.find((j) => j.id === jugador.id)?.control;
   const tam: Tamano = propia ? 'md' : 'sm';
+  const { motor } = useCatalogo();
+  const desglose = desgloseClases(
+    motor.catalogo,
+    m.idDe,
+    jugador.lider,
+    jugador.grupo,
+  );
 
   return (
     <section
@@ -47,6 +56,14 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
         <span className="text-stone-600 dark:text-stone-400">
           {t('mesa.monstruosMatados', { n: jugador.monstruos.length })}
         </span>
+        <ContadorClases
+          jugadorId={jugador.id}
+          nombreJugador={jugador.nombre}
+          desglose={desglose}
+          monstruos={jugador.monstruos.length}
+          modo={vista.opciones.modo}
+          nombreCarta={m.nombreCarta}
+        />
       </header>
       <div className="flex items-end gap-2 overflow-x-auto pb-1">
         <Carta

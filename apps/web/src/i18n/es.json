@@ -96,6 +96,21 @@
     "cartasEnMano": "{n} en mano",
     "grupo": "Grupo",
     "monstruosMatados": "Monstruos: {n}",
+    "contadorClases": {
+      "etiqueta": "Clases: {n}/6",
+      "titulo": "Clases de {nombre}",
+      "falta": "falta",
+      "estado": {
+        "cerca": "· cerca",
+        "listo": "· ¡gana al terminar el turno!"
+      },
+      "lider": "(Líder)",
+      "mascara": "(máscara: {objeto})",
+      "nota": {
+        "normal": "El Líder cuenta. Con 6 clases se gana al terminar el turno.",
+        "dificil": "El Líder cuenta. Con 6 clases hace falta además 1 Monstruo; con 4 Monstruos bastan 3 clases."
+      }
+    },
     "sinHeroes": "Sin Héroes",
     "manoVacia": "No tienes cartas en la mano.",
     "reglasModo": {

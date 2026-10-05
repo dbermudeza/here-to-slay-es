@@ -1,4 +1,4 @@
-import type { Carta, Clase, RangoTirada, Requisito } from '@hts/cards';
+import { CLASES, type Carta, type Clase, type RangoTirada, type Requisito } from '@hts/cards';
 import type { Catalogo, GameState, Jugador, JugadorId, Ranura, Tirada, Uid } from './tipos';
 
 /** Error de invariante interna: indica un fallo del motor, no una acción ilegal. */
@@ -49,23 +49,110 @@ export function buscarRanura(estado: GameState, heroe: Uid): Ubicacion | null {
   return null;
 }
 
-/** Clase de un Héroe teniendo en cuenta su Objeto equipado (máscaras, R-046). */
-export function claseEfectiva(catalogo: Catalogo, estado: GameState, ranura: Ranura): Clase {
-  const heroe = cartaDe(catalogo, estado, ranura.heroe);
-  if (heroe.tipo !== 'heroe') throw new ErrorInterno(`${ranura.heroe} no es un Héroe`);
+/** Traduce un uid a id de carta; `null`/`undefined` si la carta no se conoce (p. ej., oculta). */
+export type IdDeCarta = (uid: Uid) => string | null | undefined;
+
+/** Quién aporta una clase al Grupo (R-046, R-091). */
+export interface AportacionClase {
+  /** Id de carta (no uid) del Líder o del Héroe que aporta la clase. */
+  carta: string;
+  /** Uid de esa carta en la mesa. */
+  uid: Uid;
+  /** 'mascara': Héroe cuya clase viene de su Objeto equipado (su id va en `objeto`). */
+  origen: 'lider' | 'heroe' | 'mascara';
+  /** Id de carta del Objeto; solo si `origen === 'mascara'`. */
+  objeto?: string;
+}
+
+export interface DesgloseClases {
+  /** Las 6 clases (orden de CLASES), con quién aporta cada una; lista vacía si nadie. */
+  porClase: Record<Clase, AportacionClase[]>;
+  /** Número de clases distintas representadas (lo que usa la victoria, R-091). */
+  total: number;
+}
+
+interface ClaseAportada {
+  clase: Clase;
+  aportacion: AportacionClase;
+}
+
+/** Clase que aporta el Líder `uid`, o null si no es un Líder conocido. */
+function aportacionLider(catalogo: Catalogo, idDe: IdDeCarta, uid: Uid): ClaseAportada | null {
+  const id = idDe(uid);
+  const carta = id == null ? undefined : catalogo.get(id);
+  if (id == null || carta?.tipo !== 'lider') return null;
+  return { clase: carta.clase, aportacion: { carta: id, uid, origen: 'lider' } };
+}
+
+/**
+ * Clase que aporta un Héroe del Grupo (R-046): la de su máscara si lleva un Objeto que otorga
+ * clase (y entonces solo esa), si no la suya. Null si la ranura no tiene un Héroe conocido.
+ */
+function aportacionHeroe(
+  catalogo: Catalogo,
+  idDe: IdDeCarta,
+  ranura: Ranura,
+): ClaseAportada | null {
+  const id = idDe(ranura.heroe);
+  const heroe = id == null ? undefined : catalogo.get(id);
+  if (id == null || heroe?.tipo !== 'heroe') return null;
+  const uid = ranura.heroe;
   if (ranura.objeto !== null) {
-    const objeto = cartaDe(catalogo, estado, ranura.objeto);
-    if ((objeto.tipo === 'objeto' || objeto.tipo === 'objeto_maldito') && objeto.otorgaClase) {
-      return objeto.otorgaClase;
+    const objetoId = idDe(ranura.objeto);
+    const objeto = objetoId == null ? undefined : catalogo.get(objetoId);
+    if (
+      objetoId != null &&
+      (objeto?.tipo === 'objeto' || objeto?.tipo === 'objeto_maldito') &&
+      objeto.otorgaClase
+    ) {
+      return {
+        clase: objeto.otorgaClase,
+        aportacion: { carta: id, uid, origen: 'mascara', objeto: objetoId },
+      };
     }
   }
-  return heroe.clase;
+  return { clase: heroe.clase, aportacion: { carta: id, uid, origen: 'heroe' } };
+}
+
+/**
+ * Desglose de las clases de un Grupo, Líder incluido (R-046, R-081, R-091). Sirve tanto con el
+ * estado como con una vista: las cartas que `idDe` no conoce se ignoran.
+ */
+export function desgloseClases(
+  catalogo: Catalogo,
+  idDe: IdDeCarta,
+  lider: Uid,
+  grupo: readonly Ranura[],
+): DesgloseClases {
+  const porClase = Object.fromEntries(CLASES.map((c) => [c, []])) as unknown as Record<
+    Clase,
+    AportacionClase[]
+  >;
+  const aportadas = [
+    aportacionLider(catalogo, idDe, lider),
+    ...grupo.map((r) => aportacionHeroe(catalogo, idDe, r)),
+  ];
+  for (const a of aportadas) if (a !== null) porClase[a.clase].push(a.aportacion);
+  const total = CLASES.filter((c) => porClase[c].length > 0).length;
+  return { porClase, total };
+}
+
+const idDeEstado =
+  (estado: GameState): IdDeCarta =>
+  (uid) =>
+    idCarta(estado, uid);
+
+/** Clase de un Héroe teniendo en cuenta su Objeto equipado (máscaras, R-046). */
+export function claseEfectiva(catalogo: Catalogo, estado: GameState, ranura: Ranura): Clase {
+  const a = aportacionHeroe(catalogo, idDeEstado(estado), ranura);
+  if (a === null) throw new ErrorInterno(`${ranura.heroe} no es un Héroe`);
+  return a.clase;
 }
 
 export function claseLider(catalogo: Catalogo, estado: GameState, j: Jugador): Clase {
-  const lider = cartaDe(catalogo, estado, j.lider);
-  if (lider.tipo !== 'lider') throw new ErrorInterno(`${j.lider} no es un Líder`);
-  return lider.clase;
+  const a = aportacionLider(catalogo, idDeEstado(estado), j.lider);
+  if (a === null) throw new ErrorInterno(`${j.lider} no es un Líder`);
+  return a.clase;
 }
 
 /** Clases distintas representadas en el Grupo, incluido el Líder (R-081, R-091). */

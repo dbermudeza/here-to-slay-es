@@ -15,7 +15,16 @@ export {
   type VistaJugador,
 } from './vista';
 export { respuestasPosibles } from './legales';
-export { clasesDelGrupo, cumpleRequisitos, problemaDeConservacion, totalTirada } from './consultas';
+export {
+  clasesDelGrupo,
+  cumpleRequisitos,
+  desgloseClases,
+  problemaDeConservacion,
+  totalTirada,
+  type AportacionClase,
+  type DesgloseClases,
+  type IdDeCarta,
+} from './consultas';
 export { bonosDeTirada } from './pasivas';
 export { PA_POR_TURNO } from './ops';
 export { crearRng, siguienteRng, type EstadoRng } from './rng';
