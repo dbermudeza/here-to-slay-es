@@ -12,6 +12,8 @@ test-results/
 Referencias/
 referencias/
 assets/cartas/
+# Ejecutable de escritorio (pnpm empaquetar): lleva dentro la web con las cartas.
+dist-app/
 
 # Claude Code: ajustes personales (los del proyecto, .claude/settings.json, sí se versionan)
 .claude/settings.local.json

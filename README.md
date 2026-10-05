@@ -167,6 +167,18 @@ con el código ya puesto: uno para la red de casa y, con el botón **Abrir acces
 para jugar por internet mediante un túnel de Cloudflare (sin contratar ningún servidor ni tocar el
 router). Los detalles están en **[docs/EN_LINEA.md](docs/EN_LINEA.md)**.
 
+### Con doble clic (ejecutable de escritorio)
+
+```sh
+pnpm empaquetar
+```
+
+Genera `dist-app/HereToSlay/` con `HereToSlay.exe`, la web compilada y las cartas. Al abrir
+`HereToSlay.exe` arranca el servidor y abre el navegador; cerrar su ventana lo detiene. No necesita
+Node ni pnpm, así que la carpeta se puede copiar a otro equipo. Vuelve a ejecutar `pnpm empaquetar`
+cuando cambie el código. La carpeta contiene el arte y los textos de las cartas: es personal y no se
+versiona.
+
 En línea, el creador puede añadir bots; si alguien se desconecta se le esperan 60 s y después un
 bot juega por él hasta que vuelve; y se puede poner un tiempo máximo por decisión.
 
@@ -255,6 +267,7 @@ Las convenciones de código están en [CLAUDE.md](CLAUDE.md).
 | `pnpm dev`               | Aplicación en http://localhost:5173 (en línea: con el servidor arrancado) |
 | `pnpm build`             | Compila la aplicación web (`apps/web/dist`)                               |
 | `pnpm servidor`          | Compila la web y arranca el servidor en línea en el puerto 3000           |
+| `pnpm empaquetar`        | Genera el ejecutable de escritorio `dist-app/HereToSlay/HereToSlay.exe`   |
 | `pnpm lint`              | ESLint con TypeScript estricto                                            |
 | `pnpm format`            | Formatea con Prettier                                                     |
 | `pnpm typecheck`         | Comprobación de tipos en todos los paquetes                               |

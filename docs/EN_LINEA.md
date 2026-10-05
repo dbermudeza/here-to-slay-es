@@ -21,6 +21,13 @@ Compila la aplicación web y arranca el servidor en el puerto **3000**. Verás a
 
 Para usar otro puerto: `PUERTO=4000 pnpm servidor` (en PowerShell: `$env:PUERTO=4000; pnpm servidor`).
 
+**Sin terminal:** `pnpm empaquetar` genera `dist-app/HereToSlay/HereToSlay.exe`. Con doble clic
+arranca el servidor en el puerto 3000 (o en uno libre, si otro programa lo ocupa) y abre el
+navegador; si ya estaba en marcha, solo abre el navegador. La ventana que se queda abierta muestra
+las mismas direcciones; al cerrarla se detiene el servidor. Windows puede avisar la primera vez
+(SmartScreen y el cortafuegos) porque el ejecutable no está firmado: permite el acceso en redes
+privadas para que entren los de tu Wi-Fi.
+
 ## 2. Jugar en la misma red (Wi-Fi de casa)
 
 1. Todos se conectan a la misma Wi-Fi.

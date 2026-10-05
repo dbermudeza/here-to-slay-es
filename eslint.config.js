@@ -32,6 +32,7 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/dist/**',
       '**/dist-e2e/**',
+      'dist-app/**',
       'apps/e2e/informe/**',
       'apps/e2e/resultados/**',
       '**/coverage/**',
