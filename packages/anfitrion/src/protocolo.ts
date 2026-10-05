@@ -86,6 +86,7 @@ export const AccionSchema = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('TIRADA_INMEDIATA'), tirar: z.boolean() }).strict(),
   z.object({ tipo: z.literal('ELEGIR'), uids: z.array(Uid).max(20) }).strict(),
   z.object({ tipo: z.literal('RESPONDER'), respuesta: RespuestaSchema }).strict(),
+  z.object({ tipo: z.literal('RENDIRSE') }).strict(),
 ]);
 
 /** Valida una acción recibida por red y la convierte al tipo del motor. */

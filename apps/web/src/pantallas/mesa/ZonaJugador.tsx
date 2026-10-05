@@ -24,6 +24,11 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
     >
       <header className="mb-1 flex flex-wrap items-baseline gap-x-2 text-sm">
         <span className="font-semibold">{jugador.nombre}</span>
+        {vista.rendidos.includes(jugador.id) && (
+          <span className="rounded bg-stone-300 px-1.5 text-xs dark:bg-stone-600">
+            {t('mesa.rendirse.insignia')}
+          </span>
+        )}
         {director.conexion(jugador.id) !== 'conectado' && (
           <span className="rounded bg-red-100 px-1.5 text-xs text-red-800 dark:bg-red-950 dark:text-red-200">
             {t(`mesa.conexion.${director.conexion(jugador.id)}`)}

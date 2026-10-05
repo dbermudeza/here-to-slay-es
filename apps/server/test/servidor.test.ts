@@ -154,6 +154,21 @@ describe('Partida en línea', () => {
     );
   });
 
+  it('rendirse (D-43): por red y en cualquier momento; si queda un solo humano, gana', async () => {
+    const { ana, beto } = await partidaDeDos();
+    const otro = ana.partida?.vista.turno.jugador === 'j1' ? beto : ana;
+    const queda = otro === ana ? beto : ana;
+    expect(await pedir(otro, MENSAJES.accion, { accion: { tipo: 'RENDIRSE' } })).toEqual({
+      ok: true,
+    });
+    await esperar(() => queda.partida?.vista.ganador !== null);
+    expect(queda.partida?.vista.ganador).toEqual({
+      jugador: queda.partida?.yo,
+      motivo: 'rendicion',
+    });
+    await esperar(() => queda.sala?.fase === 'terminada');
+  });
+
   it('los motivos explican las acciones no disponibles', async () => {
     const { ana, beto } = await partidaDeDos();
     const otro = ana.partida?.vista.turno.jugador === 'j1' ? beto : ana;

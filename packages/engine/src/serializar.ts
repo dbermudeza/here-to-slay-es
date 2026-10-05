@@ -51,6 +51,10 @@ export function cargarPartida(ctx: Ctx, texto: string): GameState {
       throw new ErrorCarga(`La partida usa una carta que no está en el catálogo: ${String(id)}.`);
     }
   }
+  // Partidas guardadas antes de poder rendirse (D-43).
+  if (e.rendidos === undefined) e.rendidos = [];
+  if (!Array.isArray(e.rendidos)) throw new ErrorCarga('Campo inválido: rendidos.');
+  if (esObjeto(e.opciones) && e.opciones.bots === undefined) e.opciones.bots = [];
   const estado = e as unknown as GameState;
   if (!estado.jugadores.some((j) => j.id === estado.turno.jugador)) {
     throw new ErrorCarga('El jugador del turno no existe.');

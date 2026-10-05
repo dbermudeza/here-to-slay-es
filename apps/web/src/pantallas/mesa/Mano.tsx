@@ -18,7 +18,9 @@ export function Mano() {
     <section aria-label={t('mesa.mano')} data-zona={`mano:${m.yo}`}>
       <h2 className="mb-1 text-sm font-semibold">{t('mesa.mano')}</h2>
       {mano.length === 0 ? (
-        <p className="text-sm text-stone-600 dark:text-stone-400">{t('mesa.manoVacia')}</p>
+        <p className="text-sm text-stone-600 dark:text-stone-400">
+          {m.vista.rendidos.includes(m.yo) ? t('mesa.rendirse.manoVacia') : t('mesa.manoVacia')}
+        </p>
       ) : (
         <div className="flex gap-2 overflow-x-auto pb-2">
           {mano.map((uid) => (

@@ -48,6 +48,7 @@ export interface VistaJugador {
   opciones: OpcionesPartida;
   turno: Turno;
   ganador: GameState['ganador'];
+  rendidos: JugadorId[];
   jugadores: JugadorVista[];
   cartasEnMazo: number;
   descarte: Uid[];
@@ -118,6 +119,7 @@ export function getPlayerView(estado: GameState, yo: JugadorId | null): VistaJug
     opciones: { ...estado.opciones },
     turno: clonar(estado.turno),
     ganador: estado.ganador,
+    rendidos: [...estado.rendidos],
     jugadores,
     cartasEnMazo: estado.mazo.length,
     descarte: [...estado.descarte],

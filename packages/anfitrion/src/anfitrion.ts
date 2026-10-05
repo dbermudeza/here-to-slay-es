@@ -125,6 +125,11 @@ export class Anfitrion {
   // ------------------------------------------------------------------ consultas
 
   /** Jugadores controlados por personas (según la configuración). */
+  /** Humanos que no se han rendido (D-43). */
+  private get humanosEnJuego(): JugadorId[] {
+    return this.humanos.filter((id) => !this.estado.rendidos.includes(id));
+  }
+
   get humanos(): JugadorId[] {
     return this.config.jugadores.filter((j) => j.control === 'humano').map((j) => j.id);
   }
@@ -203,9 +208,11 @@ export class Anfitrion {
   respondedoresPosibles(): JugadorId[] {
     const cima = this.estado.pila[this.estado.pila.length - 1];
     if (cima?.tipo === 'ventanaDesafio') {
-      return this.humanos.filter((id) => id !== cima.jugada.jugador && !cima.pasaron.includes(id));
+      return this.humanosEnJuego.filter(
+        (id) => id !== cima.jugada.jugador && !cima.pasaron.includes(id),
+      );
     }
-    if (cima?.tipo === 'ventanaModificadores') return [...this.humanos];
+    if (cima?.tipo === 'ventanaModificadores') return [...this.humanosEnJuego];
     return [];
   }
 

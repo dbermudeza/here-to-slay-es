@@ -10,6 +10,7 @@ const MOTIVOS: Record<MotivoVictoria, string> = {
   grupoCompleto: 'ha completado un Grupo con las 6 clases',
   grupoCompletoYMonstruo: 'tiene las 6 clases y al menos 1 Monstruo',
   cuatroMonstruosTresClases: 'tiene 4 Monstruos y al menos 3 clases',
+  rendicion: 'todos los demás jugadores se han rendido',
 };
 
 const TEMPORALES: Record<TipoTemporal, (valor: number) => string> = {
@@ -48,6 +49,10 @@ export function describirEvento(e: Evento, n: Nombres): string | null {
       return 'No quedan cartas en el mazo ni en la pila de descarte.';
     case 'manoRenovada':
       return `${J(e.jugador)} descarta su mano y roba 5 cartas.`;
+    case 'jugadorRendido':
+      return `🏳️ ${J(e.jugador)} se rinde.`;
+    case 'cartasRetiradas':
+      return `Las cartas de ${J(e.jugador)} van al descarte: ${e.cartas.map(C).join(', ')}.`;
     case 'cartasDescartadas':
       return `${J(e.jugador)} descarta ${e.cartas.map(C).join(', ')}.`;
     case 'cartaJugada':

@@ -125,7 +125,25 @@
       "reglas": "Ver reglas",
       "tutorial": "Ver tutorial",
       "salir": "Salir al inicio",
-      "salirConfirmar": "¿Salir al inicio? La partida queda guardada y podrás continuarla."
+      "salirConfirmar": "¿Salir al inicio? La partida queda guardada y podrás continuarla.",
+      "rendirse": "Rendirse"
+    },
+    "rendirse": {
+      "titulo": "¿Rendirte?",
+      "texto": "Dejarás de jugar esta partida: tus cartas de la mano y del Grupo irán a la pila de descarte y no podrás volver a jugar. Si todos los demás jugadores humanos se rinden, gana el que quede.",
+      "confirmar": "Me rindo",
+      "cancelar": "Seguir jugando",
+      "hecho": "Te has rendido",
+      "hechoLocal": "{nombre} se ha rendido",
+      "hechoTexto": "La partida sigue sin ti. Puedes quedarte a verla hasta el final o salir.",
+      "hechoTextoLocal": "Los demás siguen jugando en este dispositivo.",
+      "ver": "Ver la partida",
+      "salir": "Salir al inicio",
+      "salirSala": "Salir de la sala",
+      "salirLocal": "Salir al inicio (la partida termina para todos)",
+      "espectador": "Te has rendido · estás viendo la partida",
+      "insignia": "Se ha rendido",
+      "manoVacia": "Te has rendido: ya no tienes cartas."
     },
     "log": "Historial",
     "verLog": "Ver historial",
@@ -216,7 +234,8 @@
       "tresMonstruos": "Ha matado 3 Monstruos.",
       "grupoCompleto": "Ha completado un Grupo con las 6 clases.",
       "grupoCompletoYMonstruo": "Tiene las 6 clases y al menos un Monstruo.",
-      "cuatroMonstruosTresClases": "Tiene 4 Monstruos y al menos 3 clases."
+      "cuatroMonstruosTresClases": "Tiene 4 Monstruos y al menos 3 clases.",
+      "rendicion": "Todos los demás jugadores se han rendido."
     },
     "turnos": "Partida de {n} turnos.",
     "revancha": "Revancha",
@@ -245,7 +264,8 @@
     "TIRADA_INVALIDA": "Esa tirada no existe.",
     "SELECCION_INVALIDA": "La selección no es válida.",
     "RESPUESTA_INVALIDA": "La respuesta no es válida.",
-    "SECUENCIA_OBSOLETA": "La ventana ya había cambiado."
+    "SECUENCIA_OBSOLETA": "La ventana ya había cambiado.",
+    "JUGADOR_RENDIDO": "Te has rendido: ya no puedes jugar."
   },
   "tipos": {
     "heroe": "Héroe",

@@ -90,6 +90,7 @@ export function crearPartida(
     pila: [],
     temporales: [],
     ganador: null,
+    rendidos: [],
     dadosForzados: [],
   };
   const events: Evento[] = [{ tipo: 'partidaCreada', modo: opciones.modo, jugadores: [...ids] }];

@@ -99,6 +99,7 @@ describe('Preparación', () => {
       duracionVentanaDesafioMs: 3000,
       duracionVentanaModificadoresMs: 5000,
       duracionVentanaModificadoresDesafioMs: 10000,
+      bots: [],
     });
   });
 });

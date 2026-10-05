@@ -65,7 +65,10 @@ export function pasivasDeJugador(ctx: Ctx, d: GameState, j: Jugador): PasivaActi
 export function todasLasPasivas(ctx: Ctx, d: GameState): PasivaActiva[] {
   const i = d.jugadores.findIndex((j) => j.id === d.turno.jugador);
   const orden = [...d.jugadores.slice(i), ...d.jugadores.slice(0, i)];
-  return orden.flatMap((j) => pasivasDeJugador(ctx, d, j));
+  // D-43: el Líder y los Monstruos de quien se ha rendido ya no tienen efecto.
+  return orden
+    .filter((j) => !d.rendidos.includes(j.id))
+    .flatMap((j) => pasivasDeJugador(ctx, d, j));
 }
 
 function tieneRegla(

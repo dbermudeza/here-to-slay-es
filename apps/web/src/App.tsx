@@ -125,7 +125,11 @@ export function App() {
               director={director}
               onTutorial={() => mostrarTutorial(true)}
               onSalir={() => {
-                if (director.estado.ganador !== null) borrarAuto();
+                const { ganador, rendidos } = director.estado;
+                // Contra bots, si te has rendido ya no hay partida que continuar.
+                const sinMi =
+                  director.config.modo === 'bots' && rendidos.includes(director.observador);
+                if (ganador !== null || sinMi) borrarAuto();
                 salir();
               }}
               onRevancha={() => {

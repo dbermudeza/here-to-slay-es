@@ -38,6 +38,7 @@ export function comprobarVictoria(
   emitir: Emitir,
 ): boolean {
   if (d.ganador !== null) return true;
+  if (d.rendidos.includes(j.id)) return false;
   const monstruos = j.monstruos.length;
   const clases = clasesDelGrupo(catalogo, d, j).size;
   for (const c of CONDICIONES[d.opciones.modo]) {

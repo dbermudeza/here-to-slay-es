@@ -46,12 +46,13 @@ export function respuestasPosibles(s: GameState, p: Pregunta): Respuesta[] {
 }
 
 /**
- * Todas las acciones legales de `actor` en el estado actual. Se generan candidatas y se filtran con
+ * Todas las acciones legales de `actor` en el estado actual (sin RENDIRSE, que siempre es posible
+ * pero nunca se propone: los bots no se rinden). Se generan candidatas y se filtran con
  * `validar`, así que la lista nunca contradice al reducer. Sirve para la UI y los bots.
  */
 export function accionesLegales(ctx: Ctx, s: GameState, actor: Actor): Accion[] {
   const j = buscarJugador(s, actor);
-  if (j === undefined || s.ganador !== null) return [];
+  if (j === undefined || s.ganador !== null || s.rendidos.includes(j.id)) return [];
   const candidatas: Accion[] = [];
   const cima = cimaPila(s);
 

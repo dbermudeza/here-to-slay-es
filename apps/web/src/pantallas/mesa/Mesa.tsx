@@ -42,6 +42,9 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
   const [menu, setMenu] = useState(false);
   const [reglas, setReglas] = useState(false);
   const [historialMovil, setHistorialMovil] = useState(false);
+  /** Rendirse (D-43): pedir confirmación y, una vez hecho, ofrecer ver la partida o salir. */
+  const [rendicion, setRendicion] = useState<'confirmar' | 'hecha' | null>(null);
+  const [rendido, setRendido] = useState<string>('');
 
   // Guardado automático tras cada cambio (solo partidas locales).
   const local = director instanceof DirectorVivo ? director : null;
@@ -106,6 +109,13 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
   }, [director, version, equipando, motor]);
 
   const { vista, yo } = valor;
+  const meRendi = vista.rendidos.includes(yo);
+  const modo = director.config.modo;
+  const rendirse = (): void => {
+    setRendido(valor.nombreJugador(yo));
+    director.actuar({ tipo: 'RENDIRSE' });
+    setRendicion('hecha');
+  };
   const propio = vista.jugadores.find((j) => j.id === yo);
   const rivales = vista.jugadores.filter((j) => j.id !== yo);
   const cima = vista.pila[vista.pila.length - 1];
@@ -144,6 +154,11 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
             {t(`mesa.reglasModo.${vista.opciones.modo}`)}
           </span>
           <TiempoDecision />
+          {meRendi && vista.ganador === null && (
+            <span className="rounded bg-stone-200 px-2 py-0.5 text-sm dark:bg-stone-700">
+              {t('mesa.rendirse.espectador')}
+            </span>
+          )}
           <div className="ml-auto flex gap-2">
             <Boton
               pequeno
@@ -236,6 +251,17 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
             <div className="py-1">
               <Ajustes />
             </div>
+            {vista.ganador === null && !meRendi && (
+              <Boton
+                variante="peligro"
+                onClick={() => {
+                  setMenu(false);
+                  setRendicion('confirmar');
+                }}
+              >
+                {t('mesa.menu.rendirse')}
+              </Boton>
+            )}
             <Boton
               variante="peligro"
               onClick={() => {
@@ -243,6 +269,47 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
               }}
             >
               {t('mesa.menu.salir')}
+            </Boton>
+          </div>
+        </Modal>
+
+        <Modal
+          abierto={rendicion === 'confirmar'}
+          titulo={t('mesa.rendirse.titulo')}
+          onCerrar={() => setRendicion(null)}
+          ancho="sm"
+        >
+          <p className="text-stone-700 dark:text-stone-300">{t('mesa.rendirse.texto')}</p>
+          <div className="mt-5 flex flex-wrap justify-end gap-2">
+            <Boton onClick={() => setRendicion(null)}>{t('mesa.rendirse.cancelar')}</Boton>
+            <Boton variante="peligro" onClick={rendirse}>
+              {t('mesa.rendirse.confirmar')}
+            </Boton>
+          </div>
+        </Modal>
+
+        <Modal
+          abierto={rendicion === 'hecha' && vista.ganador === null}
+          titulo={
+            modo === 'local'
+              ? t('mesa.rendirse.hechoLocal', { nombre: rendido })
+              : t('mesa.rendirse.hecho')
+          }
+          ancho="sm"
+        >
+          <p className="text-stone-700 dark:text-stone-300">
+            {modo === 'local' ? t('mesa.rendirse.hechoTextoLocal') : t('mesa.rendirse.hechoTexto')}
+          </p>
+          <div className="mt-5 flex flex-col gap-2">
+            <Boton variante="primario" onClick={() => setRendicion(null)}>
+              {t('mesa.rendirse.ver')}
+            </Boton>
+            <Boton onClick={onSalir}>
+              {modo === 'enLinea'
+                ? t('mesa.rendirse.salirSala')
+                : modo === 'local'
+                  ? t('mesa.rendirse.salirLocal')
+                  : t('mesa.rendirse.salir')}
             </Boton>
           </div>
         </Modal>

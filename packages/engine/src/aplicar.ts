@@ -18,6 +18,7 @@ import {
   tirar,
 } from './ops';
 import { habilidadDe, heroeSellado, notificar } from './pasivas';
+import { activos, rendirse } from './rendicion';
 import type { Emitir, Envio, GameState, Jugada, Respuesta, Valor } from './tipos';
 
 function valorDeRespuesta(r: Respuesta): Valor {
@@ -133,7 +134,8 @@ export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir
       if (cima?.tipo !== 'ventanaDesafio') throw new ErrorInterno('Pasar sin ventana');
       cima.pasaron.push(actor);
       emitir({ tipo: 'pasa', jugador: actor });
-      const rivales = d.jugadores.filter((j) => j.id !== cima.jugada.jugador);
+      // D-43: quien se ha rendido no responde (cuenta como que ha pasado).
+      const rivales = activos(d).filter((j) => j.id !== cima.jugada.jugador);
       if (rivales.every((j) => cima.pasaron.includes(j.id))) cerrarVentana(ctx, d, emitir);
       return;
     }
@@ -190,5 +192,9 @@ export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir
       entregarRespuesta(d, cima.efecto, valorDeRespuesta(accion.respuesta));
       return;
     }
+
+    case 'RENDIRSE':
+      rendirse(d, actor, emitir);
+      return;
   }
 }

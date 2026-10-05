@@ -97,3 +97,10 @@ export async function empezarSala(page: Page, bots: number): Promise<void> {
   await expect(page.getByRole('button', { name: 'Empezar partida' })).toBeEnabled();
   await page.getByRole('button', { name: 'Empezar partida' }).click();
 }
+
+/** Rendirse desde el menú de la partida (con su confirmación). */
+export async function rendirse(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Menú' }).click();
+  await page.getByRole('button', { name: 'Rendirse' }).click();
+  await page.getByRole('button', { name: 'Me rindo' }).click();
+}

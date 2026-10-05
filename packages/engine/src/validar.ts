@@ -30,6 +30,9 @@ export function validar(ctx: Ctx, s: GameState, { actor, accion }: Envio): Codig
 
   const j = buscarJugador(s, actor);
   if (j === undefined) return 'JUGADOR_DESCONOCIDO';
+  // D-43: quien se ha rendido ya no actúa; rendirse se puede en cualquier momento.
+  if (s.rendidos.includes(actor)) return 'JUGADOR_RENDIDO';
+  if (accion.tipo === 'RENDIRSE') return null;
   const enMano = (uid: string): boolean => j.mano.includes(uid);
 
   switch (accion.tipo) {

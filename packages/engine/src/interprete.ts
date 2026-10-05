@@ -143,9 +143,12 @@ function elegirCartas(
   });
 }
 
+/** Los demás jugadores en sentido horario, sin los que se han rendido (D-43). */
 function otros(d: GameState, yo: Jugador): Jugador[] {
   const i = d.jugadores.indexOf(yo);
-  return [...d.jugadores.slice(i + 1), ...d.jugadores.slice(0, i)];
+  return [...d.jugadores.slice(i + 1), ...d.jugadores.slice(0, i)].filter(
+    (j) => !d.rendidos.includes(j.id),
+  );
 }
 
 function heroesArrebatables(d: GameState, yo: Jugador, de: Jugador | null): Uid[] {

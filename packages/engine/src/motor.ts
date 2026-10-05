@@ -6,6 +6,7 @@ import type { Ctx, RegistroCustom } from './efectos';
 import { avanzarTurno } from './flujo';
 import { ejecutarEfectos } from './interprete';
 import { accionesLegales } from './legales';
+import { atenderRendidos } from './rendicion';
 import { cargarPartida, serializarPartida } from './serializar';
 import type {
   Accion,
@@ -33,9 +34,11 @@ const clonar = <T>(valor: T): T => JSON.parse(JSON.stringify(valor)) as T;
 /** Tras cada acción: ejecuta los efectos pendientes y, si no queda nada ni PA, termina el turno. */
 function avanzar(ctx: Ctx, d: GameState, emitir: Emitir): void {
   ejecutarEfectos(ctx, d, emitir);
+  atenderRendidos(ctx, d, emitir);
   avanzarTurno(ctx, d, emitir);
   // El robo al empezar el turno (R-029) puede activar disparadores (Malamamut, Orthus…).
   ejecutarEfectos(ctx, d, emitir);
+  atenderRendidos(ctx, d, emitir);
 }
 
 /** Núcleo puro: valida y aplica una acción sin mutar el estado recibido. */

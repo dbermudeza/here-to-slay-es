@@ -60,6 +60,8 @@ export function aConfigPartida(c: ConfigAnfitrion): ConfigPartida {
       duracionVentanaDesafioMs: c.segundos.desafio * 1000,
       duracionVentanaModificadoresMs: c.segundos.modificadores * 1000,
       duracionVentanaModificadoresDesafioMs: c.segundos.modificadoresDesafio * 1000,
+      // D-43: los bots no cuentan para la victoria por rendición.
+      bots: c.jugadores.filter((j) => j.control !== 'humano').map((j) => j.id),
     },
   };
 }

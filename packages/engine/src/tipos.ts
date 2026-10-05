@@ -19,6 +19,8 @@ export interface OpcionesPartida {
   duracionVentanaModificadoresMs: number;
   /** Ventana de modificadores tras las dos tiradas de un desafío (R-067). */
   duracionVentanaModificadoresDesafioMs: number;
+  /** Jugadores controlados por bots: no cuentan para la victoria por rendición (D-43). */
+  bots: JugadorId[];
 }
 
 export const OPCIONES_POR_DEFECTO: OpcionesPartida = {
@@ -26,6 +28,7 @@ export const OPCIONES_POR_DEFECTO: OpcionesPartida = {
   duracionVentanaDesafioMs: 10_000,
   duracionVentanaModificadoresMs: 5_000,
   duracionVentanaModificadoresDesafioMs: 10_000,
+  bots: [],
 };
 
 /** Un Héroe del Grupo con su Objeto equipado (máximo uno, R-043). */
@@ -199,7 +202,12 @@ export interface Temporal {
 }
 
 export type MotivoVictoria =
-  'tresMonstruos' | 'grupoCompleto' | 'grupoCompletoYMonstruo' | 'cuatroMonstruosTresClases';
+  | 'tresMonstruos'
+  | 'grupoCompleto'
+  | 'grupoCompletoYMonstruo'
+  | 'cuatroMonstruosTresClases'
+  /** D-43: todos los demás jugadores humanos se han rendido. */
+  | 'rendicion';
 
 export interface GameState {
   version: 1;
@@ -225,6 +233,8 @@ export interface GameState {
   /** Efectos con duración activos. */
   temporales: Temporal[];
   ganador: { jugador: JugadorId; motivo: MotivoVictoria } | null;
+  /** Jugadores que se han rendido (D-43): ya no juegan, no responden ni pueden ganar. */
+  rendidos: JugadorId[];
   /**
    * Solo para tests: valores de dado (1–6) que se consumen antes de usar el RNG.
    * Nunca se envía a los clientes.
@@ -247,6 +257,8 @@ export type Accion =
   | { tipo: 'TIRADA_INMEDIATA'; tirar: boolean }
   | { tipo: 'ELEGIR'; uids: Uid[] }
   | { tipo: 'RESPONDER'; respuesta: Respuesta }
+  /** Rendirse (D-43): se puede en cualquier momento. */
+  | { tipo: 'RENDIRSE' }
   | { tipo: 'CERRAR_VENTANA'; secuencia: number };
 
 export interface Envio {
@@ -369,7 +381,10 @@ export type Evento =
       carta: string;
     }
   | { tipo: 'temporalTerminado'; jugador: JugadorId; efecto: TipoTemporal; carta: string }
-  | { tipo: 'victoria'; jugador: JugadorId; motivo: MotivoVictoria };
+  | { tipo: 'victoria'; jugador: JugadorId; motivo: MotivoVictoria }
+  | { tipo: 'jugadorRendido'; jugador: JugadorId }
+  /** Las cartas de la mano y del Grupo de quien se ha rendido van al descarte (D-43). */
+  | { tipo: 'cartasRetiradas'; jugador: JugadorId; cartas: string[] };
 
 export type CodigoError =
   | 'PARTIDA_TERMINADA'
@@ -394,7 +409,8 @@ export type CodigoError =
   | 'TIRADA_INVALIDA'
   | 'SELECCION_INVALIDA'
   | 'RESPUESTA_INVALIDA'
-  | 'SECUENCIA_OBSOLETA';
+  | 'SECUENCIA_OBSOLETA'
+  | 'JUGADOR_RENDIDO';
 
 export interface ErrorMotor {
   codigo: CodigoError;

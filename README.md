@@ -92,17 +92,18 @@ bot juega por él hasta que vuelve; y se puede poner un tiempo máximo por decis
 
 ## 4. Cómo se juega en la pantalla
 
-| Quiero…                          | Cómo                                                                                               |
-| -------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Robar, renovar la mano, terminar | **Robar**, **Descartar mano y robar 5** y **Terminar turno** (indican su coste en PA)              |
-| Jugar una carta de la mano       | Pulsa la carta y después **Jugar** (Héroes y Magias) o **Equipar a un Héroe** (Objetos)            |
-| Equipar un Objeto                | **Equipar a un Héroe** y pulsa el Héroe que lo llevará (se resaltan los posibles, también rivales) |
-| Usar el efecto de un Héroe       | **Usar efecto** bajo el Héroe de tu Grupo                                                          |
-| Atacar a un Monstruo             | **Atacar** bajo el Monstruo del centro                                                             |
-| Desafiar o jugar un Modificador  | En el panel de la ventana (con cuenta atrás) que aparece cuando es posible                         |
-| Ver una carta en grande          | Clic en cualquier carta de la mesa; **doble clic** en las de tu mano (o **Ver carta**)             |
-| Ver el historial                 | Panel derecho (en pantallas pequeñas, **Ver historial**)                                           |
-| Responder en "este dispositivo"  | En las ventanas, **Responde X** pasa el dispositivo a X; al acabar, **He terminado**               |
+| Quiero…                          | Cómo                                                                                                                                            |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Robar, renovar la mano, terminar | **Robar**, **Descartar mano y robar 5** y **Terminar turno** (indican su coste en PA)                                                           |
+| Jugar una carta de la mano       | Pulsa la carta y después **Jugar** (Héroes y Magias) o **Equipar a un Héroe** (Objetos)                                                         |
+| Equipar un Objeto                | **Equipar a un Héroe** y pulsa el Héroe que lo llevará (se resaltan los posibles, también rivales)                                              |
+| Usar el efecto de un Héroe       | **Usar efecto** bajo el Héroe de tu Grupo                                                                                                       |
+| Atacar a un Monstruo             | **Atacar** bajo el Monstruo del centro                                                                                                          |
+| Desafiar o jugar un Modificador  | En el panel de la ventana (con cuenta atrás) que aparece cuando es posible                                                                      |
+| Ver una carta en grande          | Clic en cualquier carta de la mesa; **doble clic** en las de tu mano (o **Ver carta**)                                                          |
+| Ver el historial                 | Panel derecho (en pantallas pequeñas, **Ver historial**)                                                                                        |
+| Responder en "este dispositivo"  | En las ventanas, **Responde X** pasa el dispositivo a X; al acabar, **He terminado**                                                            |
+| Rendirse                         | **Menú → Rendirse**: tus cartas van al descarte y puedes ver la partida o salir; si todos los demás humanos se rinden, gana el que queda (D-43) |
 
 Un botón gris no está disponible: pasa el ratón por encima para ver por qué (por ejemplo, "No
 te quedan suficientes puntos de acción").

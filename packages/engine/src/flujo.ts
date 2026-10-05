@@ -346,7 +346,11 @@ export function finTurno(ctx: Ctx, d: GameState, emitir: Emitir): void {
   expirarTemporales(d, actual.id, 'finTurno', emitir);
   if (comprobarVictoria(ctx.catalogo, d, actual, 'finTurno', emitir)) return;
   const i = d.jugadores.indexOf(actual);
-  const siguiente = d.jugadores[(i + 1) % d.jugadores.length];
+  // D-43: el turno salta a quienes se han rendido.
+  const n = d.jugadores.length;
+  const siguiente = Array.from({ length: n }, (_, k) => d.jugadores[(i + 1 + k) % n]).find(
+    (j) => j !== undefined && !d.rendidos.includes(j.id),
+  );
   if (siguiente === undefined) throw new ErrorInterno('Sin jugadores');
   expirarTemporales(d, siguiente.id, 'inicioTurnoPropio', emitir);
   d.turno = {

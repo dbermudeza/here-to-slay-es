@@ -50,6 +50,7 @@ estado. En el código, cada punto provisional aparece como `// TODO(regla) D-xx`
 | D-40 | Elecciones forzosas automáticas                        | ✅     |
 | D-41 | Hook: jugar el Objeto es obligatorio                   | ✅     |
 | D-42 | Robo gratis al empezar el turno                        | ✅     |
+| D-43 | Rendirse (opción de la versión digital)                | ✅     |
 
 ---
 
@@ -351,3 +352,22 @@ El reglamento en PDF no lo menciona.
 **Aplicado también al primer turno de la partida** (interpretación de "al inicio del turno de un
 jugador"). Las habilidades de "cada vez que robas…" (Malamamut, Orthus, Rex Mayor) también se activan
 con este robo.
+
+### D-43 · Rendirse (opción de la versión digital)
+
+El reglamento no contempla rendirse; es una opción añadida en la versión digital (menú de la partida).
+**✅ Resuelta (usuario, 2026-10-05):**
+
+- Se puede rendir cualquier jugador humano **en cualquier momento**, también fuera de su turno o con
+  una ventana abierta. Los bots nunca se rinden.
+- Quien se rinde deja de jugar: se salta su turno, cuenta como que pasa en las ventanas de desafío,
+  no juega Modificadores, los efectos no lo eligen y las pasivas de su Líder y sus Monstruos dejan de
+  actuar. Lo que estuviera esperando su decisión se resuelve solo (primera opción legal; la tirada
+  inmediata, sin tirar).
+- **Sus cartas se descartan:** cuando no queda nada pendiente en la pila, su mano, sus Héroes y sus
+  Objetos van a la pila de descarte. Su Líder y sus Monstruos matados se quedan con él, fuera de juego.
+- **Victoria por rendición:** gana el único jugador humano que no se ha rendido cuando todos los demás
+  humanos se han rendido. Los bots no cuentan (en línea, con Ana, Beto y un bot: si Ana se rinde, gana
+  Beto).
+- **Si se rinde el último humano** (por ejemplo, tú contra bots), la partida sigue entre los bots hasta
+  que uno cumpla una condición de victoria; quien se rindió puede quedarse a verla.

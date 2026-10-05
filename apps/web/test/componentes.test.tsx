@@ -210,3 +210,57 @@ describe('Mesa', () => {
     expect(container.textContent).not.toMatch(/\b(mesa|ventana|decision|errores)\.[a-zA-Z]+/);
   });
 });
+
+describe('Rendirse (D-43)', () => {
+  const mesa = (d: ReturnType<typeof directorEn>['director'], onSalir = () => undefined) =>
+    conCatalogo(
+      <Mesa
+        director={d}
+        onSalir={onSalir}
+        onRevancha={() => undefined}
+        onTutorial={() => undefined}
+      />,
+    );
+
+  it('contra bots: desde el menú, con confirmación; después se puede ver la partida o salir', async () => {
+    const onSalir = vi.fn();
+    const { director } = directorEn(config('bots', ['humano', 'normal', 'normal']), (s) => {
+      darCarta(s, 'j1', 'magia_prueba');
+    });
+    mesa(director, onSalir);
+    fireEvent.click(screen.getByRole('button', { name: 'Menú' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rendirse' }));
+    // Cancelar no hace nada.
+    fireEvent.click(screen.getByRole('button', { name: 'Seguir jugando' }));
+    expect(director.estado.rendidos).toEqual([]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menú' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rendirse' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Me rindo' }));
+    expect(director.estado.rendidos).toEqual(['j1']);
+    expect(screen.getByRole('heading', { name: 'Te has rendido' })).toBeInTheDocument();
+    expect(screen.getByText('Te has rendido: ya no tienes cartas.')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver la partida' }));
+    await waitFor(() =>
+      expect(screen.queryByRole('heading', { name: 'Te has rendido' })).not.toBeInTheDocument(),
+    );
+    expect(screen.getByText(/estás viendo la partida/)).toBeInTheDocument();
+    // Ya no se ofrece rendirse otra vez.
+    fireEvent.click(screen.getByRole('button', { name: 'Menú' }));
+    expect(screen.queryByRole('button', { name: 'Rendirse' })).not.toBeInTheDocument();
+  });
+
+  it('en este dispositivo: si los demás se rinden, gana el que queda', async () => {
+    const { director } = directorEn(config('local', ['humano', 'humano']));
+    mesa(director);
+    fireEvent.click(screen.getByRole('button', { name: 'Menú' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rendirse' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Me rindo' }));
+    expect(director.estado.ganador).toEqual({ jugador: 'j2', motivo: 'rendicion' });
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /J2 gana la partida/ })).toBeInTheDocument(),
+    );
+    expect(screen.getByText('Todos los demás jugadores se han rendido.')).toBeInTheDocument();
+  });
+});
