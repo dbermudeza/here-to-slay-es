@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useReducirAnimaciones } from '../../estado/app';
 import { agruparVuelos, verVuelo, type Vuelo } from '../../juego/vuelos';
 import { Carta } from '../../ui/Carta';
+import { CAPA } from '../../ui/capas';
 import { useMesa } from './contexto';
 
 /** Duración de un vuelo; más corta si hay cola, para no quedarse atrás. */
@@ -70,7 +71,7 @@ export function Vuelos() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
+      className={`pointer-events-none fixed inset-0 ${CAPA.vuelos} flex items-center justify-center`}
       aria-live="polite"
     >
       <AnimatePresence>

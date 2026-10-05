@@ -2,6 +2,7 @@ import type { JugadorId } from '@hts/engine';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { t } from '../../i18n';
+import { CAPA } from '../../ui/capas';
 import { useMesa } from './contexto';
 
 const CARAS = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
@@ -35,7 +36,9 @@ export function Dados() {
   }, [eventos, eventos.length]);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-16 z-50 flex justify-center gap-3">
+    <div
+      className={`pointer-events-none fixed inset-x-0 top-16 ${CAPA.dados} flex justify-center gap-3`}
+    >
       <AnimatePresence>
         {tiradas.map((tir) => (
           <motion.div

@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode } from 'react';
+import { CAPA } from './capas';
 
 interface Props {
   abierto: boolean;
@@ -106,7 +107,7 @@ export function Modal({ abierto, titulo, onCerrar, ancho = 'md', opaco = false, 
     <AnimatePresence>
       {abierto && (
         <motion.div
-          className={`fixed inset-0 z-40 flex items-center justify-center p-4 ${
+          className={`fixed inset-0 ${CAPA.modal} flex items-center justify-center p-4 ${
             opaco ? 'bg-stone-950' : 'bg-stone-950/60 backdrop-blur-[2px]'
           }`}
           initial={{ opacity: 0 }}

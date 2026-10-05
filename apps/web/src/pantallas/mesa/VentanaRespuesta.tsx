@@ -1,6 +1,7 @@
 import type { Accion, Tirada } from '@hts/engine';
 import { useCarta, useAhora } from '../../estado/contexto';
 import { conSigno, t } from '../../i18n';
+import { CAPA } from '../../ui/capas';
 import { Boton } from '../../ui/Boton';
 import { Carta } from '../../ui/Carta';
 import { rango } from '../../ui/rango';
@@ -239,7 +240,7 @@ export function VentanaRespuesta() {
   return (
     <section
       aria-live="polite"
-      className="fixed inset-x-2 bottom-2 z-30 mx-auto max-w-2xl space-y-3 rounded-2xl bg-white p-4 shadow-2xl ring-1 ring-stone-300 lg:inset-x-auto lg:bottom-auto lg:right-2 lg:top-14 lg:mx-0 lg:max-h-[calc(100vh-4.5rem)] lg:w-[19rem] lg:overflow-y-auto dark:bg-stone-900 dark:ring-stone-600"
+      className={`fixed inset-x-2 bottom-2 ${CAPA.ventanaRespuesta} mx-auto max-w-2xl space-y-3 rounded-2xl bg-white p-4 shadow-2xl ring-1 ring-stone-300 lg:inset-x-auto lg:bottom-auto lg:right-2 lg:top-14 lg:mx-0 lg:max-h-[calc(100vh-4.5rem)] lg:w-[19rem] lg:overflow-y-auto dark:bg-stone-900 dark:ring-stone-600`}
     >
       {cima.tipo === 'ventanaDesafio' ? <VentanaDesafio /> : <VentanaModificadores />}
     </section>

@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useReducirAnimaciones } from '../../estado/app';
 import { t } from '../../i18n';
+import { CAPA } from '../../ui/capas';
 
 /** Tiempo que el rótulo permanece visible (sin contar el fundido de salida). */
 export const RETARDO_ROTULO_MS = 1800;
@@ -63,7 +64,7 @@ export function RotuloTurno({ numero, jugador, titulo, pausado, anunciarAlMontar
     <div
       aria-hidden="true"
       data-rotulo-turno=""
-      className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center p-4"
+      className={`pointer-events-none fixed inset-0 ${CAPA.rotulo} flex items-center justify-center p-4`}
     >
       <AnimatePresence mode="wait">
         {visible && (

@@ -5,6 +5,7 @@ import type { ClienteEnLinea } from '../enlinea/cliente';
 import { useDirector } from '../estado/contexto';
 import { t } from '../i18n';
 import { Boton } from '../ui/Boton';
+import { CAPA } from '../ui/capas';
 import { campo, Eleccion, Seccion } from './Configurar';
 import { Invitar } from './Invitar';
 import { Mesa } from './mesa/Mesa';
@@ -235,7 +236,7 @@ export function Sala({
     cliente.red === 'desconectado' ? (
       <p
         role="status"
-        className="fixed inset-x-0 top-0 z-50 bg-red-700 p-2 text-center text-sm text-white"
+        className={`fixed inset-x-0 top-0 ${CAPA.aviso} bg-red-700 p-2 text-center text-sm text-white`}
       >
         {t('enLinea.reconectando')}
       </p>
