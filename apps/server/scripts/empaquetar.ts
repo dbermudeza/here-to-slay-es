@@ -9,7 +9,16 @@
  * La web ya debe estar compilada (el script raíz ejecuta antes `pnpm build`).
  */
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  closeSync,
+  copyFileSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  openSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
 import { build } from 'esbuild';
@@ -30,6 +39,18 @@ for (const [ruta, falta] of [
     console.error(`Falta ${ruta}: ${falta}.`);
     process.exit(1);
   }
+}
+
+// Con el ejecutable abierto, Windows no deja borrarlo, pero sí lo que hay a su lado: se borraría
+// parte de web/ y el servidor en marcha dejaría de servir imágenes. Se comprueba antes de tocar nada.
+const ejecutable = join(DESTINO, NOMBRE);
+try {
+  if (existsSync(ejecutable)) closeSync(openSync(ejecutable, 'r+'));
+} catch {
+  console.error(
+    `${NOMBRE} está abierto: ciérralo (su ventana) y vuelve a ejecutar pnpm empaquetar.`,
+  );
+  process.exit(1);
 }
 
 rmSync(DESTINO, { recursive: true, force: true });
@@ -61,7 +82,6 @@ writeFileSync(
 );
 execFileSync(process.execPath, ['--experimental-sea-config', config], { stdio: 'inherit' });
 
-const ejecutable = join(DESTINO, NOMBRE);
 copyFileSync(process.execPath, ejecutable);
 const postject = createRequire(import.meta.url).resolve('postject/dist/cli.js');
 execFileSync(
