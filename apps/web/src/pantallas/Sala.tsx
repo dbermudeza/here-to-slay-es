@@ -6,6 +6,7 @@ import { useDirector } from '../estado/contexto';
 import { t } from '../i18n';
 import { Boton } from '../ui/Boton';
 import { campo, Eleccion, Seccion } from './Configurar';
+import { Invitar } from './Invitar';
 import { Mesa } from './mesa/Mesa';
 
 const LIMITES = [null, 30, 60, 90, 120, 180] as const;
@@ -53,6 +54,8 @@ function Lobby({ cliente, onSalir }: { cliente: ClienteEnLinea; onSalir: () => v
           {t('enLinea.sala.compartir')}
         </p>
       </Seccion>
+
+      <Invitar cliente={cliente} codigo={sala.codigo} />
 
       <Seccion titulo={t('enLinea.sala.jugadores', { n: sala.asientos.length })}>
         <ul className="divide-y divide-stone-200 dark:divide-stone-700">

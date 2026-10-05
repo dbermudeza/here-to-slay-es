@@ -22,9 +22,14 @@ export const MENSAJES = {
   volverALaSala: 'sala:volver',
   salir: 'sala:salir',
   accion: 'partida:accion',
+  /** Túnel de Cloudflare: solo desde el equipo del servidor. */
+  abrirTunel: 'tunel:abrir',
+  cerrarTunel: 'tunel:cerrar',
   /** servidor → cliente */
   estadoSala: 'sala:estado',
   estadoPartida: 'partida:estado',
+  infoServidor: 'servidor:info',
+  estadoTunel: 'tunel:estado',
 } as const;
 
 // ------------------------------------------------------------------ esquemas (cliente → servidor)
@@ -128,7 +133,24 @@ export type ErrorSala =
   | 'NO_ESTAN_LISTOS'
   | 'POCOS_JUGADORES'
   | 'SIN_SALA'
-  | 'SIN_PARTIDA';
+  | 'SIN_PARTIDA'
+  | 'SOLO_EQUIPO_SERVIDOR';
+
+/** Estado del túnel de Cloudflare para jugar por internet. */
+export interface EstadoTunel {
+  fase: 'apagado' | 'conectando' | 'activo' | 'error';
+  /** Dirección pública (https://….trycloudflare.com) cuando está activo. */
+  url: string | null;
+  error: 'NO_INSTALADO' | 'FALLO' | 'TIEMPO' | null;
+}
+
+/** Lo que el servidor cuenta a cada conexión al conectarse. */
+export interface InfoServidor {
+  /** La conexión viene del propio equipo del servidor (no de la red ni del túnel). */
+  esEquipoServidor: boolean;
+  /** Direcciones de la red local (http://ip:puerto); solo para el equipo del servidor. */
+  redLocal: string[];
+}
 
 export type Ack<T> = ({ ok: true } & T) | { ok: false; error: ErrorSala | string };
 

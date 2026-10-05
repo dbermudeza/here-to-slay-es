@@ -82,10 +82,12 @@ duración de las ventanas de desafío y de Modificadores y una **semilla** para 
 pnpm servidor
 ```
 
-Compila la aplicación y arranca el servidor en el puerto 3000. Uno **crea la sala** y comparte el
-código de 5 letras; los demás **se unen** con ese código. Para la red de casa basta con la dirección
-que muestra la consola; para jugar por internet, sin contratar ningún servidor, sigue
-**[docs/EN_LINEA.md](docs/EN_LINEA.md)** (túnel de Cloudflare o abrir un puerto).
+Compila la aplicación y arranca el servidor en el puerto 3000. Desde ese equipo, abre
+`http://localhost:3000` y **crea la sala**. En "Invitar a jugar" tienes enlaces para copiar y enviar,
+con el código ya puesto: uno para la red de casa y, con el botón **Abrir acceso por internet**, otro
+para jugar por internet mediante un túnel de Cloudflare (sin contratar ningún servidor ni tocar el
+router). Los detalles (instalar `cloudflared`, otras opciones) están en
+**[docs/EN_LINEA.md](docs/EN_LINEA.md)**.
 
 En línea, el creador puede añadir bots; si alguien se desconecta se le esperan 60 s y después un
 bot juega por él hasta que vuelve; y se puede poner un tiempo máximo por decisión.

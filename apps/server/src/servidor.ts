@@ -3,6 +3,7 @@
  * Socket.IO (salas, lobby y partidas). Cada jugador envía intenciones y recibe solo su vista.
  */
 import { existsSync } from 'node:fs';
+import { networkInterfaces } from 'node:os';
 import { sep } from 'node:path';
 import fastifyCompress from '@fastify/compress';
 import fastifyStatic from '@fastify/static';
@@ -25,6 +26,7 @@ import {
   type ConfigAnfitrion,
   type ErrorSala,
   type EstadoPartida,
+  type InfoServidor,
   type OpcionesAnfitrion,
   type Reloj,
   type Sesion,
@@ -33,6 +35,29 @@ import { eventoParaJugador, type GameState, type JugadorId, type Motor } from '@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { Server, type Socket } from 'socket.io';
 import { GestorSalas, MAX_ASIENTOS, MIN_ASIENTOS, type Sala } from './salas';
+import { Tunel, type OpcionesTunel } from './tunel';
+
+/** Cabeceras que añaden Cloudflare u otros intermediarios: la conexión no es del propio equipo. */
+const CABECERAS_REENVIO = ['cf-ray', 'cf-connecting-ip', 'cf-visitor', 'x-forwarded-for'];
+const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+
+/**
+ * ¿La conexión viene del propio equipo del servidor? Las visitas por el túnel también llegan desde
+ * localhost (cloudflared las reenvía), pero con las cabeceras de Cloudflare.
+ */
+export function esDelEquipoServidor(
+  direccion: string,
+  cabeceras: Record<string, string | string[] | undefined>,
+): boolean {
+  return LOOPBACK.has(direccion) && CABECERAS_REENVIO.every((c) => cabeceras[c] === undefined);
+}
+
+function direccionesRedLocal(puerto: number): string[] {
+  return Object.values(networkInterfaces())
+    .flat()
+    .filter((i) => i !== undefined && i.family === 'IPv4' && !i.internal)
+    .map((i) => `http://${i?.address ?? ''}:${puerto}`);
+}
 
 export interface OpcionesServidor {
   motor: Motor;
@@ -48,6 +73,8 @@ export interface OpcionesServidor {
   alEnviarPartida?: (jugador: JugadorId, enviado: EstadoPartida, real: GameState) => void;
   /** Solo para tests: genera la semilla de cada partida (por defecto, aleatoria). */
   semilla?: () => string;
+  /** Túnel de Cloudflare (en los tests, un ejecutable falso). */
+  tunel?: OpcionesTunel;
   registro?: boolean;
 }
 
@@ -76,6 +103,8 @@ export function crearServidor(o: OpcionesServidor): ServidorHts {
   /** Índice del siguiente evento que hay que enviar a cada conexión. */
   const indices = new Map<string, number>();
   const difusionPendiente = new Set<string>();
+  let puertoEscuchado = 0;
+  const tunel = new Tunel((estado) => io.emit(MENSAJES.estadoTunel, estado), o.tunel);
 
   if (o.dirWeb && existsSync(o.dirWeb)) {
     // Comprimido (gzip/brotli) y con caché: se nota especialmente a través de un túnel.
@@ -219,6 +248,13 @@ export function crearServidor(o: OpcionesServidor): ServidorHts {
   // ---------------------------------------------------------------- conexiones
 
   io.on('connection', (socket) => {
+    const local = esDelEquipoServidor(socket.handshake.address, socket.handshake.headers);
+    const info: InfoServidor = {
+      esEquipoServidor: local,
+      redLocal: local ? direccionesRedLocal(puertoEscuchado) : [],
+    };
+    socket.emit(MENSAJES.infoServidor, info);
+    socket.emit(MENSAJES.estadoTunel, tunel.estado);
     let mensajesEnEsteSegundo = 0;
     let segundoActual = Math.floor(Date.now() / 1000);
     const limite = o.limiteMensajesPorSegundo ?? 40;
@@ -402,6 +438,18 @@ export function crearServidor(o: OpcionesServidor): ServidorHts {
       return codigo === null ? { ok: true } : { ok: false, error: codigo };
     });
 
+    // Túnel de Cloudflare: abrirlo o cerrarlo solo desde el equipo del servidor.
+    manejar(MENSAJES.abrirTunel, () => {
+      if (!local) return { ok: false, error: 'SOLO_EQUIPO_SERVIDOR' };
+      tunel.abrir(puertoEscuchado);
+      return { ok: true };
+    });
+    manejar(MENSAJES.cerrarTunel, () => {
+      if (!local) return { ok: false, error: 'SOLO_EQUIPO_SERVIDOR' };
+      tunel.cerrar();
+      return { ok: true };
+    });
+
     socket.on('disconnect', () => soltarSocket(socket, false));
   });
 
@@ -417,9 +465,12 @@ export function crearServidor(o: OpcionesServidor): ServidorHts {
     escuchar: async (puerto, host = '0.0.0.0') => {
       await app.listen({ port: puerto, host });
       const direccion = app.server.address();
-      return typeof direccion === 'object' && direccion !== null ? direccion.port : puerto;
+      puertoEscuchado =
+        typeof direccion === 'object' && direccion !== null ? direccion.port : puerto;
+      return puertoEscuchado;
     },
     cerrar: async () => {
+      tunel.cerrar();
       clearInterval(limpieza);
       salas.cerrarTodas();
       await io.close();

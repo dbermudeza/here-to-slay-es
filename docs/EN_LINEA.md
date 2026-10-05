@@ -39,16 +39,30 @@ Si Windows pregunta por el **Firewall** la primera vez, permite el acceso en **r
 
 El servidor está en tu casa, así que hay que hacerlo accesible desde fuera. Dos opciones:
 
-### Opción A: túnel de Cloudflare (recomendada, sin tocar el router)
+### Opción A: túnel de Cloudflare desde la propia sala (recomendada)
 
-1. Instala `cloudflared`:
+1. Instala `cloudflared` una vez:
    - Windows: `winget install --id Cloudflare.cloudflared`
    - macOS: `brew install cloudflared`
-2. Con el servidor en marcha, en otra terminal:
 
-   ```sh
-   cloudflared tunnel --url http://localhost:3000
-   ```
+   Después cierra y vuelve a abrir la terminal (para que encuentre el programa).
+
+2. Arranca el servidor (`pnpm servidor`), abre `http://localhost:3000` **en el mismo equipo** y crea
+   la sala.
+3. En **Invitar a jugar → Jugar por internet**, pulsa **Abrir acceso por internet**. En unos segundos
+   aparece el **enlace por internet** (`https://….trycloudflare.com/?sala=CÓDIGO`): pulsa **Copiar** y
+   envíaselo a los demás. Al abrirlo entran directamente a "Unirse" con el código puesto.
+
+El botón solo aparece en el equipo del servidor; los invitados ven el enlace, pero no pueden abrir ni
+cerrar el túnel. El túnel se cierra con **Cerrar acceso por internet** o al detener el servidor.
+
+#### A mano, en otra terminal
+
+Si lo prefieres, con el servidor en marcha, en otra terminal:
+
+```sh
+cloudflared tunnel --url http://localhost:3000
+```
 
 3. Aparecerá una dirección del tipo `https://palabras-al-azar.trycloudflare.com`. Compártela con
    los demás jugadores: funciona mientras la terminal siga abierta.
@@ -76,6 +90,8 @@ Ten en cuenta que así el servidor queda expuesto a internet: ciérralo (Ctrl+C)
 - **Al terminar**, el anfitrión puede pulsar **Volver a la sala** para jugar otra con los mismos
   jugadores.
 - Las salas sin nadie conectado se borran a los 30 minutos.
+- **Enlaces de invitación:** en la sala, "Invitar a jugar" muestra enlaces con el código ya puesto,
+  para la red local y (si está abierto) por internet.
 
 ## 5. Desarrollo
 

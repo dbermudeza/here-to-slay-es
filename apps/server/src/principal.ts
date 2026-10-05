@@ -31,7 +31,8 @@ console.log('\nHere to Slay — servidor en línea\n');
 console.log(`  En este equipo:     http://localhost:${real}`);
 for (const ip of ips) console.log(`  En la red local:    http://${ip}:${real}`);
 console.log('\nComparte la dirección de la red local con quienes estén en tu misma Wi-Fi.');
-console.log('Para jugar por internet, consulta docs/EN_LINEA.md. Ctrl+C para detener.\n');
+console.log('Para jugar por internet: crea la sala desde este equipo y pulsa «Abrir acceso por');
+console.log('internet» (necesita cloudflared; ver docs/EN_LINEA.md). Ctrl+C para detener.\n');
 
 const apagar = async (): Promise<void> => {
   await servidor.cerrar();

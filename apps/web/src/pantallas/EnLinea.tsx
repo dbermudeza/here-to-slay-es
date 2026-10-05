@@ -8,16 +8,20 @@ import { campo, Seccion } from './Configurar';
 /** Crear una sala o unirse con un código. */
 export function EnLinea({
   cliente,
+  codigoInicial = '',
   onDentro,
   onVolver,
 }: {
   cliente: ClienteEnLinea;
+  /** Código de un enlace de invitación: se entra directamente a unirse. */
+  codigoInicial?: string;
   onDentro: () => void;
   onVolver: () => void;
 }) {
   useDirector(cliente);
+  const invitado = codigoInicial !== '';
   const [nombre, setNombre] = useState('');
-  const [codigo, setCodigo] = useState('');
+  const [codigo, setCodigo] = useState(codigoInicial);
   const [enviando, setEnviando] = useState(false);
 
   const intentar = async (accion: () => Promise<boolean>): Promise<void> => {
@@ -41,9 +45,16 @@ export function EnLinea({
         </p>
       )}
 
+      {invitado && (
+        <p className="rounded-lg bg-amber-50 p-3 text-amber-900 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-100 dark:ring-amber-800">
+          {t('enLinea.invitado', { codigo: codigoInicial })}
+        </p>
+      )}
+
       <Seccion titulo={t('enLinea.tuNombre')}>
         <input
           aria-label={t('enLinea.tuNombre')}
+          autoFocus={invitado}
           value={nombre}
           maxLength={20}
           onChange={(e) => setNombre(e.target.value)}
@@ -51,16 +62,20 @@ export function EnLinea({
         />
       </Seccion>
 
-      <Seccion titulo={t('enLinea.crear')}>
-        <p className="mb-3 text-sm text-stone-600 dark:text-stone-400">{t('enLinea.crearDesc')}</p>
-        <Boton
-          variante="primario"
-          disabled={sinNombre || enviando || cliente.red !== 'conectado'}
-          onClick={() => void intentar(() => cliente.crear(nombre.trim()))}
-        >
-          {t('enLinea.crear')}
-        </Boton>
-      </Seccion>
+      {!invitado && (
+        <Seccion titulo={t('enLinea.crear')}>
+          <p className="mb-3 text-sm text-stone-600 dark:text-stone-400">
+            {t('enLinea.crearDesc')}
+          </p>
+          <Boton
+            variante="primario"
+            disabled={sinNombre || enviando || cliente.red !== 'conectado'}
+            onClick={() => void intentar(() => cliente.crear(nombre.trim()))}
+          >
+            {t('enLinea.crear')}
+          </Boton>
+        </Seccion>
+      )}
 
       <Seccion titulo={t('enLinea.unirse')}>
         <p className="mb-3 text-sm text-stone-600 dark:text-stone-400">{t('enLinea.unirseDesc')}</p>

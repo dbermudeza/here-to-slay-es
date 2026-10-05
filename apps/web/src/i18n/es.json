@@ -421,6 +421,7 @@
     "codigo": "Código de la sala",
     "unirse": "Unirse",
     "unirseDesc": "Escribe el código que te han pasado.",
+    "invitado": "Te han invitado a la sala {codigo}: escribe tu nombre y pulsa «Unirse».",
     "conectando": "Conectando con el servidor…",
     "sinServidor": "No se puede conectar con el servidor. Comprueba que está en marcha (pnpm servidor) y que estás en la misma red.",
     "reconectando": "Se ha perdido la conexión. Reconectando…",
@@ -436,6 +437,7 @@
       "POCOS_JUGADORES": "Hacen falta al menos 2 jugadores (puedes añadir bots).",
       "SIN_SALA": "No estás en ninguna sala.",
       "SIN_PARTIDA": "La partida no ha empezado.",
+      "SOLO_EQUIPO_SERVIDOR": "Solo se puede hacer desde el equipo donde está el servidor.",
       "SIN_CONEXION": "Sin conexión con el servidor.",
       "DEMASIADOS_MENSAJES": "Demasiadas acciones seguidas; espera un momento.",
       "ERROR_INTERNO": "Error del servidor. Inténtalo de nuevo."
@@ -469,6 +471,24 @@
       "volverALaSala": "Volver a la sala",
       "esperandoCreador": "Esperando al anfitrión…",
       "soloAnfitrion": "Solo el anfitrión puede cambiar las opciones."
+    },
+    "invitar": {
+      "titulo": "Invitar a jugar",
+      "enlace": "Enlace de invitación",
+      "redLocal": "En tu red (misma Wi-Fi)",
+      "internet": "Jugar por internet",
+      "internetDesc": "Para invitar a gente que no está en tu red, abre un acceso temporal con un túnel de Cloudflare. No hace falta tocar el router.",
+      "abrir": "Abrir acceso por internet",
+      "conectando": "Conectando con Cloudflare… puede tardar unos segundos.",
+      "enlaceInternet": "Enlace por internet",
+      "aviso": "Funciona mientras el servidor siga abierto; cada vez que lo abras la dirección cambia. Compártela solo con quien vaya a jugar.",
+      "cerrar": "Cerrar acceso por internet",
+      "reintentar": "Reintentar",
+      "errores": {
+        "NO_INSTALADO": "No se encuentra cloudflared en este equipo. Instálalo con este comando en una terminal y vuelve a arrancar el servidor:",
+        "FALLO": "No se pudo abrir el túnel (o se ha cerrado). Comprueba la conexión a internet y vuelve a intentarlo.",
+        "TIEMPO": "Cloudflare no ha respondido a tiempo. Vuelve a intentarlo."
+      }
     }
   }
 }

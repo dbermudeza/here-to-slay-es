@@ -8,6 +8,8 @@ import {
   type EstadoConexion,
   type EstadoPartida,
   type EstadoSala,
+  type EstadoTunel,
+  type InfoServidor,
   type OpcionesSala,
   type Plazo,
   type PlazoDecision,
@@ -31,6 +33,10 @@ export class ClienteEnLinea implements FuenteMesa {
   eventos: Evento[] = [];
   /** Último error recibido del servidor (código). */
   error: string | null = null;
+  /** Lo que el servidor cuenta de esta conexión (¿es su propio equipo?, red local). */
+  info: InfoServidor | null = null;
+  /** Túnel de Cloudflare para jugar por internet. */
+  tunel: EstadoTunel = { fase: 'apagado', url: null, error: null };
 
   readonly traspaso = null;
   readonly respondiendo = null;
@@ -51,6 +57,14 @@ export class ClienteEnLinea implements FuenteMesa {
     });
     this.socket.on('disconnect', () => {
       this.red = 'desconectado';
+      this.notificar();
+    });
+    this.socket.on(MENSAJES.infoServidor, (i: InfoServidor) => {
+      this.info = i;
+      this.notificar();
+    });
+    this.socket.on(MENSAJES.estadoTunel, (e: EstadoTunel) => {
+      this.tunel = e;
       this.notificar();
     });
     this.socket.on(MENSAJES.estadoSala, (s: EstadoSala | null) => {
@@ -160,6 +174,15 @@ export class ClienteEnLinea implements FuenteMesa {
 
   quitar(jugador: JugadorId): Promise<boolean> {
     return this.conResultado(this.pedir(MENSAJES.quitar, { jugador }));
+  }
+
+  /** Abre el túnel de Cloudflare (solo desde el equipo del servidor). */
+  abrirTunel(): Promise<boolean> {
+    return this.conResultado(this.pedir(MENSAJES.abrirTunel));
+  }
+
+  cerrarTunel(): Promise<boolean> {
+    return this.conResultado(this.pedir(MENSAJES.cerrarTunel));
   }
 
   empezar(): Promise<boolean> {

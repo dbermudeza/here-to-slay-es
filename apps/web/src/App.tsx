@@ -5,6 +5,7 @@ import { useApp, useReducirAnimaciones } from './estado/app';
 import { ProveedorCatalogo } from './estado/contexto';
 import { prepararCatalogo } from './juego/catalogo';
 import { semillaAleatoria, type ModoJuego } from './juego/config';
+import { leerSesion } from './enlinea/sesion';
 import { borrarAuto } from './juego/autoguardado';
 import type { ConfigLocal } from './juego/config';
 import { OPCIONES_DIRECTOR } from './juego/opciones';
@@ -23,6 +24,16 @@ const EnLinea = lazy(() => import('./pantallas/EnLinea').then((m) => ({ default:
 const Sala = lazy(() => import('./pantallas/Sala').then((m) => ({ default: m.Sala })));
 
 const catalogo = prepararCatalogo(cartasCrudas);
+
+/** Código de sala de un enlace de invitación (…/?sala=CÓDIGO); se lee una vez y se quita de la URL. */
+function leerInvitacion(): string | null {
+  const codigo = new URLSearchParams(window.location.search).get('sala')?.trim().toUpperCase();
+  if (codigo === undefined || !/^[A-Z0-9]{5}$/.test(codigo)) return null;
+  window.history.replaceState(null, '', window.location.pathname);
+  return codigo;
+}
+const INVITACION = leerInvitacion();
+let invitacionAtendida = false;
 
 function Cargando() {
   return (
@@ -73,6 +84,20 @@ export function App() {
     cerrarEnLinea,
   } = useApp();
   const [modoNuevo, setModoNuevo] = useState<ModoJuego>('bots');
+  /** El código de la invitación solo se rellena la primera vez. */
+  const [invitacion, setInvitacion] = useState(INVITACION);
+
+  // Enlace de invitación: directo a unirse (o a la sala, si este navegador ya tenía asiento en ella).
+  useEffect(() => {
+    if (INVITACION === null || invitacionAtendida) return;
+    invitacionAtendida = true;
+    void import('./enlinea/cliente').then(({ ClienteEnLinea }) => {
+      const sesion = leerSesion();
+      if (sesion?.codigo === INVITACION)
+        abrirEnLinea(new ClienteEnLinea(undefined, sesion), 'sala');
+      else abrirEnLinea(new ClienteEnLinea(undefined, null), 'enLinea');
+    });
+  }, [abrirEnLinea]);
 
   if (!catalogo.ok) return <ErrorCatalogo motivo={catalogo.motivo} detalle={catalogo.detalle} />;
   const { motor, cartas } = catalogo;
@@ -108,8 +133,15 @@ export function App() {
           {pantalla === 'enLinea' && cliente !== null && (
             <EnLinea
               cliente={cliente}
-              onDentro={() => abrirEnLinea(cliente, 'sala')}
-              onVolver={cerrarEnLinea}
+              codigoInicial={invitacion ?? ''}
+              onDentro={() => {
+                setInvitacion(null);
+                abrirEnLinea(cliente, 'sala');
+              }}
+              onVolver={() => {
+                setInvitacion(null);
+                cerrarEnLinea();
+              }}
             />
           )}
           {pantalla === 'sala' && cliente !== null && (
