@@ -52,6 +52,31 @@ pnpm sim [n] [semilla] # simula n partidas entre bots y muestra estadísticas
 Una fase está terminada cuando `pnpm lint`, `pnpm typecheck` y `pnpm test` pasan, y se cierra con
 un commit descriptivo.
 
+## Agentes (`.claude/agents/`)
+
+La sesión principal es el **orquestador**: habla con el usuario, presenta el plan (y espera su
+aprobación), reparte el trabajo, integra, hace los commits y resume. Delega en:
+
+| Agente         | Ámbito                                        | Edita                                                      | Modelo |
+| -------------- | --------------------------------------------- | ---------------------------------------------------------- | ------ |
+| `motor-reglas` | Reglas, cartas, bots, anfitrión (`packages/`) | `packages/**`, `docs/REGLAS.md`, `docs/DUDAS_REGLAS.md`    | opus   |
+| `frontend-ux`  | Pantallas, textos, accesibilidad (`apps/web`) | `apps/web/**`, selectores de `apps/e2e/src`                | sonnet |
+| `qa`           | Tests, verificación, reproducción de errores  | Solo tests: `packages/*/test`, `apps/web/test`, `apps/e2e` | sonnet |
+| `revisor`      | Revisión del diff antes del commit            | Nada (solo lectura)                                        | sonnet |
+
+Flujo: plan → especialistas (en paralelo si no tocan los mismos archivos) → `qa` (si algo falla,
+vuelve al especialista con el test que falla; `qa` no arregla código) → `revisor` → commit. Cada
+agente termina con un informe en el formato de su archivo.
+
+Propiedad: cada especialista escribe y actualiza los tests de su propio cambio; `qa` añade tests
+nuevos y verifica, sin trabajar a la vez sobre la misma zona. El **orquestador** lleva
+`apps/server` (y sus tests), la configuración raíz (`package.json`, ESLint, TypeScript, Prettier),
+`.github/`, `.claude/`, `README.md`, `CLAUDE.md` y `docs/EN_LINEA.md`.
+
+Comandos: `/verificar [e2e]` (todas las comprobaciones), `/nueva-carta <id>`, `/fase <trabajo>`
+(plan repartido por agentes). Un hook (`.claude/hooks/formatear.mjs`) formatea con Prettier cada
+archivo que se edita.
+
 ## Convenciones
 
 - **TypeScript estricto** (`strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`). Prohibido usar `any` y `!` (non-null assertion); ESLint lo comprueba.
