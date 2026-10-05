@@ -15,7 +15,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { copiarImagenes } from '../imagenes';
 import { RAIZ, RUTA_ASSETS_CARTAS, RUTA_CARTAS_JSON } from '../rutas';
-import { ArchivoCartasSchema } from '../schema';
+import { ArchivoCartasSchema, IMAGENES_RESERVADAS } from '../schema';
 
 const REPO_POR_DEFECTO = 'https://github.com/dbermudeza/here-to-slay-recursos.git';
 const REFERENCIAS = resolve(RAIZ, 'Referencias');
@@ -96,11 +96,17 @@ if (!r.success) {
 console.log(`✔ ${r.data.cartas.length} cartas distintas en cartas.es.json.`);
 
 const hayImagenes = existsSync(RUTA_ASSETS_CARTAS) && readdirSync(RUTA_ASSETS_CARTAS).length > 0;
-if (!hayImagenes || bandera('--forzar')) {
+// Una instalación anterior puede tener las cartas pero no el reverso ni el logo.
+const faltaReservada = IMAGENES_RESERVADAS.some((f) => !existsSync(join(RUTA_ASSETS_CARTAS, f)));
+if (!hayImagenes || faltaReservada || bandera('--forzar')) {
   const { copiadas, faltan } = copiarImagenes();
   console.log(`✔ ${copiadas} imágenes preparadas en assets/cartas/.`);
-  if (faltan.length > 0)
-    console.warn(`  (${faltan.length} cartas sin imagen: se dibujarán con su texto)`);
+  if (faltan.length > 0) {
+    console.warn(
+      `  No se encontró el origen de ${faltan.length} imagen(es); las cartas sin imagen se dibujarán con su texto:`,
+    );
+    for (const f of faltan) console.warn(`    ${f}`);
+  }
 } else {
   console.log('✔ Imágenes ya preparadas en assets/cartas/.');
 }

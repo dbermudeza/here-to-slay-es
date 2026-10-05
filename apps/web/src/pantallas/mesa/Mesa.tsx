@@ -8,6 +8,7 @@ import { t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
 import { Carta } from '../../ui/Carta';
 import { DetalleCarta, type Detalle } from '../../ui/DetalleCarta';
+import { Logo } from '../../ui/Logo';
 import { Modal } from '../../ui/Modal';
 import { Ajustes } from '../../ui/Ajustes';
 import { ContenidoReglas } from '../Reglas';
@@ -129,9 +130,10 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
     <MesaContexto.Provider value={valor}>
       <div className="flex h-full flex-col">
         <header className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-stone-200 bg-white/80 px-3 py-2 dark:border-stone-800 dark:bg-stone-900/80">
-          <span className="font-titulo text-lg font-bold text-amber-700 dark:text-amber-400">
-            {t('app.titulo')}
-          </span>
+          <Logo
+            className="h-9 w-9 rounded-lg p-0.5"
+            textoClassName="font-titulo text-lg font-bold text-amber-700 dark:text-amber-400"
+          />
           <span className="text-sm">{t('mesa.turnoNumero', { n: vista.turno.numero })}</span>
           <span className="font-semibold">
             {vista.turno.jugador === yo

@@ -8,6 +8,7 @@ import { OPCIONES_DIRECTOR } from '../juego/opciones';
 import { t } from '../i18n';
 import { Boton } from '../ui/Boton';
 import { Ajustes } from '../ui/Ajustes';
+import { Logo } from '../ui/Logo';
 
 function Opcion({
   titulo,
@@ -59,8 +60,8 @@ export function Inicio({ onNueva }: { onNueva: (modo: 'local' | 'bots') => void 
   return (
     <main className="mx-auto flex min-h-full max-w-xl flex-col gap-6 px-4 py-10">
       <header className="text-center">
-        <h1 className="font-titulo text-5xl font-bold tracking-tight text-amber-700 dark:text-amber-400">
-          {t('app.titulo')}
+        <h1 className="flex justify-center font-titulo text-5xl font-bold tracking-tight text-amber-700 dark:text-amber-400">
+          <Logo prioritario className="h-40 w-40 p-3 sm:h-48 sm:w-48" />
         </h1>
         <p className="mt-2 text-stone-600 dark:text-stone-400">{t('app.subtitulo')}</p>
       </header>

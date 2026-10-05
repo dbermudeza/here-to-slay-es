@@ -39,6 +39,12 @@ const idSchema = z
   .string()
   .regex(/^[a-z0-9]+(_[a-z0-9]+)*$/, 'El id debe estar en snake_case ASCII (sin tildes ni ñ).');
 
+/** Imágenes de assets/cartas/ que no son de ninguna carta (las copia `copiarImagenes`). */
+export const IMAGEN_REVERSO = 'reverso.png';
+export const IMAGEN_LOGO = 'logo.png';
+/** Ninguna carta puede usar estos nombres en `imagen`. */
+export const IMAGENES_RESERVADAS: readonly string[] = [IMAGEN_REVERSO, IMAGEN_LOGO];
+
 const textoSchema = z.string().trim().min(1);
 
 /** Referencia a la implementación del efecto. `null` = aún sin mapear (Fase 2). */

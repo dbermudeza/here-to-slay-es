@@ -1,5 +1,6 @@
 import {
   ArchivoCartasSchema,
+  IMAGENES_RESERVADAS,
   TIPOS_MAZO_PRINCIPAL,
   type ArchivoCartas,
   type Carta,
@@ -104,6 +105,12 @@ export function validarCartas(
         severidad: 'aviso',
         donde: carta.id,
         mensaje: 'sin imagen: se usará carta genérica',
+      });
+    } else if (IMAGENES_RESERVADAS.includes(carta.imagen)) {
+      problemas.push({
+        severidad: 'error',
+        donde: carta.id,
+        mensaje: `la imagen "${carta.imagen}" está reservada (reverso o logo) y no puede ser de una carta`,
       });
     } else if (opciones.existeImagen && !opciones.existeImagen(carta.imagen)) {
       problemas.push({

@@ -20,3 +20,8 @@ export const RAIZ = buscarRaiz(process.cwd());
 export const RUTA_CARTAS_JSON = resolve(RAIZ, 'Referencias/cartas.es.json');
 export const RUTA_IMAGENES_ORIGEN = resolve(RAIZ, 'Referencias/Imagenes/Cartas');
 export const RUTA_ASSETS_CARTAS = resolve(RAIZ, 'assets/cartas');
+
+/** Origen del reverso de las cartas (se copia a assets/cartas/reverso.png). */
+export const RUTA_REVERSO_ORIGEN = resolve(RUTA_IMAGENES_ORIGEN, 'Reverso_carta.png');
+/** Origen del logo del juego. Se llama .jpg pero su contenido es PNG: se copia a assets/cartas/logo.png. */
+export const RUTA_LOGO_ORIGEN = resolve(RAIZ, 'Referencias/Imagenes/here_to_slay_logo.jpg');

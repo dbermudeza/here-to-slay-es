@@ -1,8 +1,7 @@
-import type { Carta as DatosCarta, Clase, RangoTirada } from '@hts/cards';
-import { useState, useSyncExternalStore } from 'react';
+import { IMAGEN_REVERSO, type Carta as DatosCarta, type Clase, type RangoTirada } from '@hts/cards';
 import { useCarta } from '../estado/contexto';
 import { t } from '../i18n';
-import { intentoActual, marcarCargada, marcarFallida, suscribirIntentos } from './imagenesFallidas';
+import { useImagen } from './useImagen';
 
 export type Tamano = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -87,15 +86,7 @@ export function Carta({
   className = '',
 }: Props) {
   const carta = useCarta(cartaId);
-  const intento = useSyncExternalStore(suscribirIntentos, intentoActual);
-  // El fallo se asocia a la imagen concreta. Solo las cartas con fallo usan el número de reintento
-  // (key y src); las demás mantienen key y src estables aunque cambie el intento global.
-  const [fallo, setFallo] = useState<{ imagen: string; intento: number; cargada: boolean } | null>(
-    null,
-  );
-  const propio = fallo !== null && fallo.imagen === carta?.imagen ? fallo : null;
-  const sinImagen = propio !== null && !propio.cargada && propio.intento === intento;
-  const reintento = propio === null ? 0 : propio.cargada ? propio.intento : intento;
+  const img = useImagen(carta === undefined ? IMAGEN_REVERSO : carta.imagen);
   const proporcion = esGrande(carta) ? 'aspect-[300/518]' : 'aspect-[5/7]';
   const anillo = seleccionada
     ? 'ring-4 ring-amber-400'
@@ -120,31 +111,22 @@ export function Carta({
         atenuada ? 'opacity-50' : ''
       } ${onClick ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg' : ''} ${className}`}
     >
-      {carta === undefined ? (
-        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-900 to-stone-900 p-1 text-center font-titulo text-[10px] font-bold text-amber-200">
-          {tamano === 'xs' ? 'HtS' : t('carta.reverso')}
-        </div>
-      ) : carta.imagen !== undefined && !sinImagen ? (
+      {img.mostrar ? (
         <img
-          key={`${carta.imagen}#${reintento}`}
-          src={`/cartas/${carta.imagen}${reintento > 0 ? `?r=${reintento}` : ''}`}
+          key={img.clave}
+          src={img.src}
           alt={nombre}
           loading="lazy"
           decoding="async"
           className="h-full w-full object-cover"
           draggable={false}
-          onError={() => {
-            const imagen = carta.imagen ?? '';
-            marcarFallida(imagen);
-            setFallo({ imagen, intento, cargada: false });
-          }}
-          onLoad={() => {
-            marcarCargada(carta.imagen ?? '');
-            if (propio !== null && !propio.cargada) {
-              setFallo({ imagen: propio.imagen, intento: reintento, cargada: true });
-            }
-          }}
+          onError={img.onError}
+          onLoad={img.onLoad}
         />
+      ) : carta === undefined ? (
+        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-900 to-stone-900 p-1 text-center font-titulo text-[10px] font-bold text-amber-200">
+          {tamano === 'xs' ? 'HtS' : t('carta.reverso')}
+        </div>
       ) : (
         <CartaGenerica carta={carta} tamano={tamano} />
       )}

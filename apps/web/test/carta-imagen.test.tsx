@@ -87,3 +87,21 @@ describe('Carta: imagen que falla', () => {
     ]);
   });
 });
+
+describe('Carta boca abajo', () => {
+  it('muestra la imagen del reverso y, si falla, el degradado de reserva', () => {
+    render(
+      <ProveedorCatalogo motor={motorFalso} cartas={cartas}>
+        <Carta cartaId={null} tamano="lg" />
+      </ProveedorCatalogo>,
+    );
+    const img = screen.getByRole('img', { name: 'Here to Slay' });
+    expect(img.getAttribute('src')).toBe('/cartas/reverso.png');
+    expect(img.className).toContain('object-cover');
+
+    fireEvent.error(img);
+    expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.getByLabelText('Here to Slay')).toBeTruthy();
+    expect(screen.getByText('Here to Slay')).toBeTruthy();
+  });
+});
