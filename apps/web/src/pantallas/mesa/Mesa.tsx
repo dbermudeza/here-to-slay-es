@@ -21,6 +21,7 @@ import { Vuelos } from './Vuelos';
 import { DialogoDecision } from './DialogoDecision';
 import { Anunciador, Historial } from './Historial';
 import { Mano } from './Mano';
+import { RotuloTurno } from './RotuloTurno';
 import { Traspaso, Victoria } from './Superposiciones';
 import { VentanaRespuesta } from './VentanaRespuesta';
 import { ZonaJugador } from './ZonaJugador';
@@ -211,6 +212,20 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
         <Dados />
         <Vuelos />
         <Traspaso />
+        <RotuloTurno
+          numero={vista.turno.numero}
+          jugador={vista.turno.jugador}
+          titulo={
+            vista.turno.jugador === yo && modo !== 'local'
+              ? t('mesa.tuTurno')
+              : t('mesa.turnoDe', { nombre: valor.nombreJugador(vista.turno.jugador) })
+          }
+          pausado={director.traspaso !== null}
+          // Solo al montar: el primer turno intacto de una partida recién creada.
+          anunciarAlMontar={
+            vista.turno.numero === 1 && vista.turno.pa === 3 && vista.ganador === null
+          }
+        />
         <Victoria onRevancha={onRevancha} onInicio={onSalir} textoRevancha={textoRevancha} />
         <DetalleCarta detalle={detalle} onCerrar={() => setDetalle(null)} />
 
