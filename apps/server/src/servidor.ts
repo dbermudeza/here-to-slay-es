@@ -3,6 +3,8 @@
  * Socket.IO (salas, lobby y partidas). Cada jugador envía intenciones y recibe solo su vista.
  */
 import { existsSync } from 'node:fs';
+import { sep } from 'node:path';
+import fastifyCompress from '@fastify/compress';
 import fastifyStatic from '@fastify/static';
 import {
   Anfitrion,
@@ -76,7 +78,24 @@ export function crearServidor(o: OpcionesServidor): ServidorHts {
   const difusionPendiente = new Set<string>();
 
   if (o.dirWeb && existsSync(o.dirWeb)) {
-    void app.register(fastifyStatic, { root: o.dirWeb });
+    // Comprimido (gzip/brotli) y con caché: se nota especialmente a través de un túnel.
+    void app.register(fastifyCompress);
+    void app.register(fastifyStatic, {
+      root: o.dirWeb,
+      // Las cabeceras de caché las pone setHeaders.
+      cacheControl: false,
+      setHeaders: (res, ruta) => {
+        const normal = ruta.split(sep).join('/');
+        if (normal.includes('/assets/')) {
+          // Nombres con hash: no cambian nunca.
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        } else if (normal.includes('/cartas/')) {
+          res.setHeader('Cache-Control', 'public, max-age=86400');
+        } else {
+          res.setHeader('Cache-Control', 'no-cache');
+        }
+      },
+    });
   }
   app.get('/api/estado', async () => ({ ok: true, salas: salas.total }));
 

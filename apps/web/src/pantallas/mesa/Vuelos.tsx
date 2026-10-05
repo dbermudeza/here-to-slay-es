@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
+import { useReducirAnimaciones } from '../../estado/app';
 import { agruparVuelos, verVuelo, type Vuelo } from '../../juego/vuelos';
 import { Carta } from '../../ui/Carta';
 import { useMesa } from './contexto';
@@ -7,6 +8,8 @@ import { useMesa } from './contexto';
 /** Duración de un vuelo; más corta si hay cola, para no quedarse atrás. */
 const DURACION_MS = 1900;
 const DURACION_RAPIDA_MS = 1000;
+/** Con "reducir animaciones" la carta no vuela: aparece en el centro con su texto y se desvanece. */
+const DURACION_REDUCIDA_MS = 1200;
 /** Vuelos pendientes como máximo (si se acumulan más, se descartan los más antiguos). */
 const MAX_COLA = 4;
 
@@ -46,7 +49,12 @@ export function Vuelos() {
   // En modo "este dispositivo" no se anima nada mientras se pasa el dispositivo.
   const enPausa = director.traspaso !== null;
   const actual = enPausa ? undefined : cola[0];
-  const duracion = cola.length > 2 ? DURACION_RAPIDA_MS : DURACION_MS;
+  const reducir = useReducirAnimaciones();
+  const duracion = reducir
+    ? DURACION_REDUCIDA_MS
+    : cola.length > 2
+      ? DURACION_RAPIDA_MS
+      : DURACION_MS;
 
   useEffect(() => {
     if (actual === undefined) return undefined;

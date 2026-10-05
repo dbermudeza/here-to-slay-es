@@ -2,7 +2,7 @@ import { DEFINICIONES_EFECTOS } from '@hts/cards';
 import type { Accion } from '@hts/engine';
 import { t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
-import { useMesa } from './contexto';
+import { clave, useMesa } from './contexto';
 
 /** Acciones generales del turno: robar, renovar mano, habilidad del Líder/Monstruos y terminar. */
 export function AccionesTurno() {
@@ -22,6 +22,7 @@ export function AccionesTurno() {
       key={texto}
       variante={primario ? 'primario' : 'secundario'}
       motivo={m.motivo(accion)}
+      data-accion={clave(accion)}
       onClick={() => m.enviar(accion)}
     >
       {texto}

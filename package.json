@@ -14,6 +14,7 @@
     "format": "prettier --write .",
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r test",
+    "e2e": "pnpm --filter @hts/web build:e2e && pnpm --filter @hts/e2e e2e",
     "validate:cards": "pnpm --filter @hts/cards validate",
     "copy:images": "pnpm --filter @hts/cards copy-images",
     "sim": "pnpm --filter @hts/bots sim"

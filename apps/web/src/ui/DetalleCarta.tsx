@@ -19,7 +19,7 @@ const rango = (r: RangoTirada): string => (r.tipo === 'min' ? `${r.valor}+` : `$
 function Apartado({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
     <div>
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-stone-400">
         {titulo}
       </h3>
       <div className="mt-0.5 leading-relaxed">{children}</div>
@@ -41,7 +41,7 @@ function Informacion({ carta, detalle }: { carta: DatosCarta; detalle: Detalle }
       <div>
         <p className="text-sm text-stone-600 dark:text-stone-400">{subtitulo(carta)}</p>
         {carta.nombreOriginal !== carta.nombre && (
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-stone-600 dark:text-stone-400">
             {t('detalle.nombreOriginal', { nombre: carta.nombreOriginal })}
           </p>
         )}
@@ -104,7 +104,9 @@ function Informacion({ carta, detalle }: { carta: DatosCarta; detalle: Detalle }
         <p className="text-sm">{t('detalle.equipadoA', { heroe: heroe.nombre })}</p>
       )}
       {carta.tipo !== 'lider' && carta.tipo !== 'monstruo' && (
-        <p className="text-xs text-stone-500">{t('detalle.copias', { n: carta.copias })}</p>
+        <p className="text-xs text-stone-600 dark:text-stone-400">
+          {t('detalle.copias', { n: carta.copias })}
+        </p>
       )}
     </div>
   );

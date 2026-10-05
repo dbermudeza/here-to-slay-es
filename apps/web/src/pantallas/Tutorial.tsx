@@ -20,7 +20,7 @@ export function Tutorial({ abierto, onCerrar }: { abierto: boolean; onCerrar: ()
     <Modal abierto={abierto} titulo={t('tutorial.titulo')} onCerrar={cerrar}>
       {paso !== undefined && (
         <div>
-          <div className="mb-1 text-sm text-stone-500">
+          <div className="mb-1 text-sm text-stone-600 dark:text-stone-400">
             {i + 1} / {pasos.length}
           </div>
           <h3 className="font-titulo text-lg font-semibold">{paso.titulo}</h3>

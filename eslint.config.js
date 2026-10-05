@@ -28,7 +28,16 @@ const soloTodoRegla = {
 
 export default tseslint.config(
   {
-    ignores: ['**/node_modules/**', '**/dist/**', '**/coverage/**', 'Referencias/**', 'assets/**'],
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/dist-e2e/**',
+      'apps/e2e/informe/**',
+      'apps/e2e/resultados/**',
+      '**/coverage/**',
+      'Referencias/**',
+      'assets/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.strict,

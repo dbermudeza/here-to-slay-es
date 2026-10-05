@@ -4,9 +4,9 @@
  */
 import type { Evento, Motor } from '@hts/engine';
 import type { ConfigLocal } from './config';
+import { CLAVE_AUTO } from './autoguardado';
 import { DirectorVivo, type OpcionesDirector, type Reloj } from './director-vivo';
 
-const CLAVE = 'hts:partida';
 const FORMATO = 'hts-guardado';
 const MAX_EVENTOS = 600;
 
@@ -65,28 +65,14 @@ export function restaurarGuardado(
 /** Guardado automático. El almacenamiento puede no estar disponible (modo privado): se ignora. */
 export function guardarAuto(d: DirectorVivo): void {
   try {
-    if (d.estado.ganador !== null) localStorage.removeItem(CLAVE);
-    else localStorage.setItem(CLAVE, serializarGuardado(d));
+    if (d.estado.ganador !== null) localStorage.removeItem(CLAVE_AUTO);
+    else localStorage.setItem(CLAVE_AUTO, serializarGuardado(d));
   } catch {
     // Sin almacenamiento: la partida sigue sin guardado automático.
   }
 }
 
-export function leerAuto(): string | null {
-  try {
-    return localStorage.getItem(CLAVE);
-  } catch {
-    return null;
-  }
-}
-
-export function borrarAuto(): void {
-  try {
-    localStorage.removeItem(CLAVE);
-  } catch {
-    // Nada que borrar.
-  }
-}
+export { borrarAuto, leerAuto } from './autoguardado';
 
 export function descargar(d: DirectorVivo): void {
   const blob = new Blob([serializarGuardado(d)], { type: 'application/json' });

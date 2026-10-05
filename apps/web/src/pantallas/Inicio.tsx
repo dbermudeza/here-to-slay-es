@@ -1,11 +1,13 @@
+import type { Sesion } from '@hts/anfitrion';
 import { useRef, useState } from 'react';
 import { useApp } from '../estado/app';
 import { useCatalogo } from '../estado/contexto';
-import { ClienteEnLinea, leerSesion } from '../enlinea/cliente';
-import { leerAuto, restaurarGuardado } from '../juego/guardado';
+import { leerSesion } from '../enlinea/sesion';
+import { leerAuto } from '../juego/autoguardado';
+import { OPCIONES_DIRECTOR } from '../juego/opciones';
 import { t } from '../i18n';
 import { Boton } from '../ui/Boton';
-import { SelectorTema } from '../ui/SelectorTema';
+import { Ajustes } from '../ui/Ajustes';
 
 function Opcion({
   titulo,
@@ -39,12 +41,19 @@ export function Inicio({ onNueva }: { onNueva: (modo: 'local' | 'bots') => void 
   const [error, setError] = useState<string | null>(null);
   const guardada = leerAuto();
 
-  const cargarTexto = (texto: string): void => {
+  // La partida y el cliente en línea se cargan al usarlos (no hacen falta en la portada).
+  const cargarTexto = async (texto: string): Promise<void> => {
     try {
-      empezar(restaurarGuardado(motor, texto));
+      const { restaurarGuardado } = await import('../juego/guardado');
+      empezar(restaurarGuardado(motor, texto, undefined, OPCIONES_DIRECTOR));
     } catch (e) {
       setError(t('inicio.errorCarga', { motivo: e instanceof Error ? e.message : String(e) }));
     }
+  };
+
+  const abrirCliente = async (s: Sesion | null, pantalla: 'sala' | 'enLinea'): Promise<void> => {
+    const { ClienteEnLinea } = await import('../enlinea/cliente');
+    abrirEnLinea(new ClienteEnLinea(undefined, s), pantalla);
   };
 
   return (
@@ -61,7 +70,7 @@ export function Inicio({ onNueva }: { onNueva: (modo: 'local' | 'bots') => void 
           <Opcion
             titulo={t('inicio.continuar')}
             descripcion={t('inicio.continuarDesc')}
-            onClick={() => cargarTexto(guardada)}
+            onClick={() => void cargarTexto(guardada)}
           />
         )}
         <Opcion
@@ -78,13 +87,13 @@ export function Inicio({ onNueva }: { onNueva: (modo: 'local' | 'bots') => void 
           <Opcion
             titulo={t('inicio.volverASala', { codigo: sesion.codigo })}
             descripcion={t('inicio.volverASalaDesc')}
-            onClick={() => abrirEnLinea(new ClienteEnLinea(undefined, sesion), 'sala')}
+            onClick={() => void abrirCliente(sesion, 'sala')}
           />
         )}
         <Opcion
           titulo={t('inicio.enLinea')}
           descripcion={t('inicio.enLineaDesc')}
-          onClick={() => abrirEnLinea(new ClienteEnLinea(undefined, null), 'enLinea')}
+          onClick={() => void abrirCliente(null, 'enLinea')}
         />
       </div>
 
@@ -109,13 +118,13 @@ export function Inicio({ onNueva }: { onNueva: (modo: 'local' | 'bots') => void 
           aria-label={t('inicio.cargar')}
           onChange={async (e) => {
             const f = e.target.files?.[0];
-            if (f !== undefined) cargarTexto(await f.text());
+            if (f !== undefined) await cargarTexto(await f.text());
             e.target.value = '';
           }}
         />
       </div>
       <div className="flex justify-center">
-        <SelectorTema />
+        <Ajustes />
       </div>
     </main>
   );

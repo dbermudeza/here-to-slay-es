@@ -16,29 +16,9 @@ import {
 import type { Accion, CodigoError, Evento, JugadorId, VistaJugador } from '@hts/engine';
 import { io, type Socket } from 'socket.io-client';
 import type { FuenteMesa } from '../juego/fuente';
+import { guardarSesion, leerSesion } from './sesion';
 
-const CLAVE_SESION = 'hts:sesion';
-
-export function leerSesion(): Sesion | null {
-  try {
-    const crudo = localStorage.getItem(CLAVE_SESION);
-    const s: unknown = crudo === null ? null : JSON.parse(crudo);
-    if (typeof s === 'object' && s !== null && 'codigo' in s && 'token' in s && 'jugador' in s)
-      return s as Sesion;
-  } catch {
-    // Sin almacenamiento o dato corrupto: no hay sesión.
-  }
-  return null;
-}
-
-function guardarSesion(s: Sesion | null): void {
-  try {
-    if (s === null) localStorage.removeItem(CLAVE_SESION);
-    else localStorage.setItem(CLAVE_SESION, JSON.stringify(s));
-  } catch {
-    // Sin almacenamiento: no se podrá reanudar tras recargar la página.
-  }
-}
+export { leerSesion } from './sesion';
 
 export type EstadoRed = 'conectando' | 'conectado' | 'desconectado';
 

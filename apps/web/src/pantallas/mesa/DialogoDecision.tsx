@@ -4,7 +4,7 @@ import { conSigno, t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
 import { Carta } from '../../ui/Carta';
 import { Modal } from '../../ui/Modal';
-import { useMesa } from './contexto';
+import { clave, useMesa } from './contexto';
 
 /** Selección de entre `min` y `max` cartas (con orden si `ordenado`). */
 function ElegirCartas({
@@ -37,6 +37,7 @@ function ElegirCartas({
           return (
             <Carta
               key={uid}
+              uid={uid}
               cartaId={m.idDe(uid)}
               tamano="md"
               seleccionada={i >= 0}
@@ -50,12 +51,17 @@ function ElegirCartas({
         })}
       </div>
       <div className="mt-4 flex items-center justify-between gap-2">
-        <span className="text-sm text-stone-500">
+        <span className="text-sm text-stone-600 dark:text-stone-400">
           {min === max
             ? t('decision.seleccionExacta', { n: elegidas.length, max })
             : t('decision.seleccion', { n: elegidas.length, min, max })}
         </span>
-        <Boton variante="primario" disabled={!valida} onClick={() => onConfirmar(elegidas)}>
+        <Boton
+          variante="primario"
+          disabled={!valida}
+          data-confirmar
+          onClick={() => onConfirmar(elegidas)}
+        >
           {t('decision.aceptar')}
         </Boton>
       </div>
@@ -76,7 +82,11 @@ function CuerpoPregunta({
       return (
         <div className="flex flex-wrap gap-2">
           {pregunta.opciones.map((id) => (
-            <Boton key={id} onClick={() => responder({ jugador: id })}>
+            <Boton
+              key={id}
+              data-respuesta={clave({ jugador: id })}
+              onClick={() => responder({ jugador: id })}
+            >
               {m.nombreJugador(id)}
             </Boton>
           ))}
@@ -98,7 +108,13 @@ function CuerpoPregunta({
           <p className="mb-2 text-sm">{t('decision.elegirReverso')}</p>
           <div className="flex flex-wrap justify-center gap-2">
             {Array.from({ length: pregunta.cartas }, (_, i) => (
-              <Carta key={i} cartaId={null} tamano="md" onClick={() => responder({ indice: i })} />
+              <Carta
+                key={i}
+                cartaId={null}
+                indice={i}
+                tamano="md"
+                onClick={() => responder({ indice: i })}
+              />
             ))}
           </div>
         </div>
@@ -106,17 +122,28 @@ function CuerpoPregunta({
     case 'confirmar':
       return (
         <div className="flex gap-2">
-          <Boton variante="primario" onClick={() => responder({ si: true })}>
+          <Boton
+            variante="primario"
+            data-respuesta={clave({ si: true })}
+            onClick={() => responder({ si: true })}
+          >
             {t('comun.si')}
           </Boton>
-          <Boton onClick={() => responder({ si: false })}>{t('comun.no')}</Boton>
+          <Boton data-respuesta={clave({ si: false })} onClick={() => responder({ si: false })}>
+            {t('comun.no')}
+          </Boton>
         </div>
       );
     case 'valor':
       return (
         <div className="flex gap-2">
           {pregunta.opciones.map((v) => (
-            <Boton key={v} variante="primario" onClick={() => responder({ valor: v })}>
+            <Boton
+              key={v}
+              variante="primario"
+              data-respuesta={clave({ valor: v })}
+              onClick={() => responder({ valor: v })}
+            >
               {conSigno(v)}
             </Boton>
           ))}
@@ -142,7 +169,11 @@ function CuerpoPregunta({
             ))}
           </div>
           <div className="mt-4 text-right">
-            <Boton variante="primario" onClick={() => responder({ ok: true })}>
+            <Boton
+              variante="primario"
+              data-respuesta={clave({ ok: true })}
+              onClick={() => responder({ ok: true })}
+            >
               {t('comun.aceptar')}
             </Boton>
           </div>
@@ -167,11 +198,15 @@ export function DialogoDecision() {
         <div className="mt-4 flex gap-2">
           <Boton
             variante="primario"
+            data-accion={clave({ tipo: 'TIRADA_INMEDIATA', tirar: true })}
             onClick={() => m.enviar({ tipo: 'TIRADA_INMEDIATA', tirar: true })}
           >
             {t('decision.tirar')}
           </Boton>
-          <Boton onClick={() => m.enviar({ tipo: 'TIRADA_INMEDIATA', tirar: false })}>
+          <Boton
+            data-accion={clave({ tipo: 'TIRADA_INMEDIATA', tirar: false })}
+            onClick={() => m.enviar({ tipo: 'TIRADA_INMEDIATA', tirar: false })}
+          >
             {t('decision.noTirar')}
           </Boton>
         </div>

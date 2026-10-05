@@ -3,7 +3,7 @@ import { t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
 import { Carta } from '../../ui/Carta';
 import { Modal } from '../../ui/Modal';
-import { useMesa } from './contexto';
+import { clave, useMesa } from './contexto';
 
 /** Monstruos atacables, mazo y pila de descarte. */
 export function Centro() {
@@ -28,7 +28,12 @@ export function Centro() {
                   onClick={() => m.detalleDe(uid)}
                 />
                 {m.esMiTurnoLibre && (
-                  <Boton pequeno motivo={m.motivo(atacar)} onClick={() => m.enviar(atacar)}>
+                  <Boton
+                    pequeno
+                    motivo={m.motivo(atacar)}
+                    data-accion={clave(atacar)}
+                    onClick={() => m.enviar(atacar)}
+                  >
                     {t('mesa.acciones.atacar')} · {t('mesa.acciones.coste', { n: 2 })}
                   </Boton>
                 )}
@@ -36,7 +41,7 @@ export function Centro() {
             );
           })}
         </div>
-        <p className="mt-1 text-center text-xs text-stone-500">
+        <p className="mt-1 text-center text-xs text-stone-600 dark:text-stone-400">
           {t('mesa.mazoMonstruos', { n: vista.cartasEnMazoMonstruos })}
         </p>
       </div>
@@ -49,7 +54,7 @@ export function Centro() {
         </div>
         <div className="flex flex-col items-center gap-1" data-zona="descarte">
           {superior === undefined ? (
-            <div className="flex aspect-[5/7] w-16 items-center justify-center rounded-lg border-2 border-dashed border-stone-400 text-xs text-stone-500">
+            <div className="flex aspect-[5/7] w-16 items-center justify-center rounded-lg border-2 border-dashed border-stone-400 text-xs text-stone-600 dark:text-stone-400">
               {t('mesa.vacia')}
             </div>
           ) : (

@@ -13,6 +13,8 @@
     "siguiente": "Siguiente",
     "anterior": "Anterior",
     "tema": "Tema",
+    "reducirAnimaciones": "Reducir animaciones",
+    "cargando": "Cargando…",
     "temas": {
       "sistema": "Automático",
       "claro": "Claro",

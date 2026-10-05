@@ -9,7 +9,7 @@ import { Boton } from '../../ui/Boton';
 import { Carta } from '../../ui/Carta';
 import { DetalleCarta, type Detalle } from '../../ui/DetalleCarta';
 import { Modal } from '../../ui/Modal';
-import { SelectorTema } from '../../ui/SelectorTema';
+import { Ajustes } from '../../ui/Ajustes';
 import { ContenidoReglas } from '../Reglas';
 import { AccionesTurno } from './AccionesTurno';
 import { Centro } from './Centro';
@@ -18,7 +18,7 @@ import { Dados } from './Dados';
 import { TiempoDecision } from './TiempoDecision';
 import { Vuelos } from './Vuelos';
 import { DialogoDecision } from './DialogoDecision';
-import { Historial } from './Historial';
+import { Anunciador, Historial } from './Historial';
 import { Mano } from './Mano';
 import { Traspaso, Victoria } from './Superposiciones';
 import { VentanaRespuesta } from './VentanaRespuesta';
@@ -48,6 +48,15 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
   useEffect(() => {
     if (local !== null) guardarAuto(local);
   }, [local, version]);
+
+  // Pruebas e2e: el piloto (src/e2e/piloto.ts) lee la mesa activa.
+  useEffect(() => {
+    if (import.meta.env.MODE !== 'e2e') return undefined;
+    window.__htsMesa = { director, motor };
+    return () => {
+      window.__htsMesa = undefined;
+    };
+  }, [director, motor]);
 
   const valor = useMemo((): ValorMesa => {
     const vista = director.vista();
@@ -131,7 +140,7 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
             ))}
             <span className="ml-1 text-sm">{t('mesa.pa')}</span>
           </span>
-          <span className="text-sm text-stone-500">
+          <span className="text-sm text-stone-600 dark:text-stone-400">
             {t(`mesa.reglasModo.${vista.opciones.modo}`)}
           </span>
           <TiempoDecision />
@@ -179,6 +188,7 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
           </div>
         </div>
 
+        <Anunciador />
         <VentanaRespuesta />
         <DialogoDecision />
         <Dados />
@@ -224,7 +234,7 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
               {t('mesa.menu.tutorial')}
             </Boton>
             <div className="py-1">
-              <SelectorTema />
+              <Ajustes />
             </div>
             <Boton
               variante="peligro"

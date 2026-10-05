@@ -3,7 +3,7 @@ import { useCarta, useAhora } from '../../estado/contexto';
 import { conSigno, t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
 import { Carta } from '../../ui/Carta';
-import { useMesa } from './contexto';
+import { clave, useMesa } from './contexto';
 
 function CuentaAtras() {
   const { director } = useMesa();
@@ -11,7 +11,11 @@ function CuentaAtras() {
   const restante = director.restanteMs();
   const total = director.plazo?.duracionMs ?? 1;
   if (restante === null) {
-    return <div className="text-sm font-semibold text-amber-600">{t('ventana.pausa')}</div>;
+    return (
+      <div className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+        {t('ventana.pausa')}
+      </div>
+    );
   }
   return (
     <div className="flex items-center gap-2" aria-live="off">
@@ -35,7 +39,9 @@ function Respondedores() {
   if (director.config.modo !== 'local') return null;
   if (director.respondiendo !== null) {
     return director.respondiendo === m.yo ? (
-      <Boton onClick={() => director.terminarRespuesta()}>{t('ventana.terminarRespuesta')}</Boton>
+      <Boton data-terminar-respuesta onClick={() => director.terminarRespuesta()}>
+        {t('ventana.terminarRespuesta')}
+      </Boton>
     ) : null;
   }
   const otros = director.respondedoresPosibles().filter((id) => id !== m.yo);
@@ -44,7 +50,7 @@ function Respondedores() {
     <div className="flex flex-wrap items-center gap-2">
       <span className="text-sm">{t('ventana.responderAqui')}</span>
       {otros.map((id) => (
-        <Boton key={id} pequeno onClick={() => director.responder(id)}>
+        <Boton key={id} pequeno data-responde={id} onClick={() => director.responder(id)}>
           {t('ventana.responde', { nombre: m.nombreJugador(id) })}
         </Boton>
       ))}
@@ -91,6 +97,7 @@ function VentanaDesafio() {
         {desafios[0] !== undefined && (
           <Boton
             variante="peligro"
+            data-accion={clave(desafios[0])}
             onClick={() => {
               if (desafios[0] !== undefined) m.enviar(desafios[0]);
               terminar();
@@ -101,6 +108,7 @@ function VentanaDesafio() {
         )}
         {puedePasar && (
           <Boton
+            data-accion={clave({ tipo: 'PASAR' })}
             onClick={() => {
               m.enviar({ tipo: 'PASAR' });
               terminar();
@@ -153,6 +161,7 @@ function FilaTirada({ tirada, indice }: { tirada: Tirada; indice: number }) {
             <Boton
               key={`${a.uid}:${a.valor}`}
               pequeno
+              data-accion={clave(a)}
               onClick={() => m.enviar(a)}
               title={m.nombreCarta(m.idDe(a.uid) ?? '')}
             >
@@ -204,9 +213,11 @@ function VentanaModificadores() {
       ))}
       <CuentaAtras />
       {!tengoModificadores && m.director.respondiendo === m.yo && (
-        <p className="text-sm text-stone-500">{t('ventana.sinTusModificadores')}</p>
+        <p className="text-sm text-stone-600 dark:text-stone-400">
+          {t('ventana.sinTusModificadores')}
+        </p>
       )}
-      <p className="text-xs text-stone-500">{t('ventana.bonos')}</p>
+      <p className="text-xs text-stone-600 dark:text-stone-400">{t('ventana.bonos')}</p>
       <Respondedores />
     </>
   );

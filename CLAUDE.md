@@ -11,7 +11,7 @@ por sesión**. Antes de escribir código, presenta el plan de la fase y espera l
 - [x] Fase 3 — Bots + simulación de 1.000 partidas
 - [x] Fase 4 — UI local (hot-seat y contra bots)
 - [x] Fase 5 — Multijugador en línea
-- [ ] Fase 6 — Pulido, e2e con Playwright y README
+- [x] Fase 6 — Pulido, e2e con Playwright y README
 
 ## Fuentes de verdad
 
@@ -29,6 +29,7 @@ packages/bots     IA fácil/normal (misma API de acciones que un humano)     —
 packages/anfitrion Host de partida (temporizadores, bots, conexiones) y protocolo de red — Fase 4/5
 apps/server       Fastify + Socket.IO, servidor autoritativo                — Fase 5
 apps/web          React + Vite + Zustand + Tailwind + Framer Motion         — Fase 4/5
+apps/e2e          Playwright: partidas completas, accesibilidad y rendimiento — Fase 6
 docs/             REGLAS.md, DUDAS_REGLAS.md, EN_LINEA.md
 ```
 
@@ -41,6 +42,7 @@ pnpm servidor         # compila la web y arranca el servidor en línea en :3000 
 pnpm lint             # ESLint (TS estricto)
 pnpm typecheck        # tsc en todos los paquetes
 pnpm test             # Vitest en todos los paquetes
+pnpm e2e              # Playwright (necesita Referencias/; no va en el CI), ~5 min
 pnpm validate:cards   # valida Referencias/cartas.es.json (errores → exit 1)
 pnpm copy:images      # copia Referencias/Imagenes/Cartas/** → assets/cartas/<id>.png
 pnpm sim [n] [semilla] # simula n partidas entre bots y muestra estadísticas
@@ -109,5 +111,13 @@ un commit descriptivo.
   - `crearServidor` (Fastify + Socket.IO) gestiona salas en memoria (código de 5 caracteres, token por asiento) y sirve `apps/web/dist`.
   - El actor de una acción es siempre el jugador de la conexión; cada cliente recibe solo su vista filtrada.
   - Tests con clientes reales de socket.io-client contra un servidor en un puerto aleatorio.
+- **E2E** (`apps/e2e`):
+  - `pnpm e2e` compila la web en modo `e2e` (`apps/web/dist-e2e`) y arranca el servidor en el puerto 3100.
+  - El **piloto** (`apps/web/src/e2e/piloto.ts`, solo existe en la compilación `--mode e2e`) expone `window.__hts.sugerencia()`: lo que haría el bot normal. `apps/e2e/src/piloto.ts` lo ejecuta pulsando la interfaz y espera a que cambie la versión del estado antes del siguiente paso.
+  - La interfaz lleva atributos para las pruebas: `data-accion` (clave canónica de la acción, `clave()` en `pantallas/mesa/contexto.tsx`), `data-respuesta`, `data-uid`, `data-indice`, `data-equipar`, `data-traspaso`, `data-responde`, `data-confirmar`, `data-terminar-respuesta`. Un botón de acción nuevo debe llevar su `data-accion`.
+  - `accesibilidad.spec.ts` pasa axe-core (WCAG 2.1 AA) por cada pantalla en tema claro y oscuro: el texto secundario usa `text-stone-600 dark:text-stone-400` (no `stone-500`).
+  - `HTS_TRAZA=1` muestra cada paso del piloto y los clics fallidos.
+- **Accesibilidad:** `Modal` atrapa el foco, se cierra con Escape (si tiene `onCerrar`) y devuelve el foco; "Reducir animaciones" (Ajustes) sigue por defecto a `prefers-reduced-motion` (`useReducirAnimaciones`).
+- **Rendimiento:** las pantallas que no son la portada se cargan con `React.lazy`; el director (`juego/director-vivo`), el guardado y el cliente en línea, con `import()`. No importes módulos pesados desde `Inicio`/`App` de forma estática.
 - **Tests:** Vitest junto a cada paquete (`test/*.test.ts`). Los tests que leen `Referencias/` usan `describe.skipIf` cuando el archivo no existe.
 - Prettier: comillas simples, `;`, `printWidth` 100.

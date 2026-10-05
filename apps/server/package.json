@@ -10,6 +10,7 @@
     "start": "tsx src/principal.ts"
   },
   "dependencies": {
+    "@fastify/compress": "^8",
     "@fastify/static": "^8",
     "@hts/anfitrion": "workspace:^",
     "@hts/cards": "workspace:^",

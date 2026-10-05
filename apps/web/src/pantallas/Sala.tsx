@@ -60,7 +60,9 @@ function Lobby({ cliente, onSalir }: { cliente: ClienteEnLinea; onSalir: () => v
             <li key={a.id} className="flex flex-wrap items-center gap-2 py-2">
               <span className="font-semibold">{a.nombre}</span>
               {a.id === yo && (
-                <span className="text-sm text-stone-500">{t('enLinea.sala.tu')}</span>
+                <span className="text-sm text-stone-600 dark:text-stone-400">
+                  {t('enLinea.sala.tu')}
+                </span>
               )}
               {a.id === sala.creador && (
                 <span className="rounded bg-amber-100 px-1.5 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-100">
@@ -81,7 +83,9 @@ function Lobby({ cliente, onSalir }: { cliente: ClienteEnLinea; onSalir: () => v
                     ✓ {t('enLinea.sala.listo')}
                   </span>
                 ) : (
-                  <span className="text-stone-500">{t('enLinea.sala.noListo')}</span>
+                  <span className="text-stone-600 dark:text-stone-400">
+                    {t('enLinea.sala.noListo')}
+                  </span>
                 )}
               </span>
               {creador && a.id !== yo && (
@@ -107,7 +111,9 @@ function Lobby({ cliente, onSalir }: { cliente: ClienteEnLinea; onSalir: () => v
 
       <Seccion titulo={t('enLinea.sala.opciones')}>
         {!creador && (
-          <p className="mb-2 text-sm text-stone-500">{t('enLinea.sala.soloAnfitrion')}</p>
+          <p className="mb-2 text-sm text-stone-600 dark:text-stone-400">
+            {t('enLinea.sala.soloAnfitrion')}
+          </p>
         )}
         <fieldset disabled={!creador} className="space-y-3">
           <Eleccion<Modo>
@@ -145,7 +151,9 @@ function Lobby({ cliente, onSalir }: { cliente: ClienteEnLinea; onSalir: () => v
               ))}
             </select>
           </label>
-          <p className="text-xs text-stone-500">{t('enLinea.sala.limiteNota')}</p>
+          <p className="text-xs text-stone-600 dark:text-stone-400">
+            {t('enLinea.sala.limiteNota')}
+          </p>
           <div className="grid gap-3 sm:grid-cols-3">
             {(['desafio', 'modificadores', 'modificadoresDesafio'] as const).map((k) => (
               <label key={k} className="block text-sm">
@@ -190,7 +198,7 @@ function Lobby({ cliente, onSalir }: { cliente: ClienteEnLinea; onSalir: () => v
           </Boton>
         ) : (
           <div className="flex items-center gap-3">
-            <span className="text-sm text-stone-500">
+            <span className="text-sm text-stone-600 dark:text-stone-400">
               {t('enLinea.sala.esperandoAnfitrion', { nombre: nombreCreador })}
             </span>
             <Boton

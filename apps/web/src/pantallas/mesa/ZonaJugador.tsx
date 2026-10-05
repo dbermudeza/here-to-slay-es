@@ -2,7 +2,7 @@ import type { JugadorVista } from '@hts/engine';
 import { t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
 import { Carta, type Tamano } from '../../ui/Carta';
-import { useMesa } from './contexto';
+import { clave, useMesa } from './contexto';
 
 /** Grupo de un jugador: Líder, Héroes (con su Objeto) y Monstruos matados. */
 export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia: boolean }) {
@@ -35,11 +35,11 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
           </span>
         )}
         {!propia && (
-          <span className="text-stone-500" data-zona={`mano:${jugador.id}`}>
+          <span className="text-stone-600 dark:text-stone-400" data-zona={`mano:${jugador.id}`}>
             {t('mesa.cartasEnMano', { n: jugador.cartasEnMano })}
           </span>
         )}
-        <span className="text-stone-500">
+        <span className="text-stone-600 dark:text-stone-400">
           {t('mesa.monstruosMatados', { n: jugador.monstruos.length })}
         </span>
       </header>
@@ -51,7 +51,9 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
           onClick={() => m.detalleDe(jugador.lider)}
         />
         {jugador.grupo.length === 0 && (
-          <span className="self-center px-2 text-xs text-stone-500">{t('mesa.sinHeroes')}</span>
+          <span className="self-center px-2 text-xs text-stone-600 dark:text-stone-400">
+            {t('mesa.sinHeroes')}
+          </span>
         )}
         {jugador.grupo.map((r) => {
           const heroeId = m.idDe(r.heroe);
@@ -62,6 +64,7 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
               <div className="relative">
                 <Carta
                   cartaId={heroeId}
+                  uid={r.heroe}
                   tamano={tam}
                   resaltada={objetivo}
                   atenuada={m.equipando !== null && !objetivo}
@@ -98,7 +101,12 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
                 )}
               </div>
               {propia && m.esMiTurnoLibre && (
-                <Boton pequeno motivo={m.motivo(usar)} onClick={() => m.enviar(usar)}>
+                <Boton
+                  pequeno
+                  motivo={m.motivo(usar)}
+                  data-accion={clave(usar)}
+                  onClick={() => m.enviar(usar)}
+                >
                   {t('mesa.acciones.usarEfecto')} · {t('mesa.acciones.coste', { n: 1 })}
                 </Boton>
               )}

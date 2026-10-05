@@ -4,7 +4,7 @@ import { useCarta } from '../../estado/contexto';
 import { t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
 import { Carta } from '../../ui/Carta';
-import { useMesa } from './contexto';
+import { clave, useMesa } from './contexto';
 
 /** La mano del jugador que mira, con las acciones de la carta seleccionada. */
 export function Mano() {
@@ -18,12 +18,13 @@ export function Mano() {
     <section aria-label={t('mesa.mano')} data-zona={`mano:${m.yo}`}>
       <h2 className="mb-1 text-sm font-semibold">{t('mesa.mano')}</h2>
       {mano.length === 0 ? (
-        <p className="text-sm text-stone-500">{t('mesa.manoVacia')}</p>
+        <p className="text-sm text-stone-600 dark:text-stone-400">{t('mesa.manoVacia')}</p>
       ) : (
         <div className="flex gap-2 overflow-x-auto pb-2">
           {mano.map((uid) => (
             <Carta
               key={uid}
+              uid={uid}
               cartaId={m.idDe(uid)}
               tamano="md"
               seleccionada={uid === seleccionada}
@@ -57,6 +58,7 @@ function AccionesCarta({ uid, alTerminar }: { uid: Uid; alTerminar: () => void }
       <Boton
         variante="primario"
         motivo={m.motivo(jugar)}
+        data-accion={clave(jugar)}
         onClick={() => {
           m.enviar(jugar);
           alTerminar();
@@ -85,7 +87,12 @@ function AccionesCarta({ uid, alTerminar }: { uid: Uid; alTerminar: () => void }
           </Boton>
         </div>
       ) : (
-        <Boton variante="primario" motivo={motivo} onClick={() => m.setEquipando(uid)}>
+        <Boton
+          variante="primario"
+          motivo={motivo}
+          data-equipar={uid}
+          onClick={() => m.setEquipando(uid)}
+        >
           {t('mesa.acciones.equipar')} · {t('mesa.acciones.coste', { n: 1 })}
         </Boton>
       );

@@ -51,6 +51,10 @@ const esGrande = (c: DatosCarta | undefined): boolean =>
 interface Props {
   /** Id de catálogo; null = carta boca abajo. */
   cartaId: string | null;
+  /** Uid de la carta en la partida (atributo data-uid, para las pruebas). */
+  uid?: string | undefined;
+  /** Posición en una selección a ciegas (atributo data-indice). */
+  indice?: number | undefined;
   tamano?: Tamano;
   seleccionada?: boolean;
   resaltada?: boolean;
@@ -68,6 +72,8 @@ interface Props {
 /** Una carta: imagen local si existe; si no, una carta genérica con su texto (juego 100 % jugable sin imágenes). */
 export function Carta({
   cartaId,
+  uid,
+  indice,
   tamano = 'md',
   seleccionada = false,
   resaltada = false,
@@ -98,6 +104,8 @@ export function Carta({
       title={titulo}
       onMouseEnter={carta && onZoom ? () => onZoom(carta.id) : undefined}
       aria-label={nombre}
+      data-uid={uid}
+      data-indice={indice}
       aria-pressed={onClick ? seleccionada : undefined}
       className={`relative shrink-0 overflow-hidden rounded-lg text-left shadow-md transition ${ANCHO[tamano]} ${proporcion} ${anillo} ${
         atenuada ? 'opacity-50' : ''
@@ -111,6 +119,8 @@ export function Carta({
         <img
           src={`/cartas/${carta.imagen}`}
           alt={nombre}
+          loading="lazy"
+          decoding="async"
           className="h-full w-full object-cover"
           draggable={false}
           onError={() => setSinImagen(true)}

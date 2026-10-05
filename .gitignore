@@ -18,3 +18,8 @@ assets/cartas/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Pruebas e2e
+dist-e2e/
+apps/e2e/informe/
+apps/e2e/resultados/

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/limpiar-dist.mjs && vite build",
+    "build:e2e": "node scripts/limpiar-dist.mjs dist-e2e && vite build --mode e2e --outDir dist-e2e",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run"

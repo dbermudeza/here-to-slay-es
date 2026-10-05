@@ -36,5 +36,13 @@ export function useMesa(): ValorMesa {
   return v;
 }
 
-export const mismaAccion = (a: Accion, b: Accion): boolean =>
-  JSON.stringify(a) === JSON.stringify(b);
+/** JSON con las claves ordenadas: identifica una acción o respuesta sin depender del orden. */
+export function clave(valor: unknown): string {
+  return JSON.stringify(valor, (_k, v: unknown) =>
+    v !== null && typeof v === 'object' && !Array.isArray(v)
+      ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)))
+      : v,
+  );
+}
+
+export const mismaAccion = (a: Accion, b: Accion): boolean => clave(a) === clave(b);
