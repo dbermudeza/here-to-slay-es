@@ -14,12 +14,7 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
   const control = director.config.jugadores.find((j) => j.id === jugador.id)?.control;
   const tam: Tamano = propia ? 'md' : 'sm';
   const { motor } = useCatalogo();
-  const desglose = desgloseClases(
-    motor.catalogo,
-    m.idDe,
-    jugador.lider,
-    jugador.grupo,
-  );
+  const desglose = desgloseClases(motor.catalogo, m.idDe, jugador.lider, jugador.grupo);
 
   return (
     <section
