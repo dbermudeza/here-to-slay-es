@@ -5,27 +5,56 @@ _Here to Slay_ (Unstable Games), en español y fiel a las reglas del juego base.
 navegador: en un mismo dispositivo, contra bots o en línea con amigos.
 
 > ⚠️ Este repositorio es **privado y debe seguir siéndolo**: incluye, como copia de seguridad, las
-> ilustraciones y los textos de las cartas (ver [Recursos personales](#2-recursos-personales)). No lo
-> hagas público ni lo compartas.
+> ilustraciones y los textos de las cartas (ver [Recursos de las cartas](#recursos-de-las-cartas)).
+> No lo hagas público ni lo compartas.
 
 ## Índice
 
-1. [Instalación](#1-instalación)
-2. [Recursos personales](#2-recursos-personales)
-3. [Jugar](#3-jugar)
-4. [Cómo se juega en la pantalla](#4-cómo-se-juega-en-la-pantalla)
-5. [Ajustes y accesibilidad](#5-ajustes-y-accesibilidad)
-6. [Solución de problemas](#6-solución-de-problemas)
-7. [Desarrollo](#7-desarrollo)
+- [Inicio rápido](#inicio-rápido)
+- [Requisitos](#requisitos)
+- [Instalación](#instalación)
+- [Recursos de las cartas](#recursos-de-las-cartas)
+- [Jugar](#jugar)
+- [Cómo se juega en la pantalla](#cómo-se-juega-en-la-pantalla)
+- [Ajustes y accesibilidad](#ajustes-y-accesibilidad)
+- [Configuración](#configuración)
+- [Arquitectura](#arquitectura)
+- [Desarrollo](#desarrollo)
+- [Tests y CI](#tests-y-ci)
+- [Contribuir](#contribuir)
+- [Seguridad](#seguridad)
+- [Solución de problemas](#solución-de-problemas)
+- [Licencia y aviso legal](#licencia-y-aviso-legal)
 
-## 1. Instalación
+## Inicio rápido
+
+```sh
+git clone https://github.com/dbermudeza/here-to-slay-es.git
+cd here-to-slay-es
+pnpm install
+pnpm dev          # en este equipo: http://localhost:5173
+pnpm servidor     # en línea con amigos: http://localhost:3000
+```
+
+## Requisitos
+
+| Herramienta                                              | Versión             | Para qué                                      |
+| -------------------------------------------------------- | ------------------- | --------------------------------------------- |
+| [Node.js](https://nodejs.org/)                           | 24 (la de `.nvmrc`) | Ejecutar la aplicación y el servidor          |
+| [pnpm](https://pnpm.io/)                                 | 9                   | Dependencias del monorepo                     |
+| [Git](https://git-scm.com/)                              | cualquiera reciente | Clonar el repositorio                         |
+| [cloudflared](https://github.com/cloudflare/cloudflared) | opcional            | Jugar en línea por internet sin abrir puertos |
+| Chromium de Playwright                                   | opcional            | Tests e2e (`pnpm e2e`)                        |
+
+## Instalación
 
 Pasos para Windows desde cero; en macOS y Linux son los mismos con su terminal.
 
-1. **Node.js 24** (la versión de `.nvmrc`): descárgalo de [nodejs.org](https://nodejs.org/) e
-   instálalo con las opciones por defecto. Comprueba en una terminal nueva: `node --version`.
-2. **pnpm 9**: en la terminal, `npm install -g pnpm@9` (o `corepack enable`). Comprueba:
-   `pnpm --version`.
+1. **Node.js 24**: descárgalo de [nodejs.org](https://nodejs.org/) e instálalo con las opciones por
+   defecto. Comprueba en una terminal nueva: `node --version`. Con
+   [nvm](https://github.com/nvm-sh/nvm) o [fnm](https://github.com/Schniz/fnm) basta con `nvm use` /
+   `fnm use` en la carpeta del proyecto.
+2. **pnpm 9**: `npm install -g pnpm@9` (o `corepack enable`). Comprueba: `pnpm --version`.
 3. **Git**: desde [git-scm.com](https://git-scm.com/) (en Windows, "Git for Windows").
 4. **El proyecto**:
 
@@ -35,10 +64,20 @@ Pasos para Windows desde cero; en macOS y Linux son los mismos con su terminal.
    pnpm install
    ```
 
-> 💡 Mejor fuera de OneDrive (por ejemplo en `C:\proyectos\`): OneDrive sincroniza miles de
-> archivos de `node_modules` sin necesidad.
+5. **Comprueba que todo está bien**:
 
-## 2. Recursos personales
+   ```sh
+   pnpm validate:cards   # las cartas cumplen el esquema y tienen su efecto
+   pnpm test             # todos los tests (unos 2 minutos)
+   ```
+
+6. **Opcional, para jugar por internet**: instala `cloudflared`
+   (`winget install --id Cloudflare.cloudflared` en Windows, `brew install cloudflared` en macOS).
+
+> 💡 Mejor fuera de OneDrive (por ejemplo en `C:\proyectos\`): OneDrive sincroniza miles de
+> archivos de `node_modules` sin necesidad y puede bloquear la carpeta de compilación.
+
+## Recursos de las cartas
 
 El juego necesita los datos de las cartas. Son recursos personales (arte y textos oficiales) que se
 guardan en este repositorio privado como copia de seguridad, así que al clonarlo ya vienen:
@@ -46,16 +85,18 @@ guardan en este repositorio privado como copia de seguridad, así que al clonarl
 ```
 Referencias/
   Reglas.pdf                  # reglamento
-  cartas.es.json              # cartas transcritas y traducidas (ver packages/cards/src/schema.ts)
+  cartas.es.json              # cartas transcritas y traducidas (esquema: packages/cards/src/schema.ts)
   Imagenes/Cartas/<tipo>/*.png
 assets/cartas/                # imágenes con el id de cada carta (`pnpm copy:images` las regenera)
 ```
 
-1. Comprueba las cartas: `pnpm validate:cards` (debe terminar "sin errores").
-2. Si cambias imágenes en `Referencias/`, vuelve a copiarlas con `pnpm copy:images`. Las imágenes
-   son opcionales: sin ellas cada carta se dibuja con su nombre, tipo y texto.
+- Si cambias `cartas.es.json`, valídalo con `pnpm validate:cards`.
+- Si cambias imágenes en `Referencias/`, vuelve a copiarlas con `pnpm copy:images`.
+- Las imágenes son opcionales: sin ellas cada carta se dibuja con su nombre, tipo y texto.
+- Sin `cartas.es.json` la aplicación muestra "Faltan las cartas" y los tests que usan el catálogo
+  real se saltan solos.
 
-## 3. Jugar
+## Jugar
 
 ### En este equipo (contra bots o pasándose el dispositivo)
 
@@ -70,8 +111,8 @@ Abre **http://localhost:5173**. Desde la portada:
 - **Jugar en este dispositivo**: de 2 a 6 personas que se pasan el dispositivo. Entre turnos la
   mesa se tapa con "Pásale el dispositivo a…" para que nadie vea la mano de otro.
 - **Continuar partida**: la partida se guarda sola tras cada jugada; si cierras el navegador,
-  retómala desde aquí. También puedes **guardarla en un archivo** (Menú → Guardar partida en un archivo) y
-  **cargarla** después desde la portada.
+  retómala desde aquí. También puedes **guardarla en un archivo** (Menú → Guardar partida en un
+  archivo) y **cargarla** después desde la portada.
 
 En la configuración eliges las **reglas** (normales o difíciles) y, en "Opciones avanzadas", la
 duración de las ventanas de desafío y de Modificadores y una **semilla** para repetir una partida.
@@ -86,79 +127,60 @@ Compila la aplicación y arranca el servidor en el puerto 3000. Desde ese equipo
 `http://localhost:3000` y **crea la sala**. En "Invitar a jugar" tienes enlaces para copiar y enviar,
 con el código ya puesto: uno para la red de casa y, con el botón **Abrir acceso por internet**, otro
 para jugar por internet mediante un túnel de Cloudflare (sin contratar ningún servidor ni tocar el
-router). Los detalles (instalar `cloudflared`, otras opciones) están en
-**[docs/EN_LINEA.md](docs/EN_LINEA.md)**.
+router). Los detalles están en **[docs/EN_LINEA.md](docs/EN_LINEA.md)**.
 
 En línea, el creador puede añadir bots; si alguien se desconecta se le esperan 60 s y después un
 bot juega por él hasta que vuelve; y se puede poner un tiempo máximo por decisión.
 
-## 4. Cómo se juega en la pantalla
+## Cómo se juega en la pantalla
 
-| Quiero…                          | Cómo                                                                                                                                            |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Robar, renovar la mano, terminar | **Robar**, **Descartar mano y robar 5** y **Terminar turno** (indican su coste en PA)                                                           |
-| Jugar una carta de la mano       | Pulsa la carta y después **Jugar** (Héroes y Magias) o **Equipar a un Héroe** (Objetos)                                                         |
-| Equipar un Objeto                | **Equipar a un Héroe** y pulsa el Héroe que lo llevará (se resaltan los posibles, también rivales)                                              |
-| Usar el efecto de un Héroe       | **Usar efecto** bajo el Héroe de tu Grupo                                                                                                       |
-| Atacar a un Monstruo             | **Atacar** bajo el Monstruo del centro                                                                                                          |
-| Desafiar o jugar un Modificador  | En el panel de la ventana (con cuenta atrás) que aparece cuando es posible                                                                      |
-| Ver una carta en grande          | Clic en cualquier carta de la mesa; **doble clic** en las de tu mano (o **Ver carta**)                                                          |
-| Ver el historial                 | Panel derecho (en pantallas pequeñas, **Ver historial**)                                                                                        |
-| Responder en "este dispositivo"  | En las ventanas, **Responde X** pasa el dispositivo a X; al acabar, **He terminado**                                                            |
-| Rendirse                         | **Menú → Rendirse**: tus cartas van al descarte y puedes ver la partida o salir; si todos los demás humanos se rinden, gana el que queda (D-43) |
+| Quiero…                          | Cómo                                                                                                  |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Robar, renovar la mano, terminar | **Robar**, **Descartar mano y robar 5** y **Terminar turno** (indican su coste en PA)                 |
+| Jugar una carta de la mano       | Pulsa la carta y después **Jugar** (Héroes y Magias) o **Equipar a un Héroe** (Objetos)               |
+| Equipar un Objeto                | **Equipar a un Héroe** y pulsa el Héroe que lo llevará (se resaltan los posibles, también rivales)    |
+| Usar el efecto de un Héroe       | **Usar efecto** bajo el Héroe de tu Grupo                                                             |
+| Atacar a un Monstruo             | **Atacar** bajo el Monstruo del centro                                                                |
+| Desafiar o jugar un Modificador  | En el panel de la ventana (con cuenta atrás) que aparece cuando es posible                            |
+| Ver una carta en grande          | Clic en cualquier carta de la mesa; **doble clic** en las de tu mano (o **Ver carta**)                |
+| Ver el historial                 | Panel derecho (en pantallas pequeñas, **Ver historial**)                                              |
+| Responder en "este dispositivo"  | En las ventanas, **Responde X** pasa el dispositivo a X; al acabar, **He terminado**                  |
+| Rendirse                         | **Menú → Rendirse**: puedes ver la partida o salir; si los demás humanos se rinden, gana el que queda |
 
-Un botón gris no está disponible: pasa el ratón por encima para ver por qué (por ejemplo, "No
-te quedan suficientes puntos de acción").
+Un botón gris no está disponible: pasa el ratón por encima para ver por qué (por ejemplo, "No te
+quedan suficientes puntos de acción"). Las reglas completas están en la portada (**Reglas**) y en el
+menú de la partida; el **Tutorial** resume un turno paso a paso.
 
-Las reglas completas están en la portada (**Reglas**) y en el menú de la partida; el **Tutorial**
-resume un turno paso a paso.
-
-## 5. Ajustes y accesibilidad
+## Ajustes y accesibilidad
 
 En la portada y en el menú de la partida:
 
 - **Tema**: automático (el del sistema), claro u oscuro.
-- **Reducir animaciones**: sin vuelos de cartas ni giros de dados (las jugadas se muestran igual,
-  sin movimiento). Por defecto sigue la preferencia del sistema.
+- **Reducir animaciones**: sin vuelos de cartas ni giros de dados. Por defecto sigue la preferencia
+  del sistema.
 
 Toda la aplicación se puede usar con el **teclado**: `Tab`/`Mayús+Tab` para moverse, `Enter` o
 `Espacio` para pulsar o elegir cartas, y `Escape` para cerrar ventanas (las decisiones obligatorias
-no se cierran). Las ventanas mantienen el foco dentro mientras están abiertas y lo devuelven al
-cerrarse. Los lectores de pantalla anuncian cada línea nueva del historial.
+no se cierran). Las ventanas mantienen el foco dentro y lo devuelven al cerrarse, y los lectores de
+pantalla anuncian cada línea nueva del historial. Cada pantalla se revisa con axe-core (WCAG 2.1 AA).
 
-## 6. Solución de problemas
+## Configuración
 
-- **"Faltan las cartas"** al abrir la aplicación: falta `Referencias/cartas.es.json` (sección 2).
-- **`EPERM, Permission denied … dist\cartas` al compilar**: pasa dentro de OneDrive. La compilación
-  ya borra `dist` antes de empezar; si aun así ocurre, borra a mano `apps/web/dist` o mueve el
-  proyecto fuera de OneDrive.
-- **Los demás no pueden entrar a la sala**: comprueba que están en la misma Wi-Fi, que usan la
-  dirección "En la red local" (no `localhost`) y que el Firewall de Windows permite Node.js en
-  redes privadas. Más en [docs/EN_LINEA.md](docs/EN_LINEA.md).
-- **El puerto 3000 está ocupado**: `PUERTO=4000 pnpm servidor` (en PowerShell:
-  `$env:PUERTO=4000; pnpm servidor`).
-- **Las imágenes no se ven**: ejecuta `pnpm copy:images` y vuelve a compilar.
+El servidor (`pnpm servidor`) acepta estas variables de entorno (en PowerShell:
+`$env:PUERTO=4000; pnpm servidor`):
 
-## 7. Desarrollo
+| Variable         | Por defecto     | Qué hace                                                     |
+| ---------------- | --------------- | ------------------------------------------------------------ |
+| `PUERTO`         | `3000`          | Puerto del servidor                                          |
+| `CLOUDFLARED`    | se busca solo   | Ruta del ejecutable de `cloudflared` si no lo encuentra      |
+| `DIR_WEB`        | `apps/web/dist` | Carpeta de la web compilada que se sirve                     |
+| `RETARDO_BOT_MS` | `700`           | Pausa antes de que actúe un bot (las pruebas e2e la acortan) |
 
-| Comando                  | Qué hace                                                                  |
-| ------------------------ | ------------------------------------------------------------------------- |
-| `pnpm dev`               | Aplicación en http://localhost:5173 (en línea: con el servidor arrancado) |
-| `pnpm build`             | Compila la aplicación web (`apps/web/dist`)                               |
-| `pnpm servidor`          | Compila la web y arranca el servidor en línea en el puerto 3000           |
-| `pnpm lint`              | ESLint con TypeScript estricto                                            |
-| `pnpm typecheck`         | Comprobación de tipos en todos los paquetes                               |
-| `pnpm test`              | Tests (Vitest) de todos los paquetes                                      |
-| `pnpm e2e`               | Tests e2e (Playwright): partidas completas, accesibilidad y rendimiento   |
-| `pnpm validate:cards`    | Valida `cartas.es.json` y que cada carta tenga su efecto definido         |
-| `pnpm copy:images`       | Copia las imágenes de `Referencias/` a `assets/cartas/<id>.png`           |
-| `pnpm sim [n] [semilla]` | Simula `n` partidas entre bots y muestra estadísticas                     |
+`HTS_TRAZA=1` muestra en `pnpm e2e` cada paso del piloto (para depurar pruebas).
 
-`pnpm e2e` necesita `Referencias/cartas.es.json` y el navegador de Playwright
-(`pnpm --filter @hts/e2e exec playwright install chromium` la primera vez). Juega partidas
-completas pulsando la interfaz en los tres modos, revisa la accesibilidad de cada pantalla con
-axe-core (tema claro y oscuro) y mide los tirones de una mesa de 6 jugadores. Tarda unos 5 minutos;
-el informe queda en `apps/e2e/informe/`.
+## Arquitectura
+
+Monorepo con pnpm y TypeScript estricto:
 
 ```
 packages/
@@ -167,8 +189,8 @@ packages/
   bots/       Bots fácil y normal, director de partidas y simulador
   anfitrion/  Host de partida (temporizadores, bots, conexiones) y protocolo de red
 apps/
-  server/     Servidor autoritativo Fastify + Socket.IO
-  web/        Aplicación React + Vite: en este dispositivo, contra bots y en línea
+  web/        Aplicación React + Vite + Zustand + Tailwind + Framer Motion
+  server/     Servidor autoritativo Fastify + Socket.IO (y túnel de Cloudflare)
   e2e/        Pruebas e2e con Playwright
 docs/
   REGLAS.md         Reglas como especificación (R-xxx)
@@ -176,12 +198,92 @@ docs/
   EN_LINEA.md       Cómo jugar en línea (red local o por internet)
 ```
 
-Las convenciones de código y del proyecto están en [CLAUDE.md](CLAUDE.md).
+- **El motor** (`packages/engine`) no sabe nada de pantallas ni de red: recibe una acción, la valida
+  y devuelve el estado nuevo y los eventos. El azar sale de un generador con semilla guardado en el
+  estado, así que una partida se puede guardar, cargar y reproducir.
+- **Cada carta** tiene su efecto descrito en `packages/cards/src/efectos/efectos.json` (un lenguaje
+  propio validado con Zod) y su test.
+- **El anfitrión** (`packages/anfitrion`) dirige la partida: cuentas atrás, turnos de los bots,
+  traspasos del dispositivo y conexiones. Lo usan tanto la web (partidas locales) como el servidor.
+- **En línea**, el servidor es la única fuente de verdad: cada jugador envía intenciones y recibe
+  solo lo que puede ver (su mano, no la de los demás).
+
+Las convenciones de código están en [CLAUDE.md](CLAUDE.md).
+
+## Desarrollo
+
+| Comando                  | Qué hace                                                                  |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `pnpm dev`               | Aplicación en http://localhost:5173 (en línea: con el servidor arrancado) |
+| `pnpm build`             | Compila la aplicación web (`apps/web/dist`)                               |
+| `pnpm servidor`          | Compila la web y arranca el servidor en línea en el puerto 3000           |
+| `pnpm lint`              | ESLint con TypeScript estricto                                            |
+| `pnpm format`            | Formatea con Prettier                                                     |
+| `pnpm typecheck`         | Comprobación de tipos en todos los paquetes                               |
+| `pnpm test`              | Tests (Vitest) de todos los paquetes                                      |
+| `pnpm e2e`               | Tests e2e (Playwright): partidas completas, accesibilidad y rendimiento   |
+| `pnpm validate:cards`    | Valida `cartas.es.json` y que cada carta tenga su efecto definido         |
+| `pnpm copy:images`       | Copia las imágenes de `Referencias/` a `assets/cartas/<id>.png`           |
+| `pnpm sim [n] [semilla]` | Simula `n` partidas entre bots y muestra estadísticas                     |
+
+Para desarrollar el modo en línea, arranca el servidor sin compilar
+(`pnpm --filter @hts/server start`) y la web con `pnpm dev`: Vite redirige `/socket.io` al servidor.
+
+## Tests y CI
+
+- **`pnpm test`** (Vitest): reglas del motor (cada test cita su regla `R-xxx`), el efecto de cada
+  carta, 1.000 partidas simuladas entre bots, el anfitrión, el servidor con clientes reales de
+  Socket.IO y la interfaz con Testing Library.
+- **`pnpm e2e`** (Playwright, solo en local, unos 5 minutos): partidas completas pulsando la interfaz
+  en los tres modos, rendirse, enlaces de invitación, accesibilidad con axe-core en tema claro y
+  oscuro, y una medida de tirones en una mesa de 6 jugadores. La primera vez, instala el navegador:
+  `pnpm --filter @hts/e2e exec playwright install chromium`. El informe queda en
+  `apps/e2e/informe/`.
+- **CI** (GitHub Actions, `.github/workflows/ci.yml`): en cada push y pull request a `main` ejecuta
+  `pnpm lint`, `pnpm typecheck` y `pnpm test`.
+
+## Contribuir
+
+1. Crea una rama desde `main` (`git switch -c mi-cambio`).
+2. Sigue las convenciones de [CLAUDE.md](CLAUDE.md): TypeScript estricto sin `any` ni `!`, dominio y
+   textos en español, todos los textos de la interfaz en `apps/web/src/i18n/es.json`.
+3. **Reglas**: no inventes reglas. Si algo del reglamento no está claro, añade una duda `D-xx` en
+   [docs/DUDAS_REGLAS.md](docs/DUDAS_REGLAS.md) y marca el código con `// TODO(regla) D-xx`.
+4. **Cartas nuevas**: su definición en `efectos.json` (`pnpm validate:cards` lo exige) y su test en
+   `packages/engine/test/cartas/`.
+5. Antes de hacer commit: `pnpm format`, `pnpm lint`, `pnpm typecheck` y `pnpm test`; si tocas la
+   interfaz, también `pnpm e2e`.
+6. Mensajes de commit en español, descriptivos (qué cambia y por qué), y un pull request a `main`.
+
+## Seguridad
+
+- En línea, el servidor valida con Zod todo lo que llega de los clientes, limita los mensajes por
+  segundo y nunca envía la mano de un jugador a otro ni la semilla de la partida.
+- El túnel de Cloudflare solo se puede abrir o cerrar desde el equipo donde corre el servidor; los
+  invitados ven el enlace pero no los controles. Comparte el enlace solo con quien vaya a jugar y
+  cierra el servidor (Ctrl+C) al terminar.
+- No guardes secretos en el repositorio: `.env` y `.env.*` están en `.gitignore`.
+
+## Solución de problemas
+
+- **"Faltan las cartas"** al abrir la aplicación: falta `Referencias/cartas.es.json`.
+- **`EPERM, Permission denied … dist\cartas` al compilar**: pasa dentro de OneDrive. La compilación
+  ya borra `dist` antes de empezar; si aun así ocurre, borra a mano `apps/web/dist` o mueve el
+  proyecto fuera de OneDrive.
+- **"No se encuentra cloudflared"**: instálalo (ver [Instalación](#instalación)) y vuelve a arrancar
+  el servidor. Si está en una carpeta poco habitual, indícala con la variable `CLOUDFLARED`.
+- **Los demás no pueden entrar a la sala**: comprueba que están en la misma Wi-Fi, que usan el enlace
+  "En tu red" (no `localhost`) y que el Firewall de Windows permite Node.js en redes privadas. Más en
+  [docs/EN_LINEA.md](docs/EN_LINEA.md).
+- **El puerto 3000 está ocupado**: `PUERTO=4000 pnpm servidor`.
+- **Las imágenes no se ven**: ejecuta `pnpm copy:images` y vuelve a compilar.
 
 ## Licencia y aviso legal
 
 _Here to Slay_ es una marca y obra de **Unstable Games**. Este es un proyecto de aficionado, sin
-afiliación ni aval de Unstable Games, para uso personal con una copia física del juego. No se
-distribuyen ilustraciones ni textos oficiales.
+afiliación ni aval de Unstable Games, para uso personal con una copia física del juego. Las
+ilustraciones, el reglamento y los textos de las cartas (`Referencias/`, `assets/cartas/`) son
+propiedad de Unstable Games y están en este repositorio privado solo como copia de seguridad
+personal: no se distribuyen.
 
 El código fuente no tiene licencia de uso abierta: todos los derechos reservados.
