@@ -6,8 +6,7 @@ número de cartas de los demás). No hace falta contratar ningún servidor.
 
 ## 1. Arrancar el servidor (en el equipo anfitrión)
 
-Requisitos: haber hecho `pnpm install` y tener `Referencias/cartas.es.json` (y, opcionalmente, las
-imágenes con `pnpm copy:images`).
+Requisitos: haber hecho `pnpm install` y `pnpm recursos` (las cartas; ver el README).
 
 ```sh
 pnpm servidor

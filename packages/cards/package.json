@@ -8,7 +8,8 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "validate": "tsx src/scripts/validar-cartas.ts",
-    "copy-images": "tsx src/scripts/copiar-imagenes.ts"
+    "copy-images": "tsx src/scripts/copiar-imagenes.ts",
+    "recursos": "tsx src/scripts/recursos.ts"
   },
   "dependencies": {
     "zod": "^3.24.1"

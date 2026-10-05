@@ -17,6 +17,7 @@
     "e2e": "pnpm --filter @hts/web build:e2e && pnpm --filter @hts/e2e e2e",
     "validate:cards": "pnpm --filter @hts/cards validate",
     "copy:images": "pnpm --filter @hts/cards copy-images",
+    "recursos": "pnpm --filter @hts/cards recursos",
     "sim": "pnpm --filter @hts/bots sim"
   },
   "devDependencies": {

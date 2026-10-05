@@ -18,7 +18,7 @@ por sesión**. Antes de escribir código, presenta el plan de la fase y espera l
 - Reglas: `Referencias/Reglas.pdf`, resumido como especificación en [docs/REGLAS.md](docs/REGLAS.md) (ids `R-xxx`).
 - Ambigüedades: [docs/DUDAS_REGLAS.md](docs/DUDAS_REGLAS.md) (ids `D-xx`). No inventes reglas: si algo no está claro, añade una `D-xx`, aplica la lectura más literal y marca el código con `// TODO(regla) D-xx`.
 - Cartas: `Referencias/cartas.es.json`, validado con el esquema Zod de `packages/cards/src/schema.ts`.
-- `Referencias/` y `assets/cartas/` son personales (arte y textos oficiales). Se versionan en este repositorio **privado** como copia de seguridad, por decisión del usuario (2026-10-05): **el repositorio no debe hacerse público** ni compartirse. No descargues ni generes arte o texto oficial desde internet.
+- `Referencias/` y `assets/cartas/` son personales (arte y textos oficiales de Unstable Games) y **no se versionan aquí** (`.gitignore`): este repositorio es público. Su copia de seguridad está en el repositorio privado `dbermudeza/here-to-slay-recursos` y se instalan con `pnpm recursos` (o `pnpm recursos --desde <carpeta>`). Nunca añadas al repositorio arte, el reglamento ni textos oficiales de las cartas. No descargues ni generes arte o texto oficial desde internet.
 
 ## Estructura
 
@@ -44,6 +44,7 @@ pnpm typecheck        # tsc en todos los paquetes
 pnpm test             # Vitest en todos los paquetes
 pnpm e2e              # Playwright (necesita Referencias/; no va en el CI), ~5 min
 pnpm validate:cards   # valida Referencias/cartas.es.json (errores → exit 1)
+pnpm recursos         # instala Referencias/ y assets/cartas/ (repo privado de recursos o --desde <carpeta>)
 pnpm copy:images      # copia Referencias/Imagenes/Cartas/** → assets/cartas/<id>.png
 pnpm sim [n] [semilla] # simula n partidas entre bots y muestra estadísticas
 ```

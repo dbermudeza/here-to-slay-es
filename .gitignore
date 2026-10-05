@@ -7,8 +7,11 @@ coverage/
 playwright-report/
 test-results/
 
-# Recursos personales (Referencias/ y assets/cartas/): SÍ se versionan, como copia de seguridad,
-# porque el repositorio es privado. No hacer público el repositorio.
+# Recursos de las cartas (ilustraciones y textos de Unstable Games): NO se publican.
+# Se instalan con `pnpm recursos` (ver README).
+Referencias/
+referencias/
+assets/cartas/
 
 # Entorno / SO
 .env

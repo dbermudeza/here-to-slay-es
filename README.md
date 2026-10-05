@@ -4,9 +4,9 @@ Adaptación digital **no oficial**, para uso **personal y no comercial**, del ju
 _Here to Slay_ (Unstable Games), en español y fiel a las reglas del juego base. Se juega en el
 navegador: en un mismo dispositivo, contra bots o en línea con amigos.
 
-> ⚠️ Este repositorio es **privado y debe seguir siéndolo**: incluye, como copia de seguridad, las
-> ilustraciones y los textos de las cartas (ver [Recursos de las cartas](#recursos-de-las-cartas)).
-> No lo hagas público ni lo compartas.
+> ℹ️ Este repositorio contiene **solo el código** del juego. Las ilustraciones, el reglamento y los
+> textos de las cartas son de Unstable Games y **no se incluyen**: para jugar necesitas tus propios
+> recursos (ver [Recursos de las cartas](#recursos-de-las-cartas)).
 
 ## Índice
 
@@ -32,6 +32,7 @@ navegador: en un mismo dispositivo, contra bots o en línea con amigos.
 git clone https://github.com/dbermudeza/here-to-slay-es.git
 cd here-to-slay-es
 pnpm install
+pnpm recursos     # instala las cartas (ver "Recursos de las cartas")
 pnpm dev          # en este equipo: http://localhost:5173
 pnpm servidor     # en línea con amigos: http://localhost:3000
 ```
@@ -64,14 +65,20 @@ Pasos para Windows desde cero; en macOS y Linux son los mismos con su terminal.
    pnpm install
    ```
 
-5. **Comprueba que todo está bien**:
+5. **Instala los recursos de las cartas** (ver la sección siguiente):
+
+   ```sh
+   pnpm recursos
+   ```
+
+6. **Comprueba que todo está bien**:
 
    ```sh
    pnpm validate:cards   # las cartas cumplen el esquema y tienen su efecto
    pnpm test             # todos los tests (unos 2 minutos)
    ```
 
-6. **Opcional, para jugar por internet**: instala `cloudflared`
+7. **Opcional, para jugar por internet**: instala `cloudflared`
    (`winget install --id Cloudflare.cloudflared` en Windows, `brew install cloudflared` en macOS).
 
 > 💡 Mejor fuera de OneDrive (por ejemplo en `C:\proyectos\`): OneDrive sincroniza miles de
@@ -79,22 +86,53 @@ Pasos para Windows desde cero; en macOS y Linux son los mismos con su terminal.
 
 ## Recursos de las cartas
 
-El juego necesita los datos de las cartas. Son recursos personales (arte y textos oficiales) que se
-guardan en este repositorio privado como copia de seguridad, así que al clonarlo ya vienen:
+El juego necesita los datos de las cartas, que **no están en este repositorio** (son ilustraciones y
+textos de Unstable Games). Van en dos carpetas, ignoradas por Git:
 
 ```
 Referencias/
-  Reglas.pdf                  # reglamento
-  cartas.es.json              # cartas transcritas y traducidas (esquema: packages/cards/src/schema.ts)
-  Imagenes/Cartas/<tipo>/*.png
-assets/cartas/                # imágenes con el id de cada carta (`pnpm copy:images` las regenera)
+  cartas.es.json              # imprescindible: las cartas transcritas y traducidas
+  Reglas.pdf                  # opcional: el reglamento
+  Imagenes/Cartas/<tipo>/*.png  # opcional: las imágenes originales
+assets/cartas/                # imágenes con el id de cada carta (se generan solas)
 ```
 
-- Si cambias `cartas.es.json`, valídalo con `pnpm validate:cards`.
-- Si cambias imágenes en `Referencias/`, vuelve a copiarlas con `pnpm copy:images`.
-- Las imágenes son opcionales: sin ellas cada carta se dibuja con su nombre, tipo y texto.
-- Sin `cartas.es.json` la aplicación muestra "Faltan las cartas" y los tests que usan el catálogo
-  real se saltan solos.
+`pnpm recursos` las instala de una de estas formas y, al terminar, prepara las imágenes y comprueba
+las cartas:
+
+1. **Desde el repositorio privado de recursos** (si el propietario te ha dado acceso):
+
+   ```sh
+   pnpm recursos
+   ```
+
+   Descarga `dbermudeza/here-to-slay-recursos` con tu sesión de Git (si falla, inicia sesión con
+   `gh auth login`). Para usar otro repositorio: `pnpm recursos --repo <url>` o la variable
+   `HTS_RECURSOS_REPO`.
+
+2. **Desde una carpeta** (una copia de seguridad, un disco externo…):
+
+   ```sh
+   pnpm recursos --desde D:\copias\here-to-slay
+   ```
+
+   La carpeta puede ser la que contiene `Referencias/` (y, si la tiene, `assets/cartas/`) o la propia
+   carpeta `Referencias`. Para reemplazar unos recursos ya instalados, añade `--forzar`.
+
+3. **Con tus propios archivos**, a partir de tu copia física del juego: crea
+   `Referencias/cartas.es.json` con el formato de
+   [`packages/cards/src/schema.ts`](packages/cards/src/schema.ts). Cada carta lleva su `id`, `tipo`,
+   `nombre`, `nombreOriginal`, `copias`, `texto` y `textoOriginal` (y los campos propios de su tipo:
+   `clase` y `tirada` en los Héroes, `requisitos`, `exito` y `fracaso` en los Monstruos…). Los `id`
+   deben coincidir con los de [`efectos.json`](packages/cards/src/efectos/efectos.json), que define
+   lo que hace cada carta. `pnpm validate:cards` te dirá exactamente qué falta o sobra.
+
+Las **imágenes son opcionales**: sin ellas cada carta se dibuja con su nombre, tipo y texto, y el
+juego es igual de jugable. Si las tienes, ponlas en `Referencias/Imagenes/Cartas/`, indica en cada
+carta `imagen` (nombre final) y `origenImagen` (ruta original) y ejecuta `pnpm copy:images`.
+
+Sin `cartas.es.json` la aplicación muestra "Faltan las cartas" y los tests que usan el catálogo real
+se saltan solos (así funciona el CI).
 
 ## Jugar
 
@@ -222,6 +260,7 @@ Las convenciones de código están en [CLAUDE.md](CLAUDE.md).
 | `pnpm typecheck`         | Comprobación de tipos en todos los paquetes                               |
 | `pnpm test`              | Tests (Vitest) de todos los paquetes                                      |
 | `pnpm e2e`               | Tests e2e (Playwright): partidas completas, accesibilidad y rendimiento   |
+| `pnpm recursos`          | Instala los recursos de las cartas (`--desde <carpeta>`, `--forzar`)      |
 | `pnpm validate:cards`    | Valida `cartas.es.json` y que cada carta tenga su efecto definido         |
 | `pnpm copy:images`       | Copia las imágenes de `Referencias/` a `assets/cartas/<id>.png`           |
 | `pnpm sim [n] [semilla]` | Simula `n` partidas entre bots y muestra estadísticas                     |
@@ -240,7 +279,8 @@ Para desarrollar el modo en línea, arranca el servidor sin compilar
   `pnpm --filter @hts/e2e exec playwright install chromium`. El informe queda en
   `apps/e2e/informe/`.
 - **CI** (GitHub Actions, `.github/workflows/ci.yml`): en cada push y pull request a `main` ejecuta
-  `pnpm lint`, `pnpm typecheck` y `pnpm test`.
+  `pnpm lint`, `pnpm typecheck` y `pnpm test`. Como el CI no tiene los recursos de las cartas, los
+  tests con el catálogo real se saltan allí; los demás usan un catálogo de prueba propio.
 
 ## Contribuir
 
@@ -263,10 +303,15 @@ Para desarrollar el modo en línea, arranca el servidor sin compilar
   invitados ven el enlace pero no los controles. Comparte el enlace solo con quien vaya a jugar y
   cierra el servidor (Ctrl+C) al terminar.
 - No guardes secretos en el repositorio: `.env` y `.env.*` están en `.gitignore`.
+- No añadas al repositorio ilustraciones, el reglamento ni textos oficiales de las cartas:
+  `Referencias/` y `assets/cartas/` están en `.gitignore` a propósito.
 
 ## Solución de problemas
 
-- **"Faltan las cartas"** al abrir la aplicación: falta `Referencias/cartas.es.json`.
+- **"Faltan las cartas"** al abrir la aplicación: faltan los recursos; ejecuta `pnpm recursos`
+  (ver [Recursos de las cartas](#recursos-de-las-cartas)) y vuelve a arrancar.
+- **`pnpm recursos` no puede descargar**: necesitas acceso al repositorio privado de recursos y la
+  sesión de Git iniciada (`gh auth login`); si tienes los archivos, usa `--desde <carpeta>`.
 - **`EPERM, Permission denied … dist\cartas` al compilar**: pasa dentro de OneDrive. La compilación
   ya borra `dist` antes de empezar; si aun así ocurre, borra a mano `apps/web/dist` o mueve el
   proyecto fuera de OneDrive.
@@ -281,9 +326,8 @@ Para desarrollar el modo en línea, arranca el servidor sin compilar
 ## Licencia y aviso legal
 
 _Here to Slay_ es una marca y obra de **Unstable Games**. Este es un proyecto de aficionado, sin
-afiliación ni aval de Unstable Games, para uso personal con una copia física del juego. Las
-ilustraciones, el reglamento y los textos de las cartas (`Referencias/`, `assets/cartas/`) son
-propiedad de Unstable Games y están en este repositorio privado solo como copia de seguridad
-personal: no se distribuyen.
+afiliación ni aval de Unstable Games, para uso personal con una copia física del juego. Este
+repositorio **no incluye ni distribuye** ilustraciones, el reglamento ni los textos de las cartas:
+cada jugador usa sus propios recursos.
 
 El código fuente no tiene licencia de uso abierta: todos los derechos reservados.
