@@ -4,9 +4,9 @@ Adaptación digital **no oficial**, para uso **personal y no comercial**, del ju
 _Here to Slay_ (Unstable Games), en español y fiel a las reglas del juego base. Se juega en el
 navegador: en un mismo dispositivo, contra bots o en línea con amigos.
 
-> ⚠️ Este repositorio es **privado**. No incluye ilustraciones, logos ni textos oficiales: las cartas
-> e imágenes se cargan desde carpetas locales que no se versionan (ver
-> [Recursos personales](#2-recursos-personales)).
+> ⚠️ Este repositorio es **privado y debe seguir siéndolo**: incluye, como copia de seguridad, las
+> ilustraciones y los textos de las cartas (ver [Recursos personales](#2-recursos-personales)). No lo
+> hagas público ni lo compartas.
 
 ## Índice
 
@@ -36,24 +36,24 @@ Pasos para Windows desde cero; en macOS y Linux son los mismos con su terminal.
    ```
 
 > 💡 Mejor fuera de OneDrive (por ejemplo en `C:\proyectos\`): OneDrive sincroniza miles de
-> archivos de `node_modules` sin necesidad, y además subiría tus imágenes de cartas a la nube.
+> archivos de `node_modules` sin necesidad.
 
 ## 2. Recursos personales
 
-El juego necesita los datos de las cartas, que no forman parte del repositorio:
+El juego necesita los datos de las cartas. Son recursos personales (arte y textos oficiales) que se
+guardan en este repositorio privado como copia de seguridad, así que al clonarlo ya vienen:
 
 ```
 Referencias/
   Reglas.pdf                  # reglamento
   cartas.es.json              # cartas transcritas y traducidas (ver packages/cards/src/schema.ts)
   Imagenes/Cartas/<tipo>/*.png
-assets/cartas/                # se genera con `pnpm copy:images`
+assets/cartas/                # imágenes con el id de cada carta (`pnpm copy:images` las regenera)
 ```
 
-1. Copia tu carpeta `Referencias/` en la raíz del proyecto.
-2. Comprueba las cartas: `pnpm validate:cards` (debe terminar "sin errores").
-3. Copia las imágenes: `pnpm copy:images`. Las imágenes son opcionales: sin ellas cada carta se
-   dibuja con su nombre, tipo y texto, y el juego es igual de jugable.
+1. Comprueba las cartas: `pnpm validate:cards` (debe terminar "sin errores").
+2. Si cambias imágenes en `Referencias/`, vuelve a copiarlas con `pnpm copy:images`. Las imágenes
+   son opcionales: sin ellas cada carta se dibuja con su nombre, tipo y texto.
 
 ## 3. Jugar
 

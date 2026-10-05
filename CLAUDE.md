@@ -18,7 +18,7 @@ por sesión**. Antes de escribir código, presenta el plan de la fase y espera l
 - Reglas: `Referencias/Reglas.pdf`, resumido como especificación en [docs/REGLAS.md](docs/REGLAS.md) (ids `R-xxx`).
 - Ambigüedades: [docs/DUDAS_REGLAS.md](docs/DUDAS_REGLAS.md) (ids `D-xx`). No inventes reglas: si algo no está claro, añade una `D-xx`, aplica la lectura más literal y marca el código con `// TODO(regla) D-xx`.
 - Cartas: `Referencias/cartas.es.json`, validado con el esquema Zod de `packages/cards/src/schema.ts`.
-- `Referencias/` y `assets/cartas/` son personales y **no se publican** (están en `.gitignore`). No descargues ni generes arte o texto oficial desde internet.
+- `Referencias/` y `assets/cartas/` son personales (arte y textos oficiales). Se versionan en este repositorio **privado** como copia de seguridad, por decisión del usuario (2026-10-05): **el repositorio no debe hacerse público** ni compartirse. No descargues ni generes arte o texto oficial desde internet.
 
 ## Estructura
 
@@ -119,5 +119,5 @@ un commit descriptivo.
   - `HTS_TRAZA=1` muestra cada paso del piloto y los clics fallidos.
 - **Accesibilidad:** `Modal` atrapa el foco, se cierra con Escape (si tiene `onCerrar`) y devuelve el foco; "Reducir animaciones" (Ajustes) sigue por defecto a `prefers-reduced-motion` (`useReducirAnimaciones`).
 - **Rendimiento:** las pantallas que no son la portada se cargan con `React.lazy`; el director (`juego/director-vivo`), el guardado y el cliente en línea, con `import()`. No importes módulos pesados desde `Inicio`/`App` de forma estática.
-- **Tests:** Vitest junto a cada paquete (`test/*.test.ts`). Los tests que leen `Referencias/` usan `describe.skipIf` cuando el archivo no existe.
+- **Tests:** Vitest junto a cada paquete (`test/*.test.ts`). Los tests que leen `Referencias/` usan `describe.skipIf` cuando el archivo no existe (por si se usa el código sin los recursos).
 - Prettier: comillas simples, `;`, `printWidth` 100.

@@ -7,10 +7,8 @@ coverage/
 playwright-report/
 test-results/
 
-# Recursos personales: NO publicar
-Referencias/
-referencias/
-assets/cartas/
+# Recursos personales (Referencias/ y assets/cartas/): SÍ se versionan, como copia de seguridad,
+# porque el repositorio es privado. No hacer público el repositorio.
 
 # Entorno / SO
 .env
