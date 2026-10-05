@@ -16,7 +16,7 @@ function clienteFalso(info: InfoServidor, tunel: EstadoTunel) {
 const APAGADO: EstadoTunel = { fase: 'apagado', url: null, error: null };
 const SERVIDOR: InfoServidor = {
   esEquipoServidor: true,
-  redLocal: ['http://192.168.1.34:3000'],
+  redLocal: 'http://192.168.1.34:3000',
 };
 
 describe('Invitar a la sala', () => {
@@ -63,7 +63,7 @@ describe('Invitar a la sala', () => {
   });
 
   it('un invitado ve el enlace por el que ha entrado, sin botones del túnel', () => {
-    const { cliente } = clienteFalso({ esEquipoServidor: false, redLocal: [] }, APAGADO);
+    const { cliente } = clienteFalso({ esEquipoServidor: false, redLocal: null }, APAGADO);
     render(<Invitar cliente={cliente} codigo="TKDEV" />);
     expect(screen.getByText(enlaceInvitacion(window.location.origin, 'TKDEV'))).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /acceso por internet/ })).not.toBeInTheDocument();

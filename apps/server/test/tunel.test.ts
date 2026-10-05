@@ -64,7 +64,7 @@ describe('Túnel de Cloudflare desde la app', () => {
     const invitado = conectar(puerto, { 'cf-connecting-ip': '203.0.113.7' });
     await esperar(() => anfitrion.info !== null && invitado.info !== null);
     expect(anfitrion.info?.esEquipoServidor).toBe(true);
-    expect(invitado.info).toEqual({ esEquipoServidor: false, redLocal: [] });
+    expect(invitado.info).toEqual({ esEquipoServidor: false, redLocal: null });
     expect(anfitrion.tunel).toEqual({ fase: 'apagado', url: null, error: null });
 
     expect(await pedir(invitado, MENSAJES.abrirTunel)).toEqual({

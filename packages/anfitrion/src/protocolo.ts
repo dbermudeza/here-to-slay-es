@@ -148,8 +148,8 @@ export interface EstadoTunel {
 export interface InfoServidor {
   /** La conexión viene del propio equipo del servidor (no de la red ni del túnel). */
   esEquipoServidor: boolean;
-  /** Direcciones de la red local (http://ip:puerto); solo para el equipo del servidor. */
-  redLocal: string[];
+  /** Dirección en la red local (http://ip:puerto); solo para el equipo del servidor. */
+  redLocal: string | null;
 }
 
 export type Ack<T> = ({ ok: true } & T) | { ok: false; error: ErrorSala | string };

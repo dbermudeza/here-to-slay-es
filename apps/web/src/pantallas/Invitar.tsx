@@ -55,13 +55,12 @@ export function Invitar({ cliente, codigo }: { cliente: ClienteEnLinea; codigo: 
   return (
     <Seccion titulo={t('enLinea.invitar.titulo')}>
       <div className="space-y-4">
-        {info.redLocal.map((origen) => (
+        {info.redLocal !== null && (
           <Enlace
-            key={origen}
             titulo={t('enLinea.invitar.redLocal')}
-            url={enlaceInvitacion(origen, codigo)}
+            url={enlaceInvitacion(info.redLocal, codigo)}
           />
-        ))}
+        )}
 
         <div className="space-y-2 rounded-lg bg-stone-50 p-3 ring-1 ring-stone-200 dark:bg-stone-800/50 dark:ring-stone-700">
           <div className="font-semibold">{t('enLinea.invitar.internet')}</div>

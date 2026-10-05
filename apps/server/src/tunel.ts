@@ -5,11 +5,12 @@
  */
 import { spawn, type ChildProcess } from 'node:child_process';
 import type { EstadoTunel } from '@hts/anfitrion';
+import { buscarCloudflared } from './red';
 
 const URL_TUNEL = /https:\/\/[a-z0-9-]+\.trycloudflare\.com/;
 
 export interface OpcionesTunel {
-  /** Ejecutable (por defecto, `cloudflared` o la variable CLOUDFLARED). */
+  /** Ejecutable (por defecto, el que encuentre `buscarCloudflared`). */
   comando?: string;
   /** Argumentos (por defecto, los del túnel rápido hacia `puerto`). */
   argumentos?: (puerto: number) => string[];
@@ -34,7 +35,7 @@ export class Tunel {
 
   abrir(puerto: number): void {
     if (this.estado.fase === 'conectando' || this.estado.fase === 'activo') return;
-    const comando = this.opciones.comando ?? process.env['CLOUDFLARED'] ?? 'cloudflared';
+    const comando = this.opciones.comando ?? buscarCloudflared();
     const argumentos = this.opciones.argumentos?.(puerto) ?? [
       'tunnel',
       '--no-autoupdate',

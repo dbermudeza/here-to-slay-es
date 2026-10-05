@@ -3,7 +3,6 @@
  * Socket.IO (salas, lobby y partidas). Cada jugador envía intenciones y recibe solo su vista.
  */
 import { existsSync } from 'node:fs';
-import { networkInterfaces } from 'node:os';
 import { sep } from 'node:path';
 import fastifyCompress from '@fastify/compress';
 import fastifyStatic from '@fastify/static';
@@ -35,6 +34,7 @@ import { eventoParaJugador, type GameState, type JugadorId, type Motor } from '@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { Server, type Socket } from 'socket.io';
 import { GestorSalas, MAX_ASIENTOS, MIN_ASIENTOS, type Sala } from './salas';
+import { ipRedLocal } from './red';
 import { Tunel, type OpcionesTunel } from './tunel';
 
 /** Cabeceras que añaden Cloudflare u otros intermediarios: la conexión no es del propio equipo. */
@@ -45,18 +45,16 @@ const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
  * ¿La conexión viene del propio equipo del servidor? Las visitas por el túnel también llegan desde
  * localhost (cloudflared las reenvía), pero con las cabeceras de Cloudflare.
  */
+function redLocalCon(puerto: number): string | null {
+  const ip = ipRedLocal();
+  return ip === null ? null : `http://${ip}:${puerto}`;
+}
+
 export function esDelEquipoServidor(
   direccion: string,
   cabeceras: Record<string, string | string[] | undefined>,
 ): boolean {
   return LOOPBACK.has(direccion) && CABECERAS_REENVIO.every((c) => cabeceras[c] === undefined);
-}
-
-function direccionesRedLocal(puerto: number): string[] {
-  return Object.values(networkInterfaces())
-    .flat()
-    .filter((i) => i !== undefined && i.family === 'IPv4' && !i.internal)
-    .map((i) => `http://${i?.address ?? ''}:${puerto}`);
 }
 
 export interface OpcionesServidor {
@@ -251,7 +249,7 @@ export function crearServidor(o: OpcionesServidor): ServidorHts {
     const local = esDelEquipoServidor(socket.handshake.address, socket.handshake.headers);
     const info: InfoServidor = {
       esEquipoServidor: local,
-      redLocal: local ? direccionesRedLocal(puertoEscuchado) : [],
+      redLocal: local ? redLocalCon(puertoEscuchado) : null,
     };
     socket.emit(MENSAJES.infoServidor, info);
     socket.emit(MENSAJES.estadoTunel, tunel.estado);
