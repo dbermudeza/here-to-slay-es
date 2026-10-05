@@ -10,6 +10,8 @@ export interface OpcionesArranque {
   dirWeb: string;
   puerto: number;
   retardoBotMs?: number;
+  /** Pausa al matar un Monstruo (por defecto, la del anfitrión). */
+  celebracionMs?: number;
 }
 
 export interface ServidorArrancado {
@@ -23,9 +25,10 @@ export async function arrancar(o: OpcionesArranque): Promise<ServidorArrancado> 
   const servidor = crearServidor({
     motor: crearMotor(cartas),
     dirWeb: o.dirWeb,
-    ...(o.retardoBotMs === undefined
-      ? {}
-      : { opcionesAnfitrion: { retardoBotMs: o.retardoBotMs } }),
+    opcionesAnfitrion: {
+      ...(o.retardoBotMs === undefined ? {} : { retardoBotMs: o.retardoBotMs }),
+      ...(o.celebracionMs === undefined ? {} : { celebracionMs: o.celebracionMs }),
+    },
   });
   try {
     return { servidor, puerto: await servidor.escuchar(o.puerto) };

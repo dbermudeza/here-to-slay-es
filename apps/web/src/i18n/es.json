@@ -79,6 +79,9 @@
     "facil": "fácil",
     "normal": "normal"
   },
+  "celebracion": {
+    "titulo": "¡{nombre} ha derrotado a {monstruo}!"
+  },
   "mesa": {
     "turnoDe": "Turno de {nombre}",
     "tuTurno": "Tu turno",
@@ -242,6 +245,7 @@
     "inicio": "Volver al inicio"
   },
   "errores": {
+    "CELEBRACION": "Espera a que termine la celebración.",
     "PARTIDA_TERMINADA": "La partida ha terminado.",
     "JUGADOR_DESCONOCIDO": "Jugador desconocido.",
     "SOLO_SISTEMA": "Solo el sistema puede hacer esto.",

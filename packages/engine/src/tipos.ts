@@ -410,7 +410,9 @@ export type CodigoError =
   | 'SELECCION_INVALIDA'
   | 'RESPUESTA_INVALIDA'
   | 'SECUENCIA_OBSOLETA'
-  | 'JUGADOR_RENDIDO';
+  | 'JUGADOR_RENDIDO'
+  /** Lo usa solo el anfitrión: se está celebrando un Monstruo derrotado y nadie puede jugar. */
+  | 'CELEBRACION';
 
 export interface ErrorMotor {
   codigo: CodigoError;

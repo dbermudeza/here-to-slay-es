@@ -118,6 +118,7 @@ describe('Director en vivo: bots', () => {
       reloj,
       {
         retardoBotMs: 50,
+        celebracionMs: 0,
       },
     );
     for (let i = 0; i < 200_000 && director.estado.ganador === null; i++) reloj.avanzar(100);

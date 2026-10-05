@@ -15,7 +15,7 @@ describe.skipIf(!HAY_CATALOGO)('Partida completa en la interfaz (catálogo real)
       motor,
       { ...config('bots', ['normal', 'normal', 'facil', 'normal'], 'interfaz'), reglas: 'normal' },
       reloj,
-      { retardoBotMs: 50 },
+      { retardoBotMs: 50, celebracionMs: 0 },
     );
     render(
       <ProveedorCatalogo motor={motor} cartas={CARTAS}>
@@ -36,5 +36,67 @@ describe.skipIf(!HAY_CATALOGO)('Partida completa en la interfaz (catálogo real)
     expect(director.estado.turno.numero).toBeGreaterThan(8);
     expect(screen.getByRole('heading', { name: /gana la partida/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Revancha' })).toBeInTheDocument();
+  }, 300_000);
+
+  it('la mesa muestra la celebración mientras el director la tiene y la quita al acabar', () => {
+    const reloj = new RelojFalso();
+    const director = DirectorVivo.nueva(
+      motor,
+      { ...config('bots', ['normal', 'normal', 'normal'], 'celebracion'), reglas: 'normal' },
+      reloj,
+      { retardoBotMs: 50 },
+    );
+    const { container } = render(
+      <ProveedorCatalogo motor={motor} cartas={CARTAS}>
+        <Mesa
+          director={director}
+          onSalir={() => undefined}
+          onRevancha={() => undefined}
+          onTutorial={() => undefined}
+        />
+      </ProveedorCatalogo>,
+    );
+    expect(container.querySelector('[data-celebracion]')).toBeNull();
+    for (let i = 0; i < 50_000 && director.celebracion === null; i++) {
+      act(() => reloj.avanzar(100));
+    }
+    expect(director.celebracion).not.toBeNull();
+    expect(container.querySelector('[data-celebracion]')).not.toBeNull();
+    act(() => reloj.avanzar(4500));
+    expect(container.querySelector('[data-celebracion]')).toBeNull();
+  }, 300_000);
+
+  it('durante la celebración todo lo demás queda inerte y al acabar vuelve el foco', () => {
+    const reloj = new RelojFalso();
+    const director = DirectorVivo.nueva(
+      motor,
+      { ...config('bots', ['normal', 'normal', 'normal'], 'celebracion'), reglas: 'normal' },
+      reloj,
+      { retardoBotMs: 50 },
+    );
+    const { container } = render(
+      <ProveedorCatalogo motor={motor} cartas={CARTAS}>
+        <Mesa
+          director={director}
+          onSalir={() => undefined}
+          onRevancha={() => undefined}
+          onTutorial={() => undefined}
+        />
+      </ProveedorCatalogo>,
+    );
+    // Un diálogo abierto (el menú) con el foco dentro.
+    act(() => screen.getByRole('button', { name: 'Menú' }).click());
+    const rendirse = screen.getByRole('button', { name: 'Rendirse' });
+    act(() => rendirse.focus());
+    expect(document.activeElement).toBe(rendirse);
+    for (let i = 0; i < 50_000 && director.celebracion === null; i++) {
+      act(() => reloj.avanzar(100));
+    }
+    expect(director.celebracion).not.toBeNull();
+    expect(rendirse.closest('[inert]')).not.toBeNull();
+    expect(container.querySelector('[data-celebracion]')?.closest('[inert]')).toBeNull();
+    act(() => reloj.avanzar(4500));
+    expect(rendirse.closest('[inert]')).toBeNull();
+    expect(document.activeElement).toBe(rendirse);
   }, 300_000);
 });

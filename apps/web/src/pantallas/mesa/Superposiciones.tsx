@@ -37,7 +37,8 @@ export function Victoria({
 }) {
   const m = useMesa();
   const g = m.vista.ganador;
-  if (g === null) return null;
+  // La victoria espera a que acabe la celebración del Monstruo derrotado.
+  if (g === null || m.director.celebracion !== null) return null;
   return (
     <Modal abierto ancho="sm">
       <div className="space-y-3 text-center">

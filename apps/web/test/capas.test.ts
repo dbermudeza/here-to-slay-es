@@ -11,6 +11,7 @@ describe('jerarquía de capas', () => {
       CAPA.ventanaRespuesta,
       CAPA.rotulo,
       CAPA.modal,
+      CAPA.celebracion,
       CAPA.aviso,
     ].map(nivel);
     expect(orden.every(Number.isInteger)).toBe(true);

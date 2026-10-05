@@ -1,4 +1,6 @@
+import { CELEBRACION_POR_DEFECTO_MS } from '@hts/anfitrion';
 import type {
+  Celebracion,
   EstadoConexion,
   JugadorConfig,
   ModoJuego,
@@ -21,6 +23,8 @@ export interface FuenteMesa {
   readonly eventos: readonly Evento[];
   readonly plazo: Plazo | null;
   readonly plazoDecision: PlazoDecision | null;
+  /** Monstruo derrotado que se está celebrando (nadie puede jugar mientras dure), o null. */
+  readonly celebracion: Celebracion | null;
   vista(): VistaJugador;
   legales(): Accion[];
   /** null si la acción es legal; si no, el motivo. */
@@ -32,6 +36,8 @@ export interface FuenteMesa {
   conexion(id: JugadorId): EstadoConexion;
   restanteMs(): number | null;
   restanteDecisionMs(): number | null;
+  /** Milisegundos que quedan de la celebración; null si no hay. */
+  restanteCelebracionMs(): number | null;
 
   // Solo en modo "este dispositivo" (en línea no hacen nada).
   readonly traspaso: JugadorId | null;
@@ -41,3 +47,6 @@ export interface FuenteMesa {
   terminarRespuesta(): void;
   confirmarTraspaso(): void;
 }
+
+/** Duración nominal de la celebración de un Monstruo derrotado (la de la animación completa). */
+export const CELEBRACION_MS = CELEBRACION_POR_DEFECTO_MS;

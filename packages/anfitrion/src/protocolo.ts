@@ -191,6 +191,15 @@ export interface EstadoPartida {
   reinicio: boolean;
   plazo: { secuencia: number; duracionMs: number; restanteMs: number | null } | null;
   decision: { jugador: JugadorId; restanteMs: number } | null;
+  /** Monstruo derrotado que se está celebrando (nadie puede jugar mientras dure), o null. */
+  celebracion: {
+    id: number;
+    jugador: JugadorId;
+    carta: string;
+    /** Duración configurada en el anfitrión (no la nominal). */
+    duracionMs: number;
+    restanteMs: number;
+  } | null;
   conexiones: Record<JugadorId, EstadoConexion>;
 }
 

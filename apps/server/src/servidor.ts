@@ -167,6 +167,10 @@ export function crearServidor(o: OpcionesServidor): ServidorHts {
         a.plazoDecision === null
           ? null
           : { jugador: a.plazoDecision.jugador, restanteMs: a.restanteDecisionMs() ?? 0 },
+      celebracion:
+        a.celebracion === null
+          ? null
+          : { ...a.celebracion, restanteMs: a.restanteCelebracionMs() ?? 0 },
       conexiones: Object.fromEntries(a.config.jugadores.map((j) => [j.id, a.conexion(j.id)])),
     };
     o.alEnviarPartida?.(jugador, estado, a.estado);

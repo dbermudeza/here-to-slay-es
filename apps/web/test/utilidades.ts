@@ -37,6 +37,6 @@ export function directorEn(
 ) {
   const s = escenario(motor.crearPartida(aConfigPartida(c)).state, { turnoDe: 'j1' });
   preparar?.(s);
-  const director = new DirectorVivo(motor, c, s, reloj, { retardoBotMs: 100 });
+  const director = new DirectorVivo(motor, c, s, reloj, { retardoBotMs: 100, celebracionMs: 0 });
   return { director, reloj };
 }

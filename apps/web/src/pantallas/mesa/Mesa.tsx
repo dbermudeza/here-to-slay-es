@@ -1,5 +1,5 @@
 import type { Accion, JugadorId, Uid } from '@hts/engine';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCatalogo, useDirector } from '../../estado/contexto';
 import { DirectorVivo } from '../../juego/director-vivo';
 import type { FuenteMesa } from '../../juego/fuente';
@@ -13,6 +13,7 @@ import { Modal } from '../../ui/Modal';
 import { Ajustes } from '../../ui/Ajustes';
 import { ContenidoReglas } from '../Reglas';
 import { AccionesTurno } from './AccionesTurno';
+import { CelebracionMonstruo } from './CelebracionMonstruo';
 import { Centro } from './Centro';
 import { MesaContexto, mismaAccion, type ValorMesa } from './contexto';
 import { Dados } from './Dados';
@@ -111,6 +112,25 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
   }, [director, version, equipando, motor]);
 
   const { vista, yo } = valor;
+  // Monstruo derrotado: la mesa queda tapada, bloqueada e inerte hasta que acaba la celebración.
+  const celebracion = director.celebracion;
+  const restanteCelebracion = director.restanteCelebracionMs();
+  const hayCelebracion = celebracion !== null;
+  // Quien tenía el foco antes de la celebración lo recupera al acabar (la mesa está inerte).
+  const foco = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (hayCelebracion) {
+      return () => {
+        const antes = foco.current;
+        if (antes?.isConnected === true) antes.focus();
+      };
+    }
+    const guardar = (e: FocusEvent): void => {
+      if (e.target instanceof HTMLElement && e.target !== document.body) foco.current = e.target;
+    };
+    document.addEventListener('focusin', guardar);
+    return () => document.removeEventListener('focusin', guardar);
+  }, [hayCelebracion]);
   const meRendi = vista.rendidos.includes(yo);
   const modo = director.config.modo;
   const rendirse = (): void => {
@@ -129,219 +149,237 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
 
   return (
     <MesaContexto.Provider value={valor}>
-      <div className="flex h-full flex-col">
-        <header className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-stone-200 bg-white/80 px-3 py-2 dark:border-stone-800 dark:bg-stone-900/80">
-          <Logo
-            className="h-9 w-9 rounded-lg p-0.5"
-            textoClassName="font-titulo text-lg font-bold text-amber-700 dark:text-amber-400"
-          />
-          <span className="text-sm">{t('mesa.turnoNumero', { n: vista.turno.numero })}</span>
-          <span className="font-semibold">
-            {vista.turno.jugador === yo
-              ? t('mesa.tuTurno')
-              : t('mesa.turnoDe', { nombre: valor.nombreJugador(vista.turno.jugador) })}
-          </span>
-          <span
-            className="flex items-center gap-1"
-            aria-label={t('mesa.paRestantes', { n: vista.turno.pa })}
-          >
-            {Array.from({ length: Math.max(3, vista.turno.pa) }, (_, i) => (
-              <span
-                key={i}
-                className={`h-3 w-3 rounded-full ${i < vista.turno.pa ? 'bg-amber-500' : 'bg-stone-300 dark:bg-stone-700'}`}
-              />
-            ))}
-            <span className="ml-1 text-sm">{t('mesa.pa')}</span>
-          </span>
-          <span className="text-sm text-stone-600 dark:text-stone-400">
-            {t(`mesa.reglasModo.${vista.opciones.modo}`)}
-          </span>
-          <TiempoDecision />
-          {meRendi && vista.ganador === null && (
-            <span className="rounded bg-stone-200 px-2 py-0.5 text-sm dark:bg-stone-700">
-              {t('mesa.rendirse.espectador')}
+      <div className="h-full">
+        {/* La mesa entera queda inerte (sin foco ni clics) mientras dura la celebración. */}
+        <div inert={hayCelebracion} className="flex h-full flex-col">
+          <header className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-stone-200 bg-white/80 px-3 py-2 dark:border-stone-800 dark:bg-stone-900/80">
+            <Logo
+              className="h-9 w-9 rounded-lg p-0.5"
+              textoClassName="font-titulo text-lg font-bold text-amber-700 dark:text-amber-400"
+            />
+            <span className="text-sm">{t('mesa.turnoNumero', { n: vista.turno.numero })}</span>
+            <span className="font-semibold">
+              {vista.turno.jugador === yo
+                ? t('mesa.tuTurno')
+                : t('mesa.turnoDe', { nombre: valor.nombreJugador(vista.turno.jugador) })}
             </span>
-          )}
-          <div className="ml-auto flex gap-2">
-            <Boton
-              pequeno
-              variante="fantasma"
-              className="lg:hidden"
-              onClick={() => setHistorialMovil(true)}
+            <span
+              className="flex items-center gap-1"
+              aria-label={t('mesa.paRestantes', { n: vista.turno.pa })}
             >
-              {t('mesa.verLog')}
-            </Boton>
-            <Boton pequeno onClick={() => setMenu(true)}>
-              {t('mesa.menu.titulo')}
-            </Boton>
-          </div>
-        </header>
-
-        <div className="flex min-h-0 flex-1">
-          <main className="min-w-0 flex-1 space-y-3 overflow-y-auto p-3 pb-56 lg:pb-3">
-            <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-              {rivales.map((j) => (
-                <ZonaJugador key={j.id} jugador={j} propia={false} />
+              {Array.from({ length: Math.max(3, vista.turno.pa) }, (_, i) => (
+                <span
+                  key={i}
+                  className={`h-3 w-3 rounded-full ${i < vista.turno.pa ? 'bg-amber-500' : 'bg-stone-300 dark:bg-stone-700'}`}
+                />
               ))}
+              <span className="ml-1 text-sm">{t('mesa.pa')}</span>
+            </span>
+            <span className="text-sm text-stone-600 dark:text-stone-400">
+              {t(`mesa.reglasModo.${vista.opciones.modo}`)}
+            </span>
+            <TiempoDecision />
+            {meRendi && vista.ganador === null && (
+              <span className="rounded bg-stone-200 px-2 py-0.5 text-sm dark:bg-stone-700">
+                {t('mesa.rendirse.espectador')}
+              </span>
+            )}
+            <div className="ml-auto flex gap-2">
+              <Boton
+                pequeno
+                variante="fantasma"
+                className="lg:hidden"
+                onClick={() => setHistorialMovil(true)}
+              >
+                {t('mesa.verLog')}
+              </Boton>
+              <Boton pequeno onClick={() => setMenu(true)}>
+                {t('mesa.menu.titulo')}
+              </Boton>
             </div>
-            <Centro />
-            {esperando !== null &&
-              cima?.tipo !== 'ventanaDesafio' &&
-              cima?.tipo !== 'ventanaModificadores' && (
-                <p role="status" className="text-center text-sm text-stone-600 dark:text-stone-400">
-                  {esperando}
-                </p>
-              )}
-            {propio !== undefined && <ZonaJugador jugador={propio} propia />}
-            <AccionesTurno />
-            <Mano />
-          </main>
-          <div className="hidden w-80 shrink-0 border-l border-stone-200 p-3 lg:flex lg:flex-col dark:border-stone-800">
-            {ampliada !== null && (
-              <div className="mb-3 flex justify-center">
-                <Carta cartaId={ampliada} tamano="lg" />
+          </header>
+
+          <div className="flex min-h-0 flex-1">
+            <main className="min-w-0 flex-1 space-y-3 overflow-y-auto p-3 pb-56 lg:pb-3">
+              <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                {rivales.map((j) => (
+                  <ZonaJugador key={j.id} jugador={j} propia={false} />
+                ))}
               </div>
-            )}
-            <Historial />
-          </div>
-        </div>
-
-        <Anunciador />
-        <VentanaRespuesta />
-        <DialogoDecision />
-        <Dados />
-        <Vuelos />
-        <Traspaso />
-        <RotuloTurno
-          numero={vista.turno.numero}
-          jugador={vista.turno.jugador}
-          titulo={
-            vista.turno.jugador === yo && modo !== 'local'
-              ? t('mesa.tuTurno')
-              : t('mesa.turnoDe', { nombre: valor.nombreJugador(vista.turno.jugador) })
-          }
-          pausado={director.traspaso !== null}
-          // Solo al montar: el primer turno intacto de una partida recién creada.
-          anunciarAlMontar={
-            vista.turno.numero === 1 && vista.turno.pa === 3 && vista.ganador === null
-          }
-        />
-        <Victoria onRevancha={onRevancha} onInicio={onSalir} textoRevancha={textoRevancha} />
-        <DetalleCarta detalle={detalle} onCerrar={() => setDetalle(null)} />
-
-        <Modal
-          abierto={historialMovil}
-          titulo={t('mesa.log')}
-          onCerrar={() => setHistorialMovil(false)}
-        >
-          <div className="h-[60vh]">
-            <Historial />
-          </div>
-        </Modal>
-
-        <Modal
-          abierto={menu}
-          titulo={t('mesa.menu.titulo')}
-          onCerrar={() => setMenu(false)}
-          ancho="sm"
-        >
-          <div className="flex flex-col gap-2">
-            {local !== null && (
-              <Boton onClick={() => descargar(local)}>{t('mesa.menu.exportar')}</Boton>
-            )}
-            <Boton
-              onClick={() => {
-                setMenu(false);
-                setReglas(true);
-              }}
-            >
-              {t('mesa.menu.reglas')}
-            </Boton>
-            <Boton
-              onClick={() => {
-                setMenu(false);
-                onTutorial();
-              }}
-            >
-              {t('mesa.menu.tutorial')}
-            </Boton>
-            <div className="py-1">
-              <Ajustes />
+              <Centro />
+              {esperando !== null &&
+                cima?.tipo !== 'ventanaDesafio' &&
+                cima?.tipo !== 'ventanaModificadores' && (
+                  <p
+                    role="status"
+                    className="text-center text-sm text-stone-600 dark:text-stone-400"
+                  >
+                    {esperando}
+                  </p>
+                )}
+              {propio !== undefined && <ZonaJugador jugador={propio} propia />}
+              <AccionesTurno />
+              <Mano />
+            </main>
+            <div className="hidden w-80 shrink-0 border-l border-stone-200 p-3 lg:flex lg:flex-col dark:border-stone-800">
+              {ampliada !== null && (
+                <div className="mb-3 flex justify-center">
+                  <Carta cartaId={ampliada} tamano="lg" />
+                </div>
+              )}
+              <Historial />
             </div>
-            {vista.ganador === null && !meRendi && (
+          </div>
+
+          <VentanaRespuesta />
+          <DialogoDecision />
+          <Dados />
+          <Vuelos />
+          <Traspaso />
+          <RotuloTurno
+            numero={vista.turno.numero}
+            jugador={vista.turno.jugador}
+            titulo={
+              vista.turno.jugador === yo && modo !== 'local'
+                ? t('mesa.tuTurno')
+                : t('mesa.turnoDe', { nombre: valor.nombreJugador(vista.turno.jugador) })
+            }
+            pausado={director.traspaso !== null || hayCelebracion}
+            // Solo al montar: el primer turno intacto de una partida recién creada.
+            anunciarAlMontar={
+              vista.turno.numero === 1 && vista.turno.pa === 3 && vista.ganador === null
+            }
+          />
+          <Victoria onRevancha={onRevancha} onInicio={onSalir} textoRevancha={textoRevancha} />
+          <DetalleCarta detalle={detalle} onCerrar={() => setDetalle(null)} />
+
+          <Modal
+            abierto={historialMovil}
+            titulo={t('mesa.log')}
+            onCerrar={() => setHistorialMovil(false)}
+          >
+            <div className="h-[60vh]">
+              <Historial />
+            </div>
+          </Modal>
+
+          <Modal
+            abierto={menu}
+            titulo={t('mesa.menu.titulo')}
+            onCerrar={() => setMenu(false)}
+            ancho="sm"
+          >
+            <div className="flex flex-col gap-2">
+              {local !== null && (
+                <Boton onClick={() => descargar(local)}>{t('mesa.menu.exportar')}</Boton>
+              )}
+              <Boton
+                onClick={() => {
+                  setMenu(false);
+                  setReglas(true);
+                }}
+              >
+                {t('mesa.menu.reglas')}
+              </Boton>
+              <Boton
+                onClick={() => {
+                  setMenu(false);
+                  onTutorial();
+                }}
+              >
+                {t('mesa.menu.tutorial')}
+              </Boton>
+              <div className="py-1">
+                <Ajustes />
+              </div>
+              {vista.ganador === null && !meRendi && (
+                <Boton
+                  variante="peligro"
+                  onClick={() => {
+                    setMenu(false);
+                    setRendicion('confirmar');
+                  }}
+                >
+                  {t('mesa.menu.rendirse')}
+                </Boton>
+              )}
               <Boton
                 variante="peligro"
                 onClick={() => {
-                  setMenu(false);
-                  setRendicion('confirmar');
+                  if (window.confirm(t('mesa.menu.salirConfirmar'))) onSalir();
                 }}
               >
-                {t('mesa.menu.rendirse')}
+                {t('mesa.menu.salir')}
               </Boton>
-            )}
-            <Boton
-              variante="peligro"
-              onClick={() => {
-                if (window.confirm(t('mesa.menu.salirConfirmar'))) onSalir();
-              }}
-            >
-              {t('mesa.menu.salir')}
-            </Boton>
-          </div>
-        </Modal>
+            </div>
+          </Modal>
 
-        <Modal
-          abierto={rendicion === 'confirmar'}
-          titulo={t('mesa.rendirse.titulo')}
-          onCerrar={() => setRendicion(null)}
-          ancho="sm"
-        >
-          <p className="text-stone-700 dark:text-stone-300">{t('mesa.rendirse.texto')}</p>
-          <div className="mt-5 flex flex-wrap justify-end gap-2">
-            <Boton onClick={() => setRendicion(null)}>{t('mesa.rendirse.cancelar')}</Boton>
-            <Boton variante="peligro" onClick={rendirse}>
-              {t('mesa.rendirse.confirmar')}
-            </Boton>
-          </div>
-        </Modal>
+          <Modal
+            abierto={rendicion === 'confirmar'}
+            titulo={t('mesa.rendirse.titulo')}
+            onCerrar={() => setRendicion(null)}
+            ancho="sm"
+          >
+            <p className="text-stone-700 dark:text-stone-300">{t('mesa.rendirse.texto')}</p>
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <Boton onClick={() => setRendicion(null)}>{t('mesa.rendirse.cancelar')}</Boton>
+              <Boton variante="peligro" onClick={rendirse}>
+                {t('mesa.rendirse.confirmar')}
+              </Boton>
+            </div>
+          </Modal>
 
-        <Modal
-          abierto={rendicion === 'hecha' && vista.ganador === null}
-          titulo={
-            modo === 'local'
-              ? t('mesa.rendirse.hechoLocal', { nombre: rendido })
-              : t('mesa.rendirse.hecho')
-          }
-          ancho="sm"
-        >
-          <p className="text-stone-700 dark:text-stone-300">
-            {modo === 'local' ? t('mesa.rendirse.hechoTextoLocal') : t('mesa.rendirse.hechoTexto')}
-          </p>
-          <div className="mt-5 flex flex-col gap-2">
-            <Boton variante="primario" onClick={() => setRendicion(null)}>
-              {t('mesa.rendirse.ver')}
-            </Boton>
-            <Boton onClick={onSalir}>
-              {modo === 'enLinea'
-                ? t('mesa.rendirse.salirSala')
-                : modo === 'local'
-                  ? t('mesa.rendirse.salirLocal')
-                  : t('mesa.rendirse.salir')}
-            </Boton>
-          </div>
-        </Modal>
+          <Modal
+            abierto={rendicion === 'hecha' && vista.ganador === null}
+            titulo={
+              modo === 'local'
+                ? t('mesa.rendirse.hechoLocal', { nombre: rendido })
+                : t('mesa.rendirse.hecho')
+            }
+            ancho="sm"
+          >
+            <p className="text-stone-700 dark:text-stone-300">
+              {modo === 'local'
+                ? t('mesa.rendirse.hechoTextoLocal')
+                : t('mesa.rendirse.hechoTexto')}
+            </p>
+            <div className="mt-5 flex flex-col gap-2">
+              <Boton variante="primario" onClick={() => setRendicion(null)}>
+                {t('mesa.rendirse.ver')}
+              </Boton>
+              <Boton onClick={onSalir}>
+                {modo === 'enLinea'
+                  ? t('mesa.rendirse.salirSala')
+                  : modo === 'local'
+                    ? t('mesa.rendirse.salirLocal')
+                    : t('mesa.rendirse.salir')}
+              </Boton>
+            </div>
+          </Modal>
 
-        <Modal
-          abierto={reglas}
-          titulo={t('reglas.titulo')}
-          onCerrar={() => setReglas(false)}
-          ancho="lg"
-        >
-          <ContenidoReglas />
-          <div className="mt-4 text-right">
-            <Boton onClick={() => setReglas(false)}>{t('comun.cerrar')}</Boton>
-          </div>
-        </Modal>
+          <Modal
+            abierto={reglas}
+            titulo={t('reglas.titulo')}
+            onCerrar={() => setReglas(false)}
+            ancho="lg"
+          >
+            <ContenidoReglas />
+            <div className="mt-4 text-right">
+              <Boton onClick={() => setReglas(false)}>{t('comun.cerrar')}</Boton>
+            </div>
+          </Modal>
+        </div>
+        <Anunciador />
+        {celebracion !== null && (
+          <CelebracionMonstruo
+            key={celebracion.id}
+            cartaId={celebracion.carta}
+            nombreJugador={valor.nombreJugador(celebracion.jugador)}
+            nombreMonstruo={valor.nombreCarta(celebracion.carta)}
+            duracionMs={celebracion.duracionMs}
+            restanteMs={restanteCelebracion ?? 0}
+          />
+        )}
       </div>
     </MesaContexto.Provider>
   );

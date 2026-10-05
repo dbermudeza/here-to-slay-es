@@ -7,7 +7,8 @@
  * 3. ventanaRespuesta desafío / Modificadores (interactiva)
  * 4. rotulo           rótulo de inicio de turno
  * 5. modal            ficha de carta, decisiones, traspaso, victoria y demás diálogos
- * 6. aviso            aviso crítico (reconexión)
+ * 6. celebracion      Monstruo derrotado (bloquea la mesa unos segundos)
+ * 7. aviso            aviso crítico (reconexión)
  */
 export const CAPA = {
   vuelos: 'z-10',
@@ -15,5 +16,6 @@ export const CAPA = {
   ventanaRespuesta: 'z-30',
   rotulo: 'z-40',
   modal: 'z-50',
+  celebracion: 'z-[55]',
   aviso: 'z-[60]',
 } as const;

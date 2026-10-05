@@ -41,6 +41,7 @@ export default defineConfig({
       PUERTO: String(PUERTO),
       DIR_WEB: 'apps/web/dist-e2e',
       RETARDO_BOT_MS: '40',
+      CELEBRACION_MS: '300',
     },
   },
 });

@@ -5,6 +5,7 @@
 import {
   MENSAJES,
   type Ack,
+  type Celebracion,
   type EstadoConexion,
   type EstadoPartida,
   type EstadoSala,
@@ -45,6 +46,15 @@ export class ClienteEnLinea implements FuenteMesa {
   private readonly escuchas = new Set<() => void>();
   /** Instante (Date.now) en que llegó el último estado de partida (para las cuentas regresivas). */
   private recibido = 0;
+  private celebracionActual: {
+    id: number;
+    jugador: JugadorId;
+    carta: string;
+    duracionMs: number;
+    fin: number;
+  } | null = null;
+  /** Avisa a la mesa cuando vence la celebración (el servidor no manda un estado solo por eso). */
+  private temporizadorCelebracion: ReturnType<typeof setTimeout> | null = null;
 
   constructor(url?: string, sesion: Sesion | null = leerSesion()) {
     this.sesion = sesion;
@@ -81,6 +91,18 @@ export class ClienteEnLinea implements FuenteMesa {
     this.socket.on(MENSAJES.estadoPartida, (p: EstadoPartida) => {
       this.partida = p;
       this.recibido = Date.now();
+      const c = p.celebracion;
+      this.celebracionActual =
+        c === null
+          ? null
+          : {
+              id: c.id,
+              jugador: c.jugador,
+              carta: c.carta,
+              duracionMs: c.duracionMs,
+              fin: this.recibido + c.restanteMs,
+            };
+      this.programarFinCelebracion();
       if (p.reinicio) this.eventos = [...p.eventos];
       else this.eventos.push(...p.eventos);
       this.notificar();
@@ -203,12 +225,15 @@ export class ClienteEnLinea implements FuenteMesa {
     this.sesion = null;
     this.sala = null;
     this.partida = null;
+    this.celebracionActual = null;
+    this.cancelarFinCelebracion();
     this.eventos = [];
     guardarSesion(null);
   }
 
   /** Cierra la conexión (al salir de las pantallas en línea). */
   cerrar(): void {
+    this.cancelarFinCelebracion();
     this.socket.disconnect();
     this.escuchas.clear();
   }
@@ -240,6 +265,30 @@ export class ClienteEnLinea implements FuenteMesa {
   get plazoDecision(): PlazoDecision | null {
     const d = this.partida?.decision ?? null;
     return d === null ? null : { jugador: d.jugador, fin: this.recibido + d.restanteMs };
+  }
+
+  get celebracion(): Celebracion | null {
+    const c = this.celebracionActual;
+    if (c === null || Date.now() >= c.fin) return null;
+    return { id: c.id, jugador: c.jugador, carta: c.carta, duracionMs: c.duracionMs };
+  }
+
+  private programarFinCelebracion(): void {
+    this.cancelarFinCelebracion();
+    const c = this.celebracionActual;
+    if (c === null) return;
+    this.temporizadorCelebracion = setTimeout(
+      () => {
+        this.temporizadorCelebracion = null;
+        this.notificar();
+      },
+      Math.max(0, c.fin - Date.now()) + 20,
+    );
+  }
+
+  private cancelarFinCelebracion(): void {
+    if (this.temporizadorCelebracion !== null) clearTimeout(this.temporizadorCelebracion);
+    this.temporizadorCelebracion = null;
   }
 
   vista(): VistaJugador {
@@ -290,7 +339,16 @@ export class ClienteEnLinea implements FuenteMesa {
 
   restanteDecisionMs(): number | null {
     const d = this.plazoDecision;
-    return d === null ? null : Math.max(0, d.fin - Date.now());
+    if (d === null) return null;
+    // Durante la celebración el servidor tiene la cuenta congelada: aquí tampoco avanza.
+    const congelado = this.partida?.decision?.restanteMs;
+    if (this.restanteCelebracionMs() !== null && congelado !== undefined) return congelado;
+    return Math.max(0, d.fin - Date.now());
+  }
+
+  restanteCelebracionMs(): number | null {
+    const c = this.celebracionActual;
+    return c === null ? null : Math.max(0, c.fin - Date.now());
   }
 
   respondedoresPosibles(): JugadorId[] {
