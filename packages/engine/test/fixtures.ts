@@ -254,6 +254,7 @@ export function escenario(
     jugador: turnoDe,
     numero: s.turno.numero,
     pa: 3,
+    paInicial: 3,
     heroesUsados: [],
     habilidadesUsadas: [],
   };

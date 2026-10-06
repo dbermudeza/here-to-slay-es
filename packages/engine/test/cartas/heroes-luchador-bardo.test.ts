@@ -88,7 +88,7 @@ describeReal('Héroes Luchadores', () => {
     expect(idsDe(r.state, jugadorDe(r.state, A).mano)).toEqual(['desafio', 'desafio']);
   });
 
-  it('heroe_heavy_bear: el jugador elegido DESCARTA 2 cartas', () => {
+  it('heroe_heavy_bear: el jugador elegido (otro, D-44) DESCARTA 2 cartas', () => {
     const s = mesa();
     const cartasB = mano(s, B, 'desafio', 'modificador_mas4', 'heroe_peanut');
     let r = activar(s, 'heroe_heavy_bear');

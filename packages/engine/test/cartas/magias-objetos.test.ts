@@ -87,6 +87,17 @@ describeReal('Magias', () => {
     expect(jugadorDe(r.state, B).grupo.map((g) => g.heroe)).toEqual([propio]);
   });
 
+  it('magia_intercambio_forzado: puedes devolver el mismo Héroe que acabas de ARREBATAR (D-45)', () => {
+    const s = mesa();
+    const propio = heroe(s, A, 'heroe_mellow_dee');
+    const x = heroe(s, B, 'heroe_peanut');
+    let r = jugarMagia(s, 'magia_intercambio_forzado');
+    r = responder(r, A, { cartas: [x] });
+    expect(r.state.pila).toEqual([]);
+    expect(jugadorDe(r.state, A).grupo.map((g) => g.heroe)).toEqual([propio]);
+    expect(jugadorDe(r.state, B).grupo.map((g) => g.heroe)).toEqual([x]);
+  });
+
   it('magia_vientos_huracanados: todos los Objetos equipados vuelven a la mano de su jugador', () => {
     const s = mesa();
     heroe(s, A, 'heroe_peanut', 'objeto_anillo_realmente_grande');

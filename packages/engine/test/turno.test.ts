@@ -49,6 +49,7 @@ describe('Turno y puntos de acción', () => {
       jugador: B,
       numero: s.turno.numero + 1,
       pa: 3,
+      paInicial: 3,
       heroesUsados: [],
       habilidadesUsadas: [],
     });

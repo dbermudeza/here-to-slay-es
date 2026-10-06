@@ -88,6 +88,9 @@
     "turnoNumero": "Turno {n}",
     "pa": "PA",
     "paRestantes": "{n} puntos de acción",
+    "paRestantesExtra": "{n} de {total} puntos de acción ({extra})",
+    "paExtraDe": "{n} extra por {carta}",
+    "paExtraGenerico": "{n} extra",
     "mazo": "Mazo",
     "descarte": "Descarte",
     "mazoMonstruos": "Monstruos en el mazo: {n}",
@@ -353,7 +356,7 @@
         ]
       },
       {
-        "titulo": "Tu turno: 3 puntos de acción (PA)",
+        "titulo": "Tu turno: 3 puntos de acción (PA; 4 si tienes la Megababosa)",
         "parrafos": [
           "Al empezar tu turno robas una carta gratis.",
           "1 PA: robar una carta; jugar un Héroe, Objeto o Magia; o tirar para usar el efecto de un Héroe de tu Grupo (una vez por Héroe y turno).",
@@ -397,7 +400,7 @@
       },
       {
         "titulo": "Puntos de acción",
-        "texto": "En tu turno tienes 3 PA. El contador está en la barra superior. Los botones muestran cuánto cuesta cada acción; si una acción no se puede hacer, pasa el ratón por encima para ver por qué."
+        "texto": "En tu turno tienes 3 PA (4 si tienes la Megababosa; el punto extra se ve resaltado). El contador está en la barra superior. Los botones muestran cuánto cuesta cada acción; si una acción no se puede hacer, pasa el ratón por encima para ver por qué."
       },
       {
         "titulo": "Tu mano",

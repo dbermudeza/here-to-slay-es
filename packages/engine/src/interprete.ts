@@ -117,6 +117,8 @@ function elegirCartas(
   min: number,
   max: number,
   alElegir: (uids: Uid[]) => void,
+  /** Pregunta aunque la elección sea forzosa: el jugador debe ver las cartas (mirar una mano). */
+  siempreMostrar = false,
 ): ResultadoPaso {
   const { f } = e;
   if (f.sub === 1) {
@@ -129,7 +131,7 @@ function elegirCartas(
     alElegir([]);
     return 'siguiente';
   }
-  if (mn === mx && mx === opciones.length) {
+  if (!siempreMostrar && mn === mx && mx === opciones.length) {
     alElegir([...opciones]);
     return 'siguiente';
   }
@@ -552,12 +554,28 @@ function ejecutarPaso(e: EntornoPaso, p: Paso): ResultadoPaso {
       const de = jugadorVar(d, f, p.de);
       if (de === null) return 'siguiente';
       if (f.sub === 0) emitir({ tipo: 'manoVista', jugador: yo.id, de: de.id });
-      return elegirCartas(e, yo.id, 'tomarDeMano', [...de.mano], 1, 1, (uids) => {
-        for (const u of uids) {
-          moverDeMano(de, yo, u);
-          emitir({ tipo: 'cartaSacada', jugador: yo.id, de: de.id, uid: u, carta: idCarta(d, u) });
-        }
-      });
+      // "Mirar" la mano es parte del efecto: se pregunta aunque solo tenga una carta (D-40 no aplica).
+      return elegirCartas(
+        e,
+        yo.id,
+        'tomarDeMano',
+        [...de.mano],
+        1,
+        1,
+        (uids) => {
+          for (const u of uids) {
+            moverDeMano(de, yo, u);
+            emitir({
+              tipo: 'cartaSacada',
+              jugador: yo.id,
+              de: de.id,
+              uid: u,
+              carta: idCarta(d, u),
+            });
+          }
+        },
+        true,
+      );
     }
 
     case 'jugadorDebe':

@@ -169,6 +169,15 @@ describeReal('Héroes Magos', () => {
     expect(evento(r, 'heroeSacrificado')).toHaveLength(1);
   });
 
+  it('heroe_hopper: «elige a un jugador» solo ofrece a los otros jugadores (D-44)', () => {
+    const s = mesa();
+    heroe(s, A, 'heroe_peanut');
+    heroe(s, B, 'heroe_mellow_dee');
+    heroe(s, C, 'heroe_wily_red');
+    const r = activar(s, 'heroe_hopper');
+    expect(decision(r.state).pregunta).toEqual({ tipo: 'jugador', opciones: [B, C] });
+  });
+
   it('heroe_snowball: ROBA; si es Magia puede jugarla y entonces ROBA otra', () => {
     const s = mesa();
     const [magia, peanut] = arriba(s, 'magia_hechizo_encantado', 'heroe_peanut');

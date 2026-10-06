@@ -51,6 +51,8 @@ estado. En el código, cada punto provisional aparece como `// TODO(regla) D-xx`
 | D-41 | Hook: jugar el Objeto es obligatorio                   | ✅     |
 | D-42 | Robo gratis al empezar el turno                        | ✅     |
 | D-43 | Rendirse (opción de la versión digital)                | ✅     |
+| D-44 | «Elige a un jugador»: solo otros jugadores             | ✅     |
+| D-45 | Intercambio Forzado: qué Héroe se entrega              | ✅     |
 
 ---
 
@@ -338,11 +340,17 @@ objetivo, un único rival válido, tener que descartar todas las cartas…), el 
 preguntar. Si es opcional ("puedes…"), siempre se pregunta.
 **✅ Resuelta (usuario, 2026-10-04):** confirmado.
 
+**Excepción (usuario, 2026-10-05):** cuando el efecto consiste en **mirar** cartas ocultas, mirarlas es
+parte del efecto y se pregunta siempre. _Silent Shadow_ («mira la mano de otro jugador, elige una
+carta…») muestra la mano y deja elegir aunque solo tenga una carta (como ya hacían _Sharp Fox_ y
+_Bullseye_). D-40 se mantiene para las elecciones sobre información pública (Grupo, descarte…).
+
 ### D-41 · Hook: jugar el Objeto es obligatorio
 
 "Juega inmediatamente un Objeto de tu mano y ROBA una carta." **Provisional:** como en _Fuzzy
 Cheeks_ (D-30), jugar el Objeto es opcional y robas siempre.
-**✅ Resuelta (usuario, 2026-10-04):** un efecto solo es opcional si la carta dice "puedes". Hook no lo dice: si tienes un Objeto y hay un Héroe sin Objeto, **debes** jugarlo (y después robas). Fuzzy Cheeks se mantiene opcional por D-30.
+**✅ Resuelta (usuario, 2026-10-04):** un efecto solo es opcional si la carta dice "puedes". Hook no lo dice: si tienes un Objeto y hay un Héroe sin Objeto, **debes** jugarlo (y después robas). Es la misma regla que _Fuzzy Cheeks_ (D-30): jugar el Héroe también es
+obligatorio.
 
 ### D-42 · Robo gratis al empezar el turno
 
@@ -371,3 +379,18 @@ El reglamento no contempla rendirse; es una opción añadida en la versión digi
   Beto).
 - **Si se rinde el último humano** (por ejemplo, tú contra bots), la partida sigue entre los bots hasta
   que uno cumpla una condición de victoria; quien se rindió puede quedarse a verla.
+
+### D-44 · «Elige a un jugador»: solo otros jugadores
+
+_Heavy Bear_ (el jugador elegido DESCARTA 2 cartas) y _Hopper_ (el jugador elegido SACRIFICA un
+Héroe) dicen «Choose a player», no «another player». **Provisional:** solo se puede elegir a otro jugador.
+**✅ Resuelta (usuario, 2026-10-05):** «Choose a player» significa **solo otros jugadores**; no puedes
+elegirte a ti mismo.
+
+### D-45 · Intercambio Forzado: qué Héroe se entrega
+
+Se ARREBATA un Héroe de otro jugador y después se mueve un Héroe del propio Grupo al suyo. La carta
+no dice si el Héroe que entregas puede ser el que acabas de ARREBATAR.
+**✅ Resuelta (usuario, 2026-10-05):** lectura literal: puede ser **cualquier** Héroe de tu Grupo,
+incluido el recién arrebatado (que entonces vuelve a su dueño). Si no tienes otro Héroe, el
+recién arrebatado vuelve solo a su dueño.

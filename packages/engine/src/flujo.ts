@@ -353,11 +353,13 @@ export function finTurno(ctx: Ctx, d: GameState, emitir: Emitir): void {
   );
   if (siguiente === undefined) throw new ErrorInterno('Sin jugadores');
   expirarTemporales(d, siguiente.id, 'inicioTurnoPropio', emitir);
+  // D-03 / D-26 / D-36: 3 PA, más los extra de Megababosa (desde el turno siguiente a matarla).
+  const pa = PA_POR_TURNO + paExtra(ctx, d, siguiente);
   d.turno = {
     jugador: siguiente.id,
     numero: d.turno.numero + 1,
-    // D-03 / D-26 / D-36: 3 PA, más los extra de Megababosa (desde el turno siguiente a matarla).
-    pa: PA_POR_TURNO + paExtra(ctx, d, siguiente),
+    pa,
+    paInicial: pa,
     heroesUsados: [],
     habilidadesUsadas: [],
   };

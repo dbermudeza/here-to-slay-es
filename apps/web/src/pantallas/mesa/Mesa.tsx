@@ -1,4 +1,4 @@
-import type { Accion, JugadorId, Uid } from '@hts/engine';
+import { PA_POR_TURNO, type Accion, type JugadorId, type Uid } from '@hts/engine';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCatalogo, useDirector } from '../../estado/contexto';
 import { DirectorVivo } from '../../juego/director-vivo';
@@ -139,6 +139,25 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
     director.actuar({ tipo: 'RENDIRSE' });
     setRendicion('hecha');
   };
+  // PA: durante el turno se pintan siempre los del inicio (con los gastados vacíos); los que
+  // superan la base vienen de una pasiva (p. ej. la Megababosa) y se destacan.
+  const totalPA = Math.max(PA_POR_TURNO, vista.turno.paInicial, vista.turno.pa);
+  const extraPA = totalPA - PA_POR_TURNO;
+  const jugadorTurno = vista.jugadores.find((j) => j.id === vista.turno.jugador);
+  const origenExtra = (jugadorTurno?.monstruos ?? [])
+    .map((uid) => vista.cartas[uid])
+    .find((id) => id === 'monstruo_megababosa');
+  const descripcionPA =
+    extraPA <= 0
+      ? t('mesa.paRestantes', { n: vista.turno.pa })
+      : t('mesa.paRestantesExtra', {
+          n: vista.turno.pa,
+          total: totalPA,
+          extra:
+            origenExtra === undefined
+              ? t('mesa.paExtraGenerico', { n: extraPA })
+              : t('mesa.paExtraDe', { n: extraPA, carta: valor.nombreCarta(origenExtra) }),
+        });
   const propio = vista.jugadores.find((j) => j.id === yo);
   const rivales = vista.jugadores.filter((j) => j.id !== yo);
   const cima = vista.pila[vista.pila.length - 1];
@@ -166,14 +185,27 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
             </span>
             <span
               className="flex items-center gap-1"
-              aria-label={t('mesa.paRestantes', { n: vista.turno.pa })}
+              role="img"
+              data-pa
+              aria-label={descripcionPA}
+              title={descripcionPA}
             >
-              {Array.from({ length: Math.max(3, vista.turno.pa) }, (_, i) => (
-                <span
-                  key={i}
-                  className={`h-3 w-3 rounded-full ${i < vista.turno.pa ? 'bg-amber-500' : 'bg-stone-300 dark:bg-stone-700'}`}
-                />
-              ))}
+              {Array.from({ length: totalPA }, (_, i) => {
+                const lleno = i < vista.turno.pa;
+                const extra = i >= PA_POR_TURNO;
+                const color = lleno
+                  ? extra
+                    ? 'bg-sky-600 dark:bg-sky-400'
+                    : 'bg-amber-500'
+                  : 'bg-stone-300 dark:bg-stone-700';
+                return (
+                  <span
+                    key={i}
+                    data-extra={extra ? '' : undefined}
+                    className={`h-3 w-3 rounded-full ${color} ${extra ? 'ring-2 ring-sky-600 ring-offset-1 dark:ring-sky-400 dark:ring-offset-stone-900' : ''}`}
+                  />
+                );
+              })}
               <span className="ml-1 text-sm">{t('mesa.pa')}</span>
             </span>
             <span className="text-sm text-stone-600 dark:text-stone-400">

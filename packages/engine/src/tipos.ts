@@ -51,6 +51,11 @@ export interface Turno {
   jugador: JugadorId;
   numero: number;
   pa: number;
+  /**
+   * PA con que empezó el turno, contando los extra (Megababosa, D-36). Solo informativo: la
+   * interfaz muestra `paInicial - PA_POR_TURNO` puntos extra aunque ya se hayan gastado.
+   */
+  paInicial: number;
   /** Héroes que ya han tirado para usar su efecto este turno (R-034, D-05). */
   heroesUsados: Uid[];
   /** Habilidades "una vez por turno" ya usadas (cartas con la habilidad). */

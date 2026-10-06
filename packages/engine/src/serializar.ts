@@ -1,5 +1,6 @@
 import { problemaDeConservacion } from './consultas';
 import type { Ctx } from './efectos';
+import { PA_POR_TURNO } from './ops';
 import type { GameState } from './tipos';
 
 export class ErrorCarga extends Error {}
@@ -55,6 +56,11 @@ export function cargarPartida(ctx: Ctx, texto: string): GameState {
   if (e.rendidos === undefined) e.rendidos = [];
   if (!Array.isArray(e.rendidos)) throw new ErrorCarga('Campo inválido: rendidos.');
   if (esObjeto(e.opciones) && e.opciones.bots === undefined) e.opciones.bots = [];
+  // Partidas guardadas antes de `turno.paInicial`: no se sabe si hubo PA extra ya gastados, así que
+  // se toma el mayor entre los PA que quedan y los PA base del turno.
+  if (esObjeto(e.turno) && e.turno.paInicial === undefined && typeof e.turno.pa === 'number') {
+    e.turno.paInicial = Math.max(e.turno.pa, PA_POR_TURNO);
+  }
   const estado = e as unknown as GameState;
   if (!estado.jugadores.some((j) => j.id === estado.turno.jugador)) {
     throw new ErrorCarga('El jugador del turno no existe.');

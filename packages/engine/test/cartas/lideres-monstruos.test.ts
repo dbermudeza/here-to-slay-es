@@ -25,7 +25,7 @@ import {
   todosPasan,
   type R,
 } from './reales';
-import type { GameState } from '../../src';
+import { PA_POR_TURNO, type GameState } from '../../src';
 
 /** A juega un Héroe de su mano y B lo DESAFÍA; devuelve el estado con la ventana de modificadores abierta. */
 function desafioDeBAA(s: GameState, dados: number[]): R {
@@ -270,6 +270,33 @@ describeReal('Monstruos (habilidades al matarlos)', () => {
     r = hacer(motor, r.state, B, { tipo: 'FIN_TURNO' });
     r = hacer(motor, r.state, C, { tipo: 'FIN_TURNO' });
     expect(r.state.turno).toMatchObject({ jugador: A, pa: 4 });
+  });
+
+  it('monstruo_megababosa: turno.paInicial guarda los PA iniciales aunque se gasten (D-36, R-020)', () => {
+    const s = mesa();
+    monstruo(s, A, 'monstruo_megababosa');
+    let r = hacer(motor, s, A, { tipo: 'FIN_TURNO' });
+    // Sin la Megababosa: 3.
+    expect(r.state.turno).toMatchObject({ jugador: B, pa: PA_POR_TURNO, paInicial: 3 });
+    r = hacer(motor, r.state, B, { tipo: 'FIN_TURNO' });
+    r = hacer(motor, r.state, C, { tipo: 'FIN_TURNO' });
+    expect(r.state.turno).toMatchObject({ jugador: A, pa: 4, paInicial: 4 });
+    expect(motor.getPlayerView(r.state, B).turno).toMatchObject({ pa: 4, paInicial: 4 });
+    r = hacer(motor, r.state, A, { tipo: 'ROBAR' });
+    expect(r.state.turno).toMatchObject({ jugador: A, pa: 3, paInicial: 4 });
+  });
+
+  it('cargar una partida guardada sin turno.paInicial: paInicial = max(pa, PA_POR_TURNO)', () => {
+    const s = mesa();
+    monstruo(s, A, 'monstruo_megababosa');
+    for (const pa of [4, 2]) {
+      const guardada = JSON.parse(motor.serializar({ ...s, turno: { ...s.turno, pa } })) as {
+        estado: { turno: Record<string, unknown> };
+      };
+      delete guardada.estado.turno.paInicial;
+      const cargada = motor.cargar(JSON.stringify(guardada));
+      expect(cargada.turno).toMatchObject({ pa, paInicial: Math.max(pa, PA_POR_TURNO) });
+    }
   });
 
   it('monstruo_megababosa: matarla no da el PA extra hasta el turno siguiente (D-36)', () => {
