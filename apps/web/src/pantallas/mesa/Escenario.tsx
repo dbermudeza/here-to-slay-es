@@ -162,17 +162,29 @@ export function Escenario({ onActivo }: { onActivo: (activo: boolean) => void })
     (cima.tipo === 'decision' || cima.tipo === 'tiradaInmediata' || cima.tipo === 'elegir') &&
     cima.jugador === m.yo;
   const tapado = director.traspaso !== null || director.celebracion !== null;
-  const actual = ventana || hayPregunta || tapado ? undefined : cola[0];
+  // Pausa tras un resultado: el anfitrión mantiene la ventana o la pregunta siguiente ya abiertas,
+  // pero nadie puede actuar. Durante la pausa se sigue enseñando el resultado (ni se descarta ni se
+  // tapa con la escena nueva); al terminar, sigue el flujo normal. La celebración manda sobre ella.
+  const hayPausa = director.pausaResultado !== null;
+  const otraCosa = (ventana || hayPregunta) && !hayPausa;
+  const actual = otraCosa || tapado ? undefined : cola[0];
   useEffect(() => {
-    if (ventana || hayPregunta || tapado) setCola((c) => (c.length > 0 ? [] : c));
-  }, [ventana, hayPregunta, tapado]);
+    if (otraCosa || tapado) setCola((c) => (c.length > 0 ? [] : c));
+  }, [otraCosa, tapado]);
   const actualId = actual?.id;
   const duracion = actual === undefined ? 0 : duracionFinal(actual, reducir);
+  // El resultado dura lo suyo, pero no se retira antes de que acabe la pausa (si dura menos, se
+  // queda hasta el final de la pausa; así nunca queda un hueco vacío con la mesa bloqueada).
+  const [vencido, setVencido] = useState<number | null>(null);
   useEffect(() => {
     if (actualId === undefined) return undefined;
-    const t = window.setTimeout(() => setCola((c) => c.filter((f) => f.id !== actualId)), duracion);
+    const t = window.setTimeout(() => setVencido(actualId), duracion);
     return () => window.clearTimeout(t);
   }, [actualId, duracion]);
+  useEffect(() => {
+    if (actualId === undefined || vencido !== actualId || hayPausa) return;
+    setCola((c) => c.filter((f) => f.id !== actualId));
+  }, [actualId, vencido, hayPausa]);
 
   // D-11: la carta de Desafío va al descarte al jugarse y es pública: la más reciente de ese tipo.
   let cartaDesafio: string | null = null;
@@ -186,7 +198,10 @@ export function Escenario({ onActivo }: { onActivo: (activo: boolean) => void })
 
   let escena: ReactNode = null;
   let clave = '';
-  if (cima?.tipo === 'ventanaDesafio') {
+  if (hayPausa && actual !== undefined) {
+    clave = `final-${actual.id}`;
+    escena = <EscenaFinal final={actual} reducir={reducir} />;
+  } else if (cima?.tipo === 'ventanaDesafio') {
     clave = 'intento';
     escena = <Intento cima={cima} />;
   } else if (cima?.tipo === 'ventanaModificadores') {

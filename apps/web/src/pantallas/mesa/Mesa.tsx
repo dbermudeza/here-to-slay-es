@@ -276,7 +276,9 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
                 ? t('mesa.tuTurno')
                 : t('mesa.turnoDe', { nombre: valor.nombreJugador(vista.turno.jugador) })
             }
-            pausado={director.traspaso !== null || hayCelebracion}
+            pausado={
+              director.traspaso !== null || hayCelebracion || director.pausaResultado !== null
+            }
             compacto={escenarioActivo}
             // Solo al montar: el primer turno intacto de una partida recién creada.
             anunciarAlMontar={
@@ -356,7 +358,11 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
             <p className="text-stone-700 dark:text-stone-300">{t('mesa.rendirse.texto')}</p>
             <div className="mt-5 flex flex-wrap justify-end gap-2">
               <Boton onClick={() => setRendicion(null)}>{t('mesa.rendirse.cancelar')}</Boton>
-              <Boton variante="peligro" onClick={rendirse}>
+              <Boton
+                variante="peligro"
+                disabled={director.pausaResultado !== null}
+                onClick={rendirse}
+              >
                 {t('mesa.rendirse.confirmar')}
               </Boton>
             </div>

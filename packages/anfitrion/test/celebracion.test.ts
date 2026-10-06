@@ -36,6 +36,7 @@ function preparado(c: ConfigAnfitrion, opciones: OpcionesAnfitrion = {}) {
   if (monstruo === undefined) throw new Error('Falta el Monstruo h');
   const a = new Anfitrion(motor, c, forzarDados(s, 4, 4), reloj, {
     retardoBotMs: 100,
+    pausaResultadoMs: 0,
     ...opciones,
   });
   return { a, reloj, monstruo };

@@ -61,6 +61,8 @@ function sugerencia({ director: d, motor }: MesaRegistrada): Paso {
   const vista = d.vista();
   // Monstruo derrotado: nadie puede jugar hasta que acabe la celebración.
   if (d.celebracion !== null) return { tipo: 'esperar' };
+  // Se está enseñando un resultado: nadie actúa hasta que acabe la pausa.
+  if (d.pausaResultado !== null) return { tipo: 'esperar' };
   if (vista.ganador !== null) return { tipo: 'fin', ganador: vista.ganador.jugador };
   if (d.traspaso !== null) return { tipo: 'traspaso', jugador: d.traspaso };
 

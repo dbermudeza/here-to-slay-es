@@ -269,3 +269,63 @@ describe('Escenario central: resultados caducados', () => {
     expect(container.querySelector('[data-escenario="final"]')).toBeNull();
   });
 });
+
+describe('Escenario central: pausa tras un resultado', () => {
+  /** Envuelve el director para controlar `pausaResultado` desde el test. */
+  function conPausa(base: ReturnType<typeof directorEn>['director']) {
+    let pausa: { id: number; duracionMs: number } | null = null;
+    let extra = 0;
+    const escuchas = new Set<() => void>();
+    const fuente = new Proxy(base, {
+      get(t, p) {
+        if (p === 'pausaResultado') return pausa;
+        if (p === 'restantePausaResultadoMs') return () => (pausa === null ? null : 1000);
+        if (p === 'version') return t.version + extra;
+        if (p === 'suscribir') {
+          return (fn: () => void) => {
+            escuchas.add(fn);
+            const baja = t.suscribir(fn);
+            return () => {
+              escuchas.delete(fn);
+              baja();
+            };
+          };
+        }
+        const v: unknown = Reflect.get(t, p, t);
+        return typeof v === 'function' ? (v as () => unknown).bind(t) : v;
+      },
+    });
+    const poner = (p: { id: number; duracionMs: number } | null) => {
+      pausa = p;
+      extra += 1;
+      for (const fn of escuchas) fn();
+    };
+    return { fuente, poner };
+  }
+
+  /** J1 juega un Héroe, la ventana de desafío vence y queda su tirada inmediata (pregunta para J1). */
+  function conPreguntaTrasResultado() {
+    let heroe = '';
+    const { director, reloj } = directorEn(tres(), (s) => {
+      heroe = darCarta(s, 'j1', 'heroe_mago');
+    });
+    const ctx = conPausa(director);
+    ctx.poner({ id: 1, duracionMs: 4300 });
+    montar(ctx.fuente);
+    act(() => {
+      director.enviar('j1', { tipo: 'JUGAR_CARTA', uid: heroe });
+    });
+    act(() => reloj.avanzar(10_000));
+    return { ...ctx, director };
+  }
+
+  it('con pausa se ve el resultado y no la pregunta; al terminar, la pregunta', () => {
+    const { director, poner } = conPreguntaTrasResultado();
+    expect(director.estado.pila[director.estado.pila.length - 1]?.tipo).toBe('tiradaInmediata');
+    expect(screen.getByRole('heading', { name: 'Jugada' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Tirar los dados' })).not.toBeInTheDocument();
+    act(() => poner(null));
+    expect(screen.getByRole('button', { name: 'Tirar los dados' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Jugada' })).not.toBeInTheDocument();
+  });
+});

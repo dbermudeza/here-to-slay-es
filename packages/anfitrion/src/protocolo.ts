@@ -200,6 +200,11 @@ export interface EstadoPartida {
     duracionMs: number;
     restanteMs: number;
   } | null;
+  /**
+   * Pausa tras un resultado (nadie puede jugar mientras dure), o null. El `id` se conserva si la
+   * pausa se alarga por otro resultado; `duracionMs` es la configurada en el anfitrión.
+   */
+  pausaResultado: { id: number; duracionMs: number; restanteMs: number } | null;
   conexiones: Record<JugadorId, EstadoConexion>;
 }
 

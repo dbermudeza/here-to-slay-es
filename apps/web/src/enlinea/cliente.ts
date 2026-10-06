@@ -18,7 +18,7 @@ import {
 } from '@hts/anfitrion';
 import type { Accion, CodigoError, Evento, JugadorId, VistaJugador } from '@hts/engine';
 import { io, type Socket } from 'socket.io-client';
-import type { FuenteMesa } from '../juego/fuente';
+import type { FuenteMesa, PausaResultado } from '../juego/fuente';
 import { guardarSesion, leerSesion } from './sesion';
 
 export { leerSesion } from './sesion';
@@ -55,6 +55,9 @@ export class ClienteEnLinea implements FuenteMesa {
   } | null = null;
   /** Avisa a la mesa cuando vence la celebración (el servidor no manda un estado solo por eso). */
   private temporizadorCelebracion: ReturnType<typeof setTimeout> | null = null;
+  private pausaActual: { id: number; duracionMs: number; fin: number } | null = null;
+  /** Avisa a la mesa cuando vence la pausa tras un resultado. */
+  private temporizadorPausa: ReturnType<typeof setTimeout> | null = null;
 
   constructor(url?: string, sesion: Sesion | null = leerSesion()) {
     this.sesion = sesion;
@@ -103,6 +106,12 @@ export class ClienteEnLinea implements FuenteMesa {
               fin: this.recibido + c.restanteMs,
             };
       this.programarFinCelebracion();
+      const pr = p.pausaResultado ?? null; // un servidor antiguo no lo manda
+      this.pausaActual =
+        pr === null
+          ? null
+          : { id: pr.id, duracionMs: pr.duracionMs, fin: this.recibido + pr.restanteMs };
+      this.programarFinPausa();
       if (p.reinicio) this.eventos = [...p.eventos];
       else this.eventos.push(...p.eventos);
       this.notificar();
@@ -227,6 +236,8 @@ export class ClienteEnLinea implements FuenteMesa {
     this.partida = null;
     this.celebracionActual = null;
     this.cancelarFinCelebracion();
+    this.pausaActual = null;
+    this.cancelarFinPausa();
     this.eventos = [];
     guardarSesion(null);
   }
@@ -234,6 +245,7 @@ export class ClienteEnLinea implements FuenteMesa {
   /** Cierra la conexión (al salir de las pantallas en línea). */
   cerrar(): void {
     this.cancelarFinCelebracion();
+    this.cancelarFinPausa();
     this.socket.disconnect();
     this.escuchas.clear();
   }
@@ -284,6 +296,36 @@ export class ClienteEnLinea implements FuenteMesa {
       },
       Math.max(0, c.fin - Date.now()) + 20,
     );
+  }
+
+  get pausaResultado(): PausaResultado | null {
+    const p = this.pausaActual;
+    if (p === null || Date.now() >= p.fin) return null;
+    return { id: p.id, duracionMs: p.duracionMs };
+  }
+
+  restantePausaResultadoMs(): number | null {
+    const p = this.pausaActual;
+    if (p === null || Date.now() >= p.fin) return null;
+    return Math.max(0, p.fin - Date.now());
+  }
+
+  private programarFinPausa(): void {
+    this.cancelarFinPausa();
+    const p = this.pausaActual;
+    if (p === null) return;
+    this.temporizadorPausa = setTimeout(
+      () => {
+        this.temporizadorPausa = null;
+        this.notificar();
+      },
+      Math.max(0, p.fin - Date.now()) + 20,
+    );
+  }
+
+  private cancelarFinPausa(): void {
+    if (this.temporizadorPausa !== null) clearTimeout(this.temporizadorPausa);
+    this.temporizadorPausa = null;
   }
 
   private cancelarFinCelebracion(): void {
@@ -342,7 +384,9 @@ export class ClienteEnLinea implements FuenteMesa {
     if (d === null) return null;
     // Durante la celebración el servidor tiene la cuenta congelada: aquí tampoco avanza.
     const congelado = this.partida?.decision?.restanteMs;
-    if (this.restanteCelebracionMs() !== null && congelado !== undefined) return congelado;
+    const enPausa =
+      this.restanteCelebracionMs() !== null || this.restantePausaResultadoMs() !== null;
+    if (enPausa && congelado !== undefined) return congelado;
     return Math.max(0, d.fin - Date.now());
   }
 

@@ -26,7 +26,10 @@ function config(controles: Control[], extra: Partial<ConfigAnfitrion> = {}): Con
 function anfitrionEn(c: ConfigAnfitrion) {
   const reloj = new RelojManual();
   const s = escenario(motor.crearPartida(aConfigPartida(c)).state, { turnoDe: 'j1' });
-  return { a: new Anfitrion(motor, c, s, reloj, { retardoBotMs: 100 }), reloj };
+  return {
+    a: new Anfitrion(motor, c, s, reloj, { retardoBotMs: 100, pausaResultadoMs: 0 }),
+    reloj,
+  };
 }
 
 describe('Anfitrión en línea: desconexiones', () => {

@@ -4,10 +4,13 @@ import type {
   EstadoConexion,
   JugadorConfig,
   ModoJuego,
+  PausaResultado,
   Plazo,
   PlazoDecision,
 } from '@hts/anfitrion';
 import type { Accion, CodigoError, Evento, JugadorId, VistaJugador } from '@hts/engine';
+
+export type { PausaResultado };
 
 /**
  * Lo que necesita la mesa para funcionar. Lo cumplen el director local (Anfitrion) y el cliente en
@@ -25,6 +28,8 @@ export interface FuenteMesa {
   readonly plazoDecision: PlazoDecision | null;
   /** Monstruo derrotado que se está celebrando (nadie puede jugar mientras dure), o null. */
   readonly celebracion: Celebracion | null;
+  /** Pausa tras un resultado (nadie actúa y las cuentas atrás se congelan), o null. */
+  readonly pausaResultado: PausaResultado | null;
   vista(): VistaJugador;
   legales(): Accion[];
   /** null si la acción es legal; si no, el motivo. */
@@ -38,6 +43,8 @@ export interface FuenteMesa {
   restanteDecisionMs(): number | null;
   /** Milisegundos que quedan de la celebración; null si no hay. */
   restanteCelebracionMs(): number | null;
+  /** Milisegundos que quedan de la pausa tras un resultado; null si no hay. */
+  restantePausaResultadoMs(): number | null;
 
   // Solo en modo "este dispositivo" (en línea no hacen nada).
   readonly traspaso: JugadorId | null;

@@ -417,7 +417,12 @@ export type CodigoError =
   | 'SECUENCIA_OBSOLETA'
   | 'JUGADOR_RENDIDO'
   /** Lo usa solo el anfitrión: se está celebrando un Monstruo derrotado y nadie puede jugar. */
-  | 'CELEBRACION';
+  | 'CELEBRACION'
+  /**
+   * Lo usa solo el anfitrión: la partida se detiene un momento para que todos vean un resultado
+   * (tirada, desafío, ataque o jugada resuelta) y nadie puede jugar.
+   */
+  | 'PAUSA_RESULTADO';
 
 export interface ErrorMotor {
   codigo: CodigoError;

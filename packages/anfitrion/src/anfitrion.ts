@@ -10,8 +10,9 @@
  *   vuelva; con límite de tiempo, el bot decide por quien tarde demasiado.
  * - Celebración: al matar un Monstruo, la partida se detiene unos segundos para que todos vean la
  *   animación a la vez (nadie puede jugar; las cuentas regresivas se congelan).
- * - Pausa de resultado: tras una tirada, un desafío o una jugada que se resuelve, los bots esperan
- *   a que la interfaz enseñe el resultado antes de su siguiente acción (los humanos no esperan).
+ * - Pausa de resultado: tras una tirada, un desafío, un ataque o una jugada que se resuelve, la
+ *   partida se detiene un momento para todos, como en la celebración pero sin animación propia,
+ *   para que el resultado se vea antes de la siguiente pregunta o ventana.
  *
  * No depende de React ni de la red: se observa con `suscribir` y `version`.
  */
@@ -52,15 +53,16 @@ export interface OpcionesAnfitrion {
   /** Pausa para celebrar un Monstruo derrotado (por defecto 4000 ms; 0 la desactiva). */
   celebracionMs?: number;
   /**
-   * Espera mínima de los bots tras un evento que la interfaz enseña como resultado (tirada, duelo,
-   * jugada resuelta o anulada), contada desde ese evento. Por defecto 4500 ms; 0 la desactiva.
-   * Solo retrasa a los bots: los humanos, los plazos de ventana y el límite por decisión no cambian.
+   * Pausa para todos tras un evento que la interfaz enseña como resultado (tirada, duelo, ataque,
+   * jugada resuelta o anulada). Mientras dura nadie puede jugar y las cuentas regresivas se
+   * congelan, como en la celebración. Por defecto 4300 ms (la escena más larga, el duelo); 0 la
+   * desactiva.
    */
   pausaResultadoMs?: number;
 }
 
 export const CELEBRACION_POR_DEFECTO_MS = 4000;
-export const PAUSA_RESULTADO_POR_DEFECTO_MS = 4500;
+export const PAUSA_RESULTADO_POR_DEFECTO_MS = 4300;
 export const RETARDO_BOT_POR_DEFECTO_MS = 700;
 
 /** Monstruo derrotado que se está celebrando: mientras dura, nadie puede jugar. */
@@ -69,6 +71,16 @@ export interface Celebracion {
   id: number;
   jugador: JugadorId;
   carta: string;
+  duracionMs: number;
+}
+
+/** Pausa tras un resultado: mientras dura, nadie puede jugar. */
+export interface PausaResultado {
+  /**
+   * Correlativo por anfitrión. Si llega otro resultado durante la pausa, esta se alarga desde ese
+   * resultado y conserva el id (para la interfaz es la misma pausa, sin cortes).
+   */
+  id: number;
   duracionMs: number;
 }
 
@@ -115,7 +127,14 @@ export class Anfitrion {
   private celebracionActual: { celebracion: Celebracion; fin: number } | null = null;
   /** Monstruos matados que esperan su celebración (se celebran uno tras otro). */
   private readonly colaCelebraciones: Celebracion[] = [];
-  /** Durante la celebración: lo que les quedaba a la ventana y a la decisión, y el traspaso. */
+  /** Pausa de resultado en curso e instante (ms) en que termina. */
+  private pausaActual: { pausa: PausaResultado; fin: number } | null = null;
+  private temporizadorPausa: unknown = null;
+  private ultimaPausa = 0;
+  /**
+   * Con la partida detenida (celebración o pausa de resultado): lo que les quedaba a la ventana y
+   * a la decisión, y el traspaso.
+   */
   private restantePlazoCongelado: number | null = null;
   private restanteDecisionCongelado: number | null = null;
   private traspasoDiferido: JugadorId | null = null;
@@ -123,8 +142,6 @@ export class Anfitrion {
   private eventosVistos = 0;
   /** Última carta jugada cuya resolución todavía no se ha visto (como la sigue la interfaz). */
   private jugadaEnCurso: { jugador: JugadorId; carta: string } | null = null;
-  /** Instante (ms) hasta el que los bots esperan para que se vea el último resultado, o null. */
-  private finPausaResultado: number | null = null;
   private ultimaCelebracion = 0;
   /** Secuencia de la ventana de Modificadores que los bots ya han evaluado sin jugar nada. */
   private botsEvaluaron: number | null = null;
@@ -202,12 +219,13 @@ export class Anfitrion {
   }
 
   legales(): Accion[] {
-    if (this.traspaso !== null || this.celebracionActual !== null) return [];
+    if (this.traspaso !== null || this.detenida() !== null) return [];
     return this.motor.accionesLegales(this.estado, this.observador);
   }
 
   validar(accion: Accion): CodigoError | null {
-    if (this.celebracionActual !== null) return 'CELEBRACION';
+    const detenida = this.detenida();
+    if (detenida !== null) return detenida.codigo;
     return this.motor.validar(this.estado, { actor: this.observador, accion });
   }
 
@@ -226,15 +244,16 @@ export class Anfitrion {
   }
 
   legalesDe(id: JugadorId): Accion[] {
-    if (this.celebracionActual !== null) return [];
+    if (this.detenida() !== null) return [];
     return this.motor.accionesLegales(this.estado, id);
   }
 
   motivosDe(id: JugadorId): MotivoAccion[] {
-    if (this.celebracionActual !== null) {
+    const detenida = this.detenida();
+    if (detenida !== null) {
       return accionesDeInterfaz(this.motor, this.estado, id).map((accion) => ({
         accion,
-        codigo: 'CELEBRACION',
+        codigo: detenida.codigo,
       }));
     }
     return motivosDe(this.motor, this.estado, id);
@@ -257,7 +276,7 @@ export class Anfitrion {
 
   /** Jugadores humanos que pueden responder en la ventana abierta (modo local). */
   respondedoresPosibles(): JugadorId[] {
-    if (this.celebracionActual !== null) return [];
+    if (this.detenida() !== null) return [];
     const cima = this.estado.pila[this.estado.pila.length - 1];
     if (cima?.tipo === 'ventanaDesafio') {
       return this.humanosEnJuego.filter(
@@ -292,6 +311,29 @@ export class Anfitrion {
     return Math.max(0, this.celebracionActual.fin - this.reloj.ahora());
   }
 
+  /** Pausa de resultado en curso, o null. */
+  get pausaResultado(): PausaResultado | null {
+    return this.pausaActual?.pausa ?? null;
+  }
+
+  /** Milisegundos que quedan de la pausa de resultado (null si no hay). */
+  restantePausaResultadoMs(): number | null {
+    if (this.pausaActual === null) return null;
+    return Math.max(0, this.pausaActual.fin - this.reloj.ahora());
+  }
+
+  /**
+   * Si la partida está detenida (celebración o pausa de resultado; nunca las dos a la vez), el
+   * código con el que se rechazan las acciones y el instante en que se reanuda; si no, null.
+   */
+  private detenida(): { codigo: CodigoError; fin: number } | null {
+    if (this.celebracionActual !== null) {
+      return { codigo: 'CELEBRACION', fin: this.celebracionActual.fin };
+    }
+    if (this.pausaActual !== null) return { codigo: 'PAUSA_RESULTADO', fin: this.pausaActual.fin };
+    return null;
+  }
+
   // ------------------------------------------------------------------ acciones
 
   suscribir(fn: () => void): () => void {
@@ -304,7 +346,8 @@ export class Anfitrion {
   /** Envía una acción de un jugador (o del sistema). Devuelve el error si es ilegal. */
   enviar(actor: Actor, accion: Accion): CodigoError | null {
     if (this.terminado) return 'PARTIDA_TERMINADA';
-    if (this.celebracionActual !== null && actor !== SISTEMA) return 'CELEBRACION';
+    const detenida = this.detenida();
+    if (detenida !== null && actor !== SISTEMA) return detenida.codigo;
     const r = this.motor.reducer(this.estado, { actor, accion });
     if (!r.ok) return r.error.codigo;
     this.estado = r.state;
@@ -315,8 +358,8 @@ export class Anfitrion {
 
   /** Modo local: el jugador `id` quiere responder en la ventana abierta. */
   responder(id: JugadorId): void {
-    // Durante la celebración nada avanza (respondedoresPosibles ya es []; se deja explícito).
-    if (this.celebracionActual !== null) return;
+    // Con la partida detenida nada avanza (respondedoresPosibles ya es []; se deja explícito).
+    if (this.detenida() !== null) return;
     if (!this.respondedoresPosibles().includes(id)) return;
     this.respondiendo = id;
     this.pausarPlazo();
@@ -326,8 +369,8 @@ export class Anfitrion {
 
   /** Modo local: el jugador que respondía ha terminado; se devuelve el dispositivo. */
   terminarRespuesta(): void {
-    // Durante la celebración no hace nada: el jugador sigue respondiendo y podrá terminar después.
-    if (this.respondiendo === null || this.celebracionActual !== null) return;
+    // Con la partida detenida no hace nada: el jugador sigue respondiendo y terminará después.
+    if (this.respondiendo === null || this.detenida() !== null) return;
     this.respondiendo = null;
     this.reanudarPlazo();
     const siguiente = this.actorRequerido() ?? this.estado.turno.jugador;
@@ -338,8 +381,8 @@ export class Anfitrion {
 
   /** Modo local: el jugador que recibe el dispositivo confirma que es él. */
   confirmarTraspaso(): void {
-    // Durante la celebración el traspaso está diferido; no se puede confirmar todavía.
-    if (this.traspaso === null || this.celebracionActual !== null) return;
+    // Con la partida detenida el traspaso está diferido; no se puede confirmar todavía.
+    if (this.traspaso === null || this.detenida() !== null) return;
     this.alMando = this.traspaso;
     this.traspaso = null;
     this.notificar();
@@ -378,6 +421,8 @@ export class Anfitrion {
     this.cancelar();
     if (this.temporizadorCelebracion !== null) this.reloj.cancelar(this.temporizadorCelebracion);
     this.temporizadorCelebracion = null;
+    if (this.temporizadorPausa !== null) this.reloj.cancelar(this.temporizadorPausa);
+    this.temporizadorPausa = null;
     for (const t of this.desconectados.values()) this.reloj.cancelar(t);
     this.desconectados.clear();
     this.escuchas.clear();
@@ -403,11 +448,27 @@ export class Anfitrion {
   private actualizar(): void {
     const nuevos = this.eventos.slice(this.eventosVistos);
     this.eventosVistos = this.eventos.length;
-    this.detectarResultados(nuevos);
+    const hayResultado = this.detectarResultados(nuevos);
     this.detectarCelebraciones(nuevos);
+    // La celebración manda: si está en curso (o acaba de empezar), no hay pausa de resultado. Con la
+    // partida ganada tampoco: no queda nada que detener (la interfaz pasa a la victoria).
+    const pausa = this.opciones.pausaResultadoMs ?? PAUSA_RESULTADO_POR_DEFECTO_MS;
+    if (
+      hayResultado &&
+      pausa > 0 &&
+      this.celebracionActual === null &&
+      this.estado.ganador === null &&
+      !this.terminado
+    ) {
+      this.empezarPausa(pausa);
+    }
     if (this.estado.ganador !== null) {
       // La celebración del Monstruo que da la victoria sigue su curso; la victoria va después.
+      // Una pausa de resultado en curso se cancela: al acabar la partida no queda temporizador.
       this.cancelar();
+      if (this.temporizadorPausa !== null) this.reloj.cancelar(this.temporizadorPausa);
+      this.temporizadorPausa = null;
+      this.pausaActual = null;
       this.plazo = null;
       this.plazoDecision = null;
       this.restantePlazoCongelado = null;
@@ -429,14 +490,14 @@ export class Anfitrion {
     } else if (this.plazo?.secuencia !== cima.secuencia) {
       // Ventana nueva o reiniciada (un Modificador o un disparador): cuenta completa.
       this.plazo = { secuencia: cima.secuencia, duracionMs: cima.duracionMs, fin: null };
-      if (this.celebracionActual !== null) this.restantePlazoCongelado = cima.duracionMs;
+      if (this.detenida() !== null) this.restantePlazoCongelado = cima.duracionMs;
       else if (this.respondiendo === null) this.reanudarPlazo();
     }
 
     const traspaso = this.traspasoNecesario();
     if (traspaso !== null) {
-      // La celebración va primero: todos la ven en la misma pantalla y después se pasa.
-      if (this.celebracionActual !== null) this.traspasoDiferido = traspaso;
+      // La celebración o la pausa van primero: todos las ven en la misma pantalla y luego se pasa.
+      if (this.detenida() !== null) this.traspasoDiferido = traspaso;
       else this.traspaso = traspaso;
     }
 
@@ -457,9 +518,9 @@ export class Anfitrion {
 
   /**
    * Busca en los eventos nuevos los que la interfaz convierte en una escena de resultado (los mismos
-   * que `Escenario.tsx` en la web) y, si hay alguno, los bots esperan desde ahora `pausaResultadoMs`.
+   * que `Escenario.tsx` en la web). Devuelve si hay alguno (entonces la partida hace una pausa).
    */
-  private detectarResultados(nuevos: readonly Evento[]): void {
+  private detectarResultados(nuevos: readonly Evento[]): boolean {
     let hayResultado = false;
     for (const e of nuevos) {
       switch (e.tipo) {
@@ -490,8 +551,7 @@ export class Anfitrion {
           break;
       }
     }
-    const pausa = this.opciones.pausaResultadoMs ?? PAUSA_RESULTADO_POR_DEFECTO_MS;
-    if (hayResultado && pausa > 0) this.finPausaResultado = this.reloj.ahora() + pausa;
+    return hayResultado;
   }
 
   /** Encola una celebración por cada Monstruo matado en los eventos nuevos. */
@@ -517,14 +577,25 @@ export class Anfitrion {
     const celebracion = this.colaCelebraciones.shift();
     if (celebracion === undefined) return;
     const fin = this.reloj.ahora() + celebracion.duracionMs;
+    // La celebración tapa el resultado (la interfaz lo descarta) y ya detiene la partida: sustituye
+    // a la pausa de resultado en curso, si la hay (lo congelado pasa a la celebración).
+    if (this.temporizadorPausa !== null) this.reloj.cancelar(this.temporizadorPausa);
+    this.temporizadorPausa = null;
+    this.pausaActual = null;
     this.celebracionActual = { celebracion, fin };
-    // La celebración tapa el resultado (la interfaz lo descarta) y ya detiene la partida: no se
-    // suma la pausa de resultado; al terminar, los bots vuelven a su retardo normal.
-    this.finPausaResultado = null;
     this.temporizadorCelebracion = this.reloj.programar(
       () => this.terminarCelebracion(),
       celebracion.duracionMs,
     );
+    this.detener(fin);
+  }
+
+  /**
+   * Detiene la partida hasta `fin` (celebración o pausa de resultado): congela la cuenta de la
+   * ventana y el límite por decisión, difiere el traspaso y para a los bots. Si ya estaba detenida
+   * (cola de celebraciones, pausa alargada), lo congelado se conserva y solo se mueve el fin.
+   */
+  private detener(fin: number): void {
     if (this.plazo !== null && this.plazo.fin !== null) {
       this.restantePlazoCongelado = this.restanteMs();
       this.pausarPlazo();
@@ -555,6 +626,30 @@ export class Anfitrion {
       this.notificar();
       return;
     }
+    this.reanudar();
+    this.notificar();
+  }
+
+  /** Empieza la pausa de resultado o, si ya hay una, la alarga desde ahora con el mismo id. */
+  private empezarPausa(duracionMs: number): void {
+    if (this.temporizadorPausa !== null) this.reloj.cancelar(this.temporizadorPausa);
+    if (this.pausaActual === null) this.ultimaPausa += 1;
+    const fin = this.reloj.ahora() + duracionMs;
+    this.pausaActual = { pausa: { id: this.ultimaPausa, duracionMs }, fin };
+    this.temporizadorPausa = this.reloj.programar(() => this.terminarPausa(), duracionMs);
+    this.detener(fin);
+  }
+
+  private terminarPausa(): void {
+    this.temporizadorPausa = null;
+    this.pausaActual = null;
+    if (this.terminado) return;
+    this.reanudar();
+    this.notificar();
+  }
+
+  /** Reanuda la partida detenida: la ventana y la decisión con lo que les quedaba, y el traspaso. */
+  private reanudar(): void {
     if (this.estado.ganador === null) {
       if (
         this.plazo !== null &&
@@ -575,10 +670,9 @@ export class Anfitrion {
     }
     this.restantePlazoCongelado = null;
     this.traspasoDiferido = null;
-    this.notificar();
   }
 
-  /** Pone en marcha la cuenta de la ventana: completa o, tras una celebración, lo que quedaba. */
+  /** Pone en marcha la cuenta de la ventana: completa o, tras una detención, lo que quedaba. */
   private reanudarPlazo(restanteMs?: number): void {
     if (this.plazo === null) return;
     if (this.temporizadorVentana !== null) this.reloj.cancelar(this.temporizadorVentana);
@@ -618,11 +712,12 @@ export class Anfitrion {
     this.programarDecision(requerido, limite * 1000);
   }
 
-  /** Plazo de `ms` para que decida `requerido`; durante una celebración queda congelado. */
+  /** Plazo de `ms` para que decida `requerido`; con la partida detenida queda congelado. */
   private programarDecision(requerido: JugadorId, ms: number): void {
-    if (this.celebracionActual !== null) {
+    const detenida = this.detenida();
+    if (detenida !== null) {
       this.restanteDecisionCongelado = ms;
-      this.plazoDecision = { jugador: requerido, fin: this.celebracionActual.fin + ms };
+      this.plazoDecision = { jugador: requerido, fin: detenida.fin + ms };
       return;
     }
     const clave = `${requerido}:${this.estado.pila.length}:${this.eventos.length}`;
@@ -638,24 +733,12 @@ export class Anfitrion {
   private programarBots(): void {
     if (this.temporizadorBot !== null) this.reloj.cancelar(this.temporizadorBot);
     this.temporizadorBot = null;
-    if (this.celebracionActual !== null) return;
+    if (this.detenida() !== null) return;
     if (this.respondiendo !== null || !this.hayTrabajoParaBots()) return;
     this.temporizadorBot = this.reloj.programar(() => {
       this.temporizadorBot = null;
       this.turnoDeBots();
-    }, this.retardoBot());
-  }
-
-  /** Retardo del próximo paso de los bots: el normal o, si es más larga, la pausa de resultado. */
-  private retardoBot(): number {
-    const retardo = this.opciones.retardoBotMs ?? RETARDO_BOT_POR_DEFECTO_MS;
-    if (this.finPausaResultado === null) return retardo;
-    const restante = this.finPausaResultado - this.reloj.ahora();
-    if (restante <= 0) {
-      this.finPausaResultado = null;
-      return retardo;
-    }
-    return Math.max(retardo, restante);
+    }, this.opciones.retardoBotMs ?? RETARDO_BOT_POR_DEFECTO_MS);
   }
 
   private hayTrabajoParaBots(): boolean {
@@ -708,7 +791,7 @@ export class Anfitrion {
 
   /** Un "paso" de los bots: como mucho una acción; después se vuelve a programar. */
   private turnoDeBots(): void {
-    if (this.estado.ganador !== null || this.terminado || this.celebracionActual !== null) return;
+    if (this.estado.ganador !== null || this.terminado || this.detenida() !== null) return;
     const cima = this.estado.pila[this.estado.pila.length - 1];
 
     if (cima?.tipo === 'ventanaDesafio') {
