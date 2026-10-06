@@ -63,7 +63,8 @@ El reglamento no indica mínimo ni máximo. Menciona partidas de 2 jugadores (p.
 
 ### D-02 · Reparto de Líderes (p.1)
 
-"Puedes tirar dados para determinar quién elige primero… o simplemente elegir libremente".
+El reglamento propone decidir con dados quién escoge primero, o bien que cada uno escoja a su
+gusto.
 **✅ Resuelta (usuario, 2026-10-04):** los Líderes se **reparten al azar**. El orden de reparto
 también es aleatorio (RNG con semilla) y empieza quien recibe el último Líder (R-015). En partidas
 de 2 jugadores no entra el Líder Ladrón (R-011).
@@ -91,22 +92,22 @@ puedas volver a gastar 1 PA para tirar por él ese mismo turno?
 
 ### D-06 · ¿A qué Héroes se puede equipar un Objeto? (p.2)
 
-El reglamento dice que los Objetos Malditos "pueden equiparse con cartas de Héroe enemigo". No
+El reglamento permite poner los Objetos Malditos a Héroes de los rivales, pero no
 aclara si un Objeto normal puede equiparse a un Héroe enemigo ni un Maldito a uno propio.
 **✅ Resuelta (usuario, 2026-10-04):** cualquier Objeto (normal o Maldito) puede equiparse a
 cualquier Héroe sin Objeto, propio o ajeno.
 
 ### D-07 · Objeto equipado cuando el Héroe se sacrifica (p.2)
 
-Se dice que el Objeto "se mueve con" el Héroe si este es destruido, arrebatado o devuelto a la
+Según el reglamento, el Objeto acompaña al Héroe si este es destruido, arrebatado o devuelto a la
 mano. El sacrificio no aparece en la lista.
 **✅ Resuelta (usuario, 2026-10-04):** al sacrificar, el Objeto va al descarte con el Héroe, salvo
 que una carta concreta diga otra cosa (Fase 2).
 
 ### D-08 · Cierre de la ventana de Modificadores (p.2)
 
-"Una vez que todos los jugadores hayan terminado de jugar sus cartas modificadoras…". No se
-define cómo se sabe que todos han terminado.
+El reglamento suma los Modificadores cuando todos han acabado de jugarlos, pero no define cómo
+se sabe que todos han terminado.
 **✅ Resuelta (usuario, 2026-10-04):**
 
 - Tras cada tirada empieza una cuenta regresiva de **5 segundos**.
@@ -145,8 +146,9 @@ En el motor es una única ventana con dos tiradas. Cada Modificador indica a cu�
 
 ### D-12 · "Sacar" carta de la mano: ¿al azar? (texto de cartas)
 
-Las cartas dicen "Pull a card from another player's hand" y el reglamento no define _pull_. Cartas
-como Silent Shadow distinguen "mira la mano y elige", lo que sugiere que _pull_ es a ciegas.
+Varias cartas usan el verbo _pull_ para quedarse con una carta de la mano de otro jugador y el
+reglamento no lo define. Otras, como Silent Shadow, dicen expresamente que se ve la mano antes de
+escoger, lo que sugiere que _pull_ es a ciegas.
 **✅ Resuelta (usuario, 2026-10-04):** el jugador activo ve solo los **reversos** de la mano del
 otro jugador y elige uno sin conocer su contenido. El motor baraja el orden con el RNG con
 semilla para que la posición no revele nada. Solo cuando la carta dice expresamente que puedes
@@ -175,8 +177,8 @@ Es la única diferencia entre ellos.
 
 ### D-16 · Mazo principal vacío (p.1–3)
 
-El reglamento no dice qué hacer si hay que ROBAR y el mazo está vacío. La frase final ("la
-próxima vez que barajas el mazo") sugiere barajar.
+El reglamento no dice qué hacer si hay que ROBAR y el mazo está vacío. Su última frase habla de
+volver a barajar el mazo, lo que sugiere barajar.
 **✅ Resuelta (usuario, 2026-10-04):** se baraja la pila de descarte y pasa a ser el nuevo
 mazo, sin penalización (R-095).
 **Caso límite (provisional):** si el mazo y el descarte están vacíos a la vez, no se roba nada
@@ -191,7 +193,8 @@ Realmente Grande tienen **2 copias**. Las máscaras y los Objetos Malditos tiene
 
 ### D-18 · Empates en la tirada de desafío (p.2) — ✅ resuelta por el reglamento
 
-"Si tu tirada es mayor o igual…": el empate lo gana quien desafía. Se anota para que no se
+Según el reglamento, quien desafía gana si iguala o supera al desafiado: el empate lo gana
+quien desafía. Se anota para que no se
 reinterprete.
 
 ### D-19 · Momento de elegir los objetivos de un efecto (p.2, R-062)
@@ -284,10 +287,10 @@ aplica la interpretación indicada y el código las marca con `TODO(regla)`.
 
 ### D-33 · Puño de la Razón y Guiverno Titán
 
-- _El Puño de la Razón_: "cada vez que tiras para DESAFIAR, +2". **Provisional:** solo cuando
-  eres tú quien desafía.
-- _Guiverno Titán_: "cada vez que tiras por una carta de Desafío, +1". **Provisional:** en
-  cualquier desafío en el que participes, como desafiante o como desafiado.
+- _El Puño de la Razón_ da +2 a las tiradas para DESAFIAR. **Provisional:** solo cuando eres tú
+  quien desafía.
+- _Guiverno Titán_ da +1 a las tiradas de una carta de Desafío. **Provisional:** en cualquier
+  desafío en el que participes, como desafiante o como desafiado.
   **✅ Resuelta (usuario, 2026-10-04):** el Puño de la Razón suma +2 en **cualquier** desafío en el que participe su dueño (desafiando o desafiado), igual que el Guiverno Titán (+1).
 
 ### D-34 · A qué mano vuelven los Objetos devueltos
@@ -300,8 +303,8 @@ _Holy Curselifter_ dice "a tu mano": va a la tuya.
 
 ### D-35 · Sabio Encapuchado y Magias desafiadas
 
-"Cada vez que juegas una Magia, ROBA". **Provisional:** solo si la Magia se llega a resolver. Si
-la desafían con éxito, no robas.
+El Líder hace ROBAR una carta por cada Magia que juegas. **Provisional:** solo si la Magia se
+llega a resolver. Si la desafían con éxito, no robas.
 **✅ Resuelta (usuario, 2026-10-04):** confirmado.
 
 ### D-36 · Megababosa en el turno en que se mata
@@ -341,14 +344,14 @@ preguntar. Si es opcional ("puedes…"), siempre se pregunta.
 **✅ Resuelta (usuario, 2026-10-04):** confirmado.
 
 **Excepción (usuario, 2026-10-05):** cuando el efecto consiste en **mirar** cartas ocultas, mirarlas es
-parte del efecto y se pregunta siempre. _Silent Shadow_ («mira la mano de otro jugador, elige una
-carta…») muestra la mano y deja elegir aunque solo tenga una carta (como ya hacían _Sharp Fox_ y
-_Bullseye_). D-40 se mantiene para las elecciones sobre información pública (Grupo, descarte…).
+parte del efecto y se pregunta siempre. El efecto de _Silent Shadow_ consiste en ver la mano de un
+rival y quedarse una carta: muestra la mano y deja elegir aunque solo tenga una carta (como ya
+hacían _Sharp Fox_ y _Bullseye_). D-40 se mantiene para las elecciones sobre información pública (Grupo, descarte…).
 
 ### D-41 · Hook: jugar el Objeto es obligatorio
 
-"Juega inmediatamente un Objeto de tu mano y ROBA una carta." **Provisional:** como en _Fuzzy
-Cheeks_ (D-30), jugar el Objeto es opcional y robas siempre.
+Hook hace jugar al momento un Objeto de la mano y después ROBAR una carta, sin decir "puedes".
+**Provisional:** como en _Fuzzy Cheeks_ (D-30), jugar el Objeto es opcional y robas siempre.
 **✅ Resuelta (usuario, 2026-10-04):** un efecto solo es opcional si la carta dice "puedes". Hook no lo dice: si tienes un Objeto y hay un Héroe sin Objeto, **debes** jugarlo (y después robas). Es la misma regla que _Fuzzy Cheeks_ (D-30): jugar el Héroe también es
 obligatorio.
 

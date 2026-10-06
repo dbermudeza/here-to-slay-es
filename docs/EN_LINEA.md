@@ -1,12 +1,28 @@
 # Jugar en línea
 
 El modo en línea usa un **servidor autoritativo**: la partida vive en el equipo que hace de
-anfitrión y cada jugador, desde su navegador, solo recibe lo que puede ver (su mano, la mesa y el
+servidor y cada jugador, desde su navegador, solo recibe lo que puede ver (su mano, la mesa y el
 número de cartas de los demás). No hace falta contratar ningún servidor.
 
-## 1. Arrancar el servidor (en el equipo anfitrión)
+Esta es la guía práctica. El detalle técnico (mensajes, seguridad, variables de entorno) está en
+[SERVIDOR_Y_PROTOCOLO.md](SERVIDOR_Y_PROTOCOLO.md), y el del ejecutable en
+[ESCRITORIO.md](ESCRITORIO.md).
 
-Requisitos: haber hecho `pnpm install` y `pnpm recursos` (las cartas; ver el README).
+## 1. Arrancar el servidor (en el equipo que hace de servidor)
+
+Hay dos formas. Las dos necesitan haber instalado antes las dependencias y los recursos de las
+cartas (`pnpm install` y `pnpm recursos`; ver el `README.md`).
+
+### Con el ejecutable (sin terminal)
+
+`pnpm empaquetar` genera `dist-app/HereToSlay/HereToSlay.exe` (una vez; vuelve a ejecutarlo tras
+actualizar el juego). Con doble clic arranca el servidor en el puerto **3000** (o en uno libre, si
+otro programa lo ocupa) y abre el navegador; si ya estaba en marcha, solo abre el navegador. La
+ventana que se queda abierta muestra las direcciones para invitar; **al cerrarla se detiene el
+servidor**. La primera vez Windows puede avisar (SmartScreen y el cortafuegos) porque el ejecutable
+no está firmado: ver [ESCRITORIO.md](ESCRITORIO.md#problemas-habituales).
+
+### Con la terminal
 
 ```sh
 pnpm servidor
@@ -16,30 +32,27 @@ Compila la aplicación web y arranca el servidor en el puerto **3000**. Verás a
 
 ```
   En este equipo:     http://localhost:3000
-  En la red local:    http://192.168.1.34:3000
+  En la red local:    http://192.168.1.20:3000
 ```
 
 Para usar otro puerto: `PUERTO=4000 pnpm servidor` (en PowerShell: `$env:PUERTO=4000; pnpm servidor`).
-
-**Sin terminal:** `pnpm empaquetar` genera `dist-app/HereToSlay/HereToSlay.exe`. Con doble clic
-arranca el servidor en el puerto 3000 (o en uno libre, si otro programa lo ocupa) y abre el
-navegador; si ya estaba en marcha, solo abre el navegador. La ventana que se queda abierta muestra
-las mismas direcciones; al cerrarla se detiene el servidor. Windows puede avisar la primera vez
-(SmartScreen y el cortafuegos) porque el ejecutable no está firmado: permite el acceso en redes
-privadas para que entren los de tu Wi-Fi.
+Se detiene con Ctrl+C. Las demás variables de entorno están en
+[SERVIDOR_Y_PROTOCOLO.md](SERVIDOR_Y_PROTOCOLO.md#variables-de-entorno).
 
 ## 2. Jugar en la misma red (Wi-Fi de casa)
 
 1. Todos se conectan a la misma Wi-Fi.
 2. Cada jugador abre en su navegador la dirección **"En la red local"** (p. ej.
-   `http://192.168.1.34:3000`). El anfitrión también puede usar `http://localhost:3000`.
-3. Uno pulsa **Jugar en línea → Crear sala** y comparte el **código de 5 letras**.
+   `http://192.168.1.20:3000`). En el equipo del servidor también vale `http://localhost:3000`.
+3. Uno pulsa **Jugar en línea → Crear sala** y comparte el **código de 5 letras** (o el enlace de
+   **Invitar a jugar**, que ya lleva el código).
 4. Los demás pulsan **Jugar en línea → Unirse**, escriben el código y su nombre, y marcan **Estoy
    listo**.
-5. El anfitrión puede añadir bots y elegir reglas, duración de las ventanas y tiempo máximo por
-   decisión. Después pulsa **Empezar partida**.
+5. Quien creó la sala puede añadir bots, quitar jugadores y elegir las reglas, la duración de las
+   ventanas y el tiempo máximo por decisión. Cuando todos están listos (de 2 a 6 jugadores, bots
+   incluidos), pulsa **Empezar partida**.
 
-Si Windows pregunta por el **Firewall** la primera vez, permite el acceso en **redes privadas**.
+Si Windows pregunta por el **cortafuegos** la primera vez, permite el acceso en **redes privadas**.
 
 ## 3. Jugar por internet
 
@@ -51,16 +64,18 @@ El servidor está en tu casa, así que hay que hacerlo accesible desde fuera. Do
    - Windows: `winget install --id Cloudflare.cloudflared`
    - macOS: `brew install cloudflared`
 
-   Después cierra y vuelve a abrir la terminal (para que encuentre el programa).
+   El servidor lo busca en el `PATH` y en las carpetas de instalación habituales. Si aun así no lo
+   encuentra, cierra y vuelve a abrir la terminal, o indica su ruta en la variable `CLOUDFLARED`.
 
-2. Arranca el servidor (`pnpm servidor`), abre `http://localhost:3000` **en el mismo equipo** y crea
-   la sala.
+2. Arranca el servidor (ejecutable o `pnpm servidor`), abre `http://localhost:3000` **en el mismo
+   equipo** y crea la sala.
 3. En **Invitar a jugar → Jugar por internet**, pulsa **Abrir acceso por internet**. En unos segundos
    aparece el **enlace por internet** (`https://….trycloudflare.com/?sala=CÓDIGO`): pulsa **Copiar** y
    envíaselo a los demás. Al abrirlo entran directamente a "Unirse" con el código puesto.
 
 El botón solo aparece en el equipo del servidor; los invitados ven el enlace, pero no pueden abrir ni
-cerrar el túnel. El túnel se cierra con **Cerrar acceso por internet** o al detener el servidor.
+cerrar el túnel. El túnel se cierra con **Cerrar acceso por internet** o al detener el servidor. Si
+`cloudflared` no está instalado, tarda demasiado (45 s) o se cae, la sala lo indica.
 
 #### A mano, en otra terminal
 
@@ -70,34 +85,38 @@ Si lo prefieres, con el servidor en marcha, en otra terminal:
 cloudflared tunnel --url http://localhost:3000
 ```
 
-3. Aparecerá una dirección del tipo `https://palabras-al-azar.trycloudflare.com`. Compártela con
-   los demás jugadores: funciona mientras la terminal siga abierta.
+Aparecerá una dirección del tipo `https://palabras-al-azar.trycloudflare.com`. Compártela con los
+demás jugadores: funciona mientras esa terminal siga abierta.
 
-Es un túnel temporal y gratuito; cada vez que lo arrancas cambia la dirección.
+En los dos casos es un túnel temporal y gratuito; cada vez que lo abres cambia la dirección.
 
 ### Opción B: abrir un puerto en el router
 
-1. En el router, redirige el **puerto TCP 3000** a la IP local del equipo anfitrión.
+1. En el router, redirige el **puerto TCP 3000** a la IP local del equipo servidor.
 2. Comparte `http://TU-IP-PÚBLICA:3000` (tu IP pública aparece en cualquier web tipo "cuál es mi IP").
 
-Ten en cuenta que así el servidor queda expuesto a internet: ciérralo (Ctrl+C) al terminar.
+Ten en cuenta que así el servidor queda expuesto a internet: ciérralo al terminar.
 
 > ⚠️ El servidor sirve las imágenes y los textos de tus cartas a quien tenga la dirección. Úsalo
 > solo con amigos y no publiques la dirección.
 
 ## 4. Durante la partida
 
+- **Pausas para todos:** cuando se activa la habilidad de un Líder, cuando alguien mata a un
+  Monstruo y tras cada resultado (una tirada, un desafío, un ataque o una carta que se resuelve), la
+  partida se detiene unos segundos **para todos a la vez** (unos 4 s para el Líder y el Monstruo, 3 s
+  para un resultado). Mientras dura, nadie puede jugar y las cuentas atrás se congelan; después
+  siguen donde estaban.
 - **Reconexión:** si se cae la conexión o alguien recarga la página, vuelve automáticamente a su
   asiento (en el inicio aparece "Volver a tu sala en línea").
 - **Desconexiones largas:** si un jugador no vuelve en **60 segundos**, un bot normal juega por él
   hasta que regrese.
-- **Tiempo máximo por decisión** (opcional, lo elige el anfitrión): si alguien agota su tiempo, un
-  bot decide por él esa vez.
-- **Al terminar**, el anfitrión puede pulsar **Volver a la sala** para jugar otra con los mismos
-  jugadores.
-- Las salas sin nadie conectado se borran a los 30 minutos.
-- **Enlaces de invitación:** en la sala, "Invitar a jugar" muestra enlaces con el código ya puesto,
-  para la red local y (si está abierto) por internet.
+- **Tiempo máximo por decisión** (opcional, lo elige quien creó la sala): si alguien agota su
+  tiempo, un bot decide por él esa vez.
+- **Al terminar**, quien creó la sala puede pulsar **Volver a la sala** para jugar otra con los
+  mismos jugadores.
+- Las salas sin nadie conectado se borran a los 30 minutos, y todas desaparecen al detener el
+  servidor.
 
 ## 5. Desarrollo
 
@@ -105,3 +124,5 @@ Ten en cuenta que así el servidor queda expuesto a internet: ciérralo (Ctrl+C)
 pnpm --filter @hts/server start   # servidor en :3000 (sin compilar la web)
 pnpm dev                          # web en :5173; /socket.io se redirige al servidor
 ```
+
+Ver [SERVIDOR_Y_PROTOCOLO.md](SERVIDOR_Y_PROTOCOLO.md#desarrollo) y [ANFITRION.md](ANFITRION.md).

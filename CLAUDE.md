@@ -30,7 +30,8 @@ packages/anfitrion Host de partida (temporizadores, bots, conexiones) y protocol
 apps/server       Fastify + Socket.IO, servidor autoritativo                — Fase 5
 apps/web          React + Vite + Zustand + Tailwind + Framer Motion         — Fase 4/5
 apps/e2e          Playwright: partidas completas, accesibilidad y rendimiento — Fase 6
-docs/             REGLAS.md, DUDAS_REGLAS.md, EN_LINEA.md
+docs/             Documentación (índice en docs/README.md): arquitectura, motor, cartas, anfitrión,
+                  servidor, web, escritorio, pruebas, glosario; REGLAS.md y DUDAS_REGLAS.md
 ```
 
 ## Comandos
@@ -62,20 +63,23 @@ aprobación), reparte el trabajo, integra, hace los commits y resume. Delega en:
 | `motor-reglas` | Reglas, cartas, bots, anfitrión (`packages/`) | `packages/**`, `docs/REGLAS.md`, `docs/DUDAS_REGLAS.md`    | opus   |
 | `frontend-ux`  | Pantallas, textos, accesibilidad (`apps/web`) | `apps/web/**`, selectores de `apps/e2e/src`                | sonnet |
 | `qa`           | Tests, verificación, reproducción de errores  | Solo tests: `packages/*/test`, `apps/web/test`, `apps/e2e` | sonnet |
+| `documentador` | Documentación técnica y de uso                | `docs/**` (salvo REGLAS/DUDAS), `README.md`                | sonnet |
 | `revisor`      | Revisión del diff antes del commit            | Nada (solo lectura)                                        | sonnet |
 
 Flujo: plan → especialistas (en paralelo si no tocan los mismos archivos) → `qa` (si algo falla,
-vuelve al especialista con el test que falla; `qa` no arregla código) → `revisor` → commit. Cada
-agente termina con un informe en el formato de su archivo.
+vuelve al especialista con el test que falla; `qa` no arregla código) → `documentador` (si cambia la
+arquitectura, un contrato, un comando o lo que ve el jugador) → `revisor` → commit. Cada agente
+termina con un informe en el formato de su archivo.
 
 Propiedad: cada especialista escribe y actualiza los tests de su propio cambio; `qa` añade tests
 nuevos y verifica, sin trabajar a la vez sobre la misma zona. El **orquestador** lleva
 `apps/server` (y sus tests), la configuración raíz (`package.json`, ESLint, TypeScript, Prettier),
-`.github/`, `.claude/`, `README.md`, `CLAUDE.md` y `docs/EN_LINEA.md`.
+`.github/`, `.claude/` y `CLAUDE.md`. La documentación (`docs/**` salvo REGLAS/DUDAS, y
+`README.md`) es del `documentador`.
 
 Comandos: `/verificar [e2e]` (todas las comprobaciones), `/nueva-carta <id>`, `/fase <trabajo>`
-(plan repartido por agentes). Un hook (`.claude/hooks/formatear.mjs`) formatea con Prettier cada
-archivo que se edita.
+(plan repartido por agentes), `/documentar [tema]` (revisión de la documentación). Un hook
+(`.claude/hooks/formatear.mjs`) formatea con Prettier cada archivo que se edita.
 
 ## Convenciones
 

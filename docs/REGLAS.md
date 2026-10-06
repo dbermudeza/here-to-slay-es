@@ -11,13 +11,13 @@ El PDF en español usa "ROBAR" para dos verbos distintos del original. El códig
 
 | Original  | Español en el proyecto | Significado (p.3)                                                           |
 | --------- | ---------------------- | --------------------------------------------------------------------------- |
-| DRAW      | **ROBAR**              | Tomar la carta superior del mazo y añadirla a tu mano.                      |
-| STEAL     | **ARREBATAR**          | Mover una carta del Grupo de otro jugador a tu Grupo.                       |
+| DRAW      | **ROBAR**              | Pasar a tu mano la primera carta del mazo.                                  |
+| STEAL     | **ARREBATAR**          | Pasar a tu Grupo una carta del Grupo de un rival.                           |
 | PULL      | **SACAR**              | Tomar una carta de la mano de otro jugador viendo solo los reversos. → D-12 |
-| DISCARD   | **DESCARTAR**          | Mover una carta de tu mano a la pila de descarte.                           |
-| DESTROY   | **DESTRUIR**           | Mover una carta del Grupo de otro jugador a la pila de descarte.            |
-| SACRIFICE | **SACRIFICAR**         | Mover una carta de tu propio Grupo a la pila de descarte.                   |
-| CHALLENGE | **DESAFIAR**           | Intentar impedir que otro jugador juegue un Héroe, Objeto o Magia.          |
+| DISCARD   | **DESCARTAR**          | Llevar al descarte una carta de tu mano.                                    |
+| DESTROY   | **DESTRUIR**           | Llevar al descarte una carta del Grupo de un rival.                         |
+| SACRIFICE | **SACRIFICAR**         | Llevar al descarte una carta de tu Grupo.                                   |
+| CHALLENGE | **DESAFIAR**           | Tratar de anular el Héroe, Objeto o Magia que juega un rival.               |
 | ATTACK    | **ATACAR**             | Tirar para MATAR un Monstruo.                                               |
 | SLAY      | **MATAR**              | Añadir a tu Grupo un Monstruo atacado con éxito.                            |
 | Party     | **Grupo**              | Área frente a ti con tu Líder, Héroes (con sus Objetos) y Monstruos.        |
@@ -48,8 +48,8 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
 - **R-020** En tu turno tienes **3 puntos de acción (PA)**. Las acciones se hacen en cualquier orden y se pueden repetir mientras queden PA (p.1, ref).
 - **R-021** Acciones de **1 PA** (p.2):
   - a) ROBAR una carta del mazo.
-  - b) Jugar una carta de Héroe, Objeto o Magia de tu mano.
-  - c) Tirar para usar el efecto de un Héroe de tu Grupo.
+  - b) Jugar desde la mano un Héroe, un Objeto o una Magia.
+  - c) Tirar los dados por el efecto de un Héroe que ya está en tu Grupo.
 - **R-022** Acción de **2 PA**: ATACAR un Monstruo (p.2, p.3).
 - **R-023** Acción de **3 PA**: DESCARTAR toda tu mano (si tienes cartas) y ROBAR 5 cartas (p.2).
 - **R-024** No se puede gastar más PA de los que quedan. → D-03
@@ -65,7 +65,7 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
 - **R-031** Cada Héroe tiene una clase, un efecto y un requisito de tirada "N+". Para usar el efecto hay que tirar 2d6 y obtener **≥ N** (con modificadores) (p.2).
 - **R-032** Al jugar un Héroe desde la mano puedes tirar **inmediatamente** para usar su efecto, sin coste adicional: solo se paga el PA de jugar la carta (p.2, ref, R-025, D-05).
 - **R-033** Un Héroe ya en tu Grupo: 1 PA para intentar usar su efecto (p.2).
-- **R-034** No puedes tirar para usar el efecto del **mismo Héroe más de una vez por turno**, aunque la primera tirada falle. La tirada inmediata de R-032 cuenta como ese uso (p.2, ref, D-05).
+- **R-034** Cada Héroe admite **una sola tirada de efecto por turno**, aunque esa tirada falle. La tirada inmediata de R-032 cuenta como ese uso (p.2, ref, D-05).
 - **R-035** Si la tirada falla, no se recupera el PA (p.2).
 - **R-036** No hay límite de Héroes en el Grupo (p.2).
 
@@ -86,18 +86,18 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
 
 ## 7. Cartas de Modificador (p.2)
 
-- **R-060** Se pueden jugar desde la mano **cuando cualquier jugador tira los dados** (incluido uno mismo), en cualquier turno, sin coste de PA (p.2).
+- **R-060** Se pueden jugar desde la mano **ante cualquier tirada de dados**, sea de quien sea (también la propia), en cualquier turno, sin coste de PA (p.2).
 - **R-061** Modifican la tirada en la cantidad indicada. Si la carta tiene dos opciones (p. ej. +1/−3), quien la juega declara una (p.2).
 - **R-062** Los objetivos de un efecto se eligen al activarse, después de cerrarse la ventana de Modificadores, no antes de tirar (p.2, D-19).
-- **R-063** En un desafío se puede esperar a que **ambos** jugadores hayan tirado antes de decidir (p.2).
-- **R-064** Se pueden jugar **varios** Modificadores sobre la misma tirada, y varios jugadores pueden hacerlo (p.2).
+- **R-063** En un desafío se puede decidir después de ver las **dos** tiradas (p.2).
+- **R-064** Una tirada admite **varios** Modificadores, de uno o de varios jugadores (p.2).
 - **R-065** Cuando **todos** han terminado de jugar Modificadores, se suman todos los cambios y se ajusta el total (p.2).
 - **R-067** Ventana de Modificadores: tras cada tirada empieza una **cuenta regresiva de 5 s** que se **reinicia** cada vez que alguien juega un Modificador. Si pasan 5 s sin ningún Modificador nuevo, la ventana se cierra y la tirada queda fijada. En un **desafío** las dos tiradas comparten ventana, cualquier jugador puede modificar cualquiera de ellas y la cuenta es de **10 s** (D-08, D-09).
 - **R-066** Después de usarse, el Modificador va a la pila de descarte (p.2).
 
 ## 8. Cartas de Desafío (p.2–3)
 
-- **R-070** Se juega en el turno de **otro** jugador, inmediatamente después de que este **intente jugar** un Héroe, Objeto o Magia desde su mano. No cuesta PA (p.2).
+- **R-070** Se juega durante el turno de un **rival**, justo cuando este **intenta jugar** desde la mano un Héroe, Objeto o Magia. No cuesta PA (p.2).
 - **R-071** El que desafía y el desafiado tiran 2d6 cada uno. Ambas tiradas admiten Modificadores (R-063) (p.2).
 - **R-072** Si la tirada del que desafía es **≥** que la del desafiado (el desafiado solo gana si saca estrictamente más, D-10), la carta desafiada va a la pila de descarte y **no** se recupera el PA (p.2).
 - **R-073** Si la del desafiado es **mayor**, su carta se juega con normalidad (p.2).
@@ -108,9 +108,9 @@ Ladrón (Thief), Mago (Wizard). Símbolo gris "H" = un Héroe de cualquier clase
 ## 9. Líderes de Grupo (p.2–3)
 
 - **R-080** No son Héroes y no cuentan para requisitos de "Héroe de cualquier clase" (p.2, p.3).
-- **R-081** Sí aportan su clase al Grupo, tanto para requisitos de clase de Monstruos como para el Grupo completo (p.2, p.3, p.3 "incluida tu carta de líder").
+- **R-081** Sí aportan su clase al Grupo, tanto para requisitos de clase de Monstruos como para el Grupo completo (p.2, p.3; la condición de victoria cuenta expresamente el Líder).
 - **R-082** Su habilidad se aplica **cada vez** que se cumple su condición, sin límite por turno (p.2).
-- **R-083** Si no usas una habilidad opcional en el momento en que se cumple la condición, ya no puedes usarla después (p.3).
+- **R-083** Una habilidad opcional que no se usa justo al cumplirse su condición se pierde: no se puede usar más tarde (p.3).
 - **R-084** El Líder no puede ser sacrificado, destruido, arrebatado ni devuelto a la mano (p.3).
 
 ## 10. Monstruos (p.3)
@@ -144,7 +144,7 @@ La partida se juega con uno de dos modos de reglas, elegido al crearla (D-15).
 ## 12. Mazo y descarte
 
 - **R-095** Si hay que robar y el mazo está vacío, se **baraja la pila de descarte** y pasa a ser el nuevo mazo. El juego sigue sin penalización (D-16, decisión del usuario).
-- **R-097** SACAR una carta de la mano de otro jugador: el jugador activo ve solo los **reversos** de esa mano, en un orden barajado, y elige uno. Solo si la carta lo dice expresamente (p. ej. _Silent Shadow_: "mira la mano… elige") puede ver el contenido antes de elegir (D-12, decisión del usuario).
+- **R-097** SACAR una carta de la mano de otro jugador: el jugador activo ve solo los **reversos** de esa mano, en un orden barajado, y elige uno. Solo si la carta lo dice expresamente (p. ej. _Silent Shadow_, que deja ver la mano antes de escoger) puede ver el contenido antes de elegir (D-12, decisión del usuario).
 - **R-096** La pila de descarte está boca arriba y es pública (p.3).
 
 ## 13. Efectos de carta (Fase 2)

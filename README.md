@@ -19,6 +19,7 @@ navegador: en un mismo dispositivo, contra bots o en línea con amigos.
 - [Ajustes y accesibilidad](#ajustes-y-accesibilidad)
 - [Configuración](#configuración)
 - [Arquitectura](#arquitectura)
+- [Documentación](#documentación)
 - [Desarrollo](#desarrollo)
 - [Tests y CI](#tests-y-ci)
 - [Contribuir](#contribuir)
@@ -175,9 +176,10 @@ pnpm empaquetar
 
 Genera `dist-app/HereToSlay/` con `HereToSlay.exe` (con el logo del juego como icono), la web
 compilada y las cartas. Al abrir `HereToSlay.exe` arranca el servidor y abre el navegador; cerrar su
-ventana lo detiene. No necesita Node ni pnpm, así que la carpeta se puede copiar a otro equipo. Vuelve a ejecutar `pnpm empaquetar`
-cuando cambie el código. La carpeta contiene el arte y los textos de las cartas: es personal y no se
-versiona.
+ventana lo detiene. No necesita Node ni pnpm, así que la carpeta se puede copiar a otro equipo.
+Vuelve a ejecutar `pnpm empaquetar` cuando cambie el código. Detalles en
+[docs/ESCRITORIO.md](docs/ESCRITORIO.md). La carpeta contiene el arte y los textos de las cartas: es
+personal y no se versiona.
 
 En línea, el creador puede añadir bots; si alguien se desconecta se le esperan 60 s y después un
 bot juega por él hasta que vuelve; y se puede poner un tiempo máximo por decisión.
@@ -219,18 +221,23 @@ pantalla anuncian cada línea nueva del historial. Cada pantalla se revisa con a
 El servidor (`pnpm servidor`) acepta estas variables de entorno (en PowerShell:
 `$env:PUERTO=4000; pnpm servidor`):
 
-| Variable         | Por defecto     | Qué hace                                                     |
-| ---------------- | --------------- | ------------------------------------------------------------ |
-| `PUERTO`         | `3000`          | Puerto del servidor                                          |
-| `CLOUDFLARED`    | se busca solo   | Ruta del ejecutable de `cloudflared` si no lo encuentra      |
-| `DIR_WEB`        | `apps/web/dist` | Carpeta de la web compilada que se sirve                     |
-| `RETARDO_BOT_MS` | `700`           | Pausa antes de que actúe un bot (las pruebas e2e la acortan) |
+| Variable                | Por defecto     | Qué hace                                                         |
+| ----------------------- | --------------- | ---------------------------------------------------------------- |
+| `PUERTO`                | `3000`          | Puerto del servidor                                              |
+| `CLOUDFLARED`           | se busca solo   | Ruta del ejecutable de `cloudflared` si no lo encuentra          |
+| `DIR_WEB`               | `apps/web/dist` | Carpeta de la web compilada que se sirve                         |
+| `RETARDO_BOT_MS`        | `700`           | Pausa antes de que actúe un bot (las pruebas e2e la acortan)     |
+| `CELEBRACION_MS`        | `4000`          | Duración de la celebración de un Monstruo matado (`0`: sin ella) |
+| `PAUSA_RESULTADO_MS`    | `3000`          | Pausa tras cada resultado (`0`: sin ella)                        |
+| `PRESENTACION_LIDER_MS` | `4000`          | Presentación de la habilidad de un Líder (`0`: sin ella)         |
 
-`HTS_TRAZA=1` muestra en `pnpm e2e` cada paso del piloto (para depurar pruebas).
+`HTS_TRAZA=1` muestra en `pnpm e2e` cada paso del piloto (para depurar pruebas) y
+`HTS_RECURSOS_REPO` cambia el repositorio de `pnpm recursos`. El ejecutable de escritorio solo lee
+`CLOUDFLARED`. Más en [docs/SERVIDOR_Y_PROTOCOLO.md](docs/SERVIDOR_Y_PROTOCOLO.md).
 
 ## Arquitectura
 
-Monorepo con pnpm y TypeScript estricto:
+Monorepo pnpm en TypeScript estricto: cuatro paquetes de lógica y tres aplicaciones.
 
 ```
 packages/
@@ -240,25 +247,24 @@ packages/
   anfitrion/  Host de partida (temporizadores, bots, conexiones) y protocolo de red
 apps/
   web/        Aplicación React + Vite + Zustand + Tailwind + Framer Motion
-  server/     Servidor autoritativo Fastify + Socket.IO (y túnel de Cloudflare)
+  server/     Servidor autoritativo Fastify + Socket.IO, túnel de Cloudflare y ejecutable
   e2e/        Pruebas e2e con Playwright
-docs/
-  REGLAS.md         Reglas como especificación (R-xxx)
-  DUDAS_REGLAS.md   Ambigüedades del reglamento y decisiones tomadas (D-xx)
-  EN_LINEA.md       Cómo jugar en línea (red local o por internet)
+docs/         Documentación completa (ver más abajo)
 ```
 
-- **El motor** (`packages/engine`) no sabe nada de pantallas ni de red: recibe una acción, la valida
-  y devuelve el estado nuevo y los eventos. El azar sale de un generador con semilla guardado en el
-  estado, así que una partida se puede guardar, cargar y reproducir.
-- **Cada carta** tiene su efecto descrito en `packages/cards/src/efectos/efectos.json` (un lenguaje
-  propio validado con Zod) y su test.
-- **El anfitrión** (`packages/anfitrion`) dirige la partida: cuentas atrás, turnos de los bots,
-  traspasos del dispositivo y conexiones. Lo usan tanto la web (partidas locales) como el servidor.
-- **En línea**, el servidor es la única fuente de verdad: cada jugador envía intenciones y recibe
-  solo lo que puede ver (su mano, no la de los demás).
+En pocas palabras: el **motor** valida cada acción y devuelve el estado nuevo y los eventos, sin
+saber nada de pantallas ni de red (el azar sale de una semilla guardada en el estado); el
+**anfitrión** lo envuelve y añade cuentas atrás, bots y pausas; la **web** usa ese anfitrión en
+partidas locales, y en línea el **servidor** es la única fuente de verdad y cada jugador recibe solo
+lo que puede ver. El detalle, con diagramas, está en [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md).
 
-Las convenciones de código están en [CLAUDE.md](CLAUDE.md).
+## Documentación
+
+Todo está en [docs/](docs/README.md), con un índice y un mapa de lectura según lo que quieras hacer:
+las reglas ([REGLAS.md](docs/REGLAS.md), [DUDAS_REGLAS.md](docs/DUDAS_REGLAS.md)), cada pieza del
+sistema (motor, cartas y efectos, bots, anfitrión, servidor y protocolo, web), el
+[modo en línea](docs/EN_LINEA.md), el [ejecutable de escritorio](docs/ESCRITORIO.md), la
+[estrategia de pruebas](docs/PRUEBAS.md) y un [glosario](docs/GLOSARIO.md).
 
 ## Desarrollo
 
@@ -306,7 +312,13 @@ Para desarrollar el modo en línea, arranca el servidor sin compilar
    `packages/engine/test/cartas/`.
 5. Antes de hacer commit: `pnpm format`, `pnpm lint`, `pnpm typecheck` y `pnpm test`; si tocas la
    interfaz, también `pnpm e2e`.
-6. Mensajes de commit en español, descriptivos (qué cambia y por qué), y un pull request a `main`.
+6. Si cambias la arquitectura, un contrato (API del motor, protocolo, opciones del anfitrión,
+   variables de entorno, comandos) o lo que ve el jugador, actualiza la documentación de `docs/`.
+7. Mensajes de commit en español, descriptivos (qué cambia y por qué), y un pull request a `main`.
+
+El trabajo con Claude Code se reparte entre agentes (`.claude/agents/`: `motor-reglas`,
+`frontend-ux`, `qa`, `revisor` y `documentador`) y comandos como `/verificar`, `/nueva-carta`,
+`/fase` y `/documentar` (revisa toda la documentación). El flujo está en [CLAUDE.md](CLAUDE.md).
 
 ## Seguridad
 

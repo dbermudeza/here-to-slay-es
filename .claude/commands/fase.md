@@ -12,13 +12,14 @@ No escribas código todavía. Prepara un plan para el usuario:
 2. Divide el trabajo por agente:
    - **motor-reglas**: `packages/**` (reglas, cartas, bots, anfitrión);
    - **frontend-ux**: `apps/web` (pantallas, textos, accesibilidad);
-   - el orquestador (tú): `apps/server`, documentación e integración;
-   - **qa**: tests nuevos y verificación; **revisor**: revisión final del diff.
+   - el orquestador (tú): `apps/server`, configuración e integración;
+   - **qa**: tests nuevos y verificación; **documentador**: `docs/**` y `README.md` si cambia la
+     arquitectura, un contrato, un comando o lo que ve el jugador; **revisor**: revisión final.
      Indica qué partes pueden ir en paralelo (sin tocar los mismos archivos) y cuáles dependen de otras.
 3. Lista las dudas de reglas (`D-xx`) y las decisiones de diseño que necesitan al usuario, con una
    recomendación para cada una.
 4. Indica cómo se comprobará que está terminado (tests, e2e, capturas) y el commit previsto.
 
 Presenta el plan de forma breve y espera la aprobación. Cuando el usuario lo apruebe, sigue el flujo:
-especialistas → qa (si falla, vuelve al especialista con el test que falla) → revisor → commit y
-resumen.
+especialistas → qa (si falla, vuelve al especialista con el test que falla) → documentador (si hace
+falta) → revisor → commit y resumen.

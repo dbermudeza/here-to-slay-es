@@ -24,6 +24,9 @@ para escribir, mover, borrar ni hacer commits. Lee `CLAUDE.md` antes de empezar.
    carga diferida de módulos pesados.
 6. **Reglas del juego**: un cambio de reglas sin su `R-xxx`/`D-xx` y su test es un hallazgo.
 7. **Tests**: el cambio está cubierto; ningún test se ha debilitado para pasar.
+8. **Documentación**: si el cambio afecta a la arquitectura, un contrato, un comando o lo que ve el
+   jugador, `docs/` y `README.md` siguen siendo ciertos (si no, es un hallazgo para el
+   `documentador`).
 
 Sé concreto: cita archivo y línea, explica el fallo con un ejemplo y propone la corrección. No
 reportes gustos de estilo que Prettier o ESLint ya resuelven.
