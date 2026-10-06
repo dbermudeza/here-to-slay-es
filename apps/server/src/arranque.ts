@@ -1,5 +1,6 @@
 /** Arranque común de `pnpm servidor` (principal.ts) y del ejecutable de escritorio (escritorio.ts). */
 import { readFileSync } from 'node:fs';
+import type { OpcionesAnfitrion } from '@hts/anfitrion';
 import { ArchivoCartasSchema } from '@hts/cards';
 import { crearMotor } from '@hts/engine';
 import { ipRedLocal } from './red';
@@ -9,9 +10,8 @@ export interface OpcionesArranque {
   rutaCartas: string;
   dirWeb: string;
   puerto: number;
-  retardoBotMs?: number;
-  /** Pausa al matar un Monstruo (por defecto, la del anfitrión). */
-  celebracionMs?: number;
+  /** Opciones de cada partida (retardo de los bots, pausas…); por defecto, las del anfitrión. */
+  opcionesAnfitrion?: OpcionesAnfitrion;
 }
 
 export interface ServidorArrancado {
@@ -25,10 +25,7 @@ export async function arrancar(o: OpcionesArranque): Promise<ServidorArrancado> 
   const servidor = crearServidor({
     motor: crearMotor(cartas),
     dirWeb: o.dirWeb,
-    opcionesAnfitrion: {
-      ...(o.retardoBotMs === undefined ? {} : { retardoBotMs: o.retardoBotMs }),
-      ...(o.celebracionMs === undefined ? {} : { celebracionMs: o.celebracionMs }),
-    },
+    ...(o.opcionesAnfitrion === undefined ? {} : { opcionesAnfitrion: o.opcionesAnfitrion }),
   });
   try {
     return { servidor, puerto: await servidor.escuchar(o.puerto) };

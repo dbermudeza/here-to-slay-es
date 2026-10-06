@@ -42,6 +42,7 @@ export default defineConfig({
       DIR_WEB: 'apps/web/dist-e2e',
       RETARDO_BOT_MS: '40',
       CELEBRACION_MS: '300',
+      PAUSA_RESULTADO_MS: '50',
     },
   },
 });

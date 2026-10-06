@@ -10,6 +10,8 @@
  *   vuelva; con límite de tiempo, el bot decide por quien tarde demasiado.
  * - Celebración: al matar un Monstruo, la partida se detiene unos segundos para que todos vean la
  *   animación a la vez (nadie puede jugar; las cuentas regresivas se congelan).
+ * - Pausa de resultado: tras una tirada, un desafío o una jugada que se resuelve, los bots esperan
+ *   a que la interfaz enseñe el resultado antes de su siguiente acción (los humanos no esperan).
  *
  * No depende de React ni de la red: se observa con `suscribir` y `version`.
  */
@@ -49,9 +51,17 @@ export interface OpcionesAnfitrion {
   esperaDesconexionMs?: number;
   /** Pausa para celebrar un Monstruo derrotado (por defecto 4000 ms; 0 la desactiva). */
   celebracionMs?: number;
+  /**
+   * Espera mínima de los bots tras un evento que la interfaz enseña como resultado (tirada, duelo,
+   * jugada resuelta o anulada), contada desde ese evento. Por defecto 4500 ms; 0 la desactiva.
+   * Solo retrasa a los bots: los humanos, los plazos de ventana y el límite por decisión no cambian.
+   */
+  pausaResultadoMs?: number;
 }
 
 export const CELEBRACION_POR_DEFECTO_MS = 4000;
+export const PAUSA_RESULTADO_POR_DEFECTO_MS = 4500;
+export const RETARDO_BOT_POR_DEFECTO_MS = 700;
 
 /** Monstruo derrotado que se está celebrando: mientras dura, nadie puede jugar. */
 export interface Celebracion {
@@ -109,8 +119,12 @@ export class Anfitrion {
   private restantePlazoCongelado: number | null = null;
   private restanteDecisionCongelado: number | null = null;
   private traspasoDiferido: JugadorId | null = null;
-  /** Eventos ya revisados en busca de Monstruos matados. */
+  /** Eventos ya revisados en busca de Monstruos matados y de resultados. */
   private eventosVistos = 0;
+  /** Última carta jugada cuya resolución todavía no se ha visto (como la sigue la interfaz). */
+  private jugadaEnCurso: { jugador: JugadorId; carta: string } | null = null;
+  /** Instante (ms) hasta el que los bots esperan para que se vea el último resultado, o null. */
+  private finPausaResultado: number | null = null;
   private ultimaCelebracion = 0;
   /** Secuencia de la ventana de Modificadores que los bots ya han evaluado sin jugar nada. */
   private botsEvaluaron: number | null = null;
@@ -387,7 +401,10 @@ export class Anfitrion {
 
   /** Recalcula temporizadores, bots y traspasos tras cada cambio de estado. */
   private actualizar(): void {
-    this.detectarCelebraciones();
+    const nuevos = this.eventos.slice(this.eventosVistos);
+    this.eventosVistos = this.eventos.length;
+    this.detectarResultados(nuevos);
+    this.detectarCelebraciones(nuevos);
     if (this.estado.ganador !== null) {
       // La celebración del Monstruo que da la victoria sigue su curso; la victoria va después.
       this.cancelar();
@@ -438,10 +455,47 @@ export class Anfitrion {
     return null;
   }
 
+  /**
+   * Busca en los eventos nuevos los que la interfaz convierte en una escena de resultado (los mismos
+   * que `Escenario.tsx` en la web) y, si hay alguno, los bots esperan desde ahora `pausaResultadoMs`.
+   */
+  private detectarResultados(nuevos: readonly Evento[]): void {
+    let hayResultado = false;
+    for (const e of nuevos) {
+      switch (e.tipo) {
+        case 'cartaJugada':
+          this.jugadaEnCurso = { jugador: e.jugador, carta: e.carta };
+          break;
+        case 'desafioResuelto':
+        case 'tiradaHeroe':
+        case 'ataqueResuelto':
+          hayResultado = true;
+          break;
+        case 'cartaAnulada':
+          this.jugadaEnCurso = null;
+          hayResultado = true;
+          break;
+        case 'heroeEntra':
+        case 'objetoEquipado':
+        case 'magiaResuelta': {
+          // Solo cuando cierra la jugada en curso (no si un efecto mete un Héroe en el Grupo).
+          const j = this.jugadaEnCurso;
+          if (j !== null && j.jugador === e.jugador && j.carta === e.carta) {
+            this.jugadaEnCurso = null;
+            hayResultado = true;
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    }
+    const pausa = this.opciones.pausaResultadoMs ?? PAUSA_RESULTADO_POR_DEFECTO_MS;
+    if (hayResultado && pausa > 0) this.finPausaResultado = this.reloj.ahora() + pausa;
+  }
+
   /** Encola una celebración por cada Monstruo matado en los eventos nuevos. */
-  private detectarCelebraciones(): void {
-    const nuevos = this.eventos.slice(this.eventosVistos);
-    this.eventosVistos = this.eventos.length;
+  private detectarCelebraciones(nuevos: readonly Evento[]): void {
     const duracionMs = this.opciones.celebracionMs ?? CELEBRACION_POR_DEFECTO_MS;
     if (duracionMs <= 0 || this.terminado) return;
     for (const e of nuevos) {
@@ -464,6 +518,9 @@ export class Anfitrion {
     if (celebracion === undefined) return;
     const fin = this.reloj.ahora() + celebracion.duracionMs;
     this.celebracionActual = { celebracion, fin };
+    // La celebración tapa el resultado (la interfaz lo descarta) y ya detiene la partida: no se
+    // suma la pausa de resultado; al terminar, los bots vuelven a su retardo normal.
+    this.finPausaResultado = null;
     this.temporizadorCelebracion = this.reloj.programar(
       () => this.terminarCelebracion(),
       celebracion.duracionMs,
@@ -586,7 +643,19 @@ export class Anfitrion {
     this.temporizadorBot = this.reloj.programar(() => {
       this.temporizadorBot = null;
       this.turnoDeBots();
-    }, this.opciones.retardoBotMs ?? 700);
+    }, this.retardoBot());
+  }
+
+  /** Retardo del próximo paso de los bots: el normal o, si es más larga, la pausa de resultado. */
+  private retardoBot(): number {
+    const retardo = this.opciones.retardoBotMs ?? RETARDO_BOT_POR_DEFECTO_MS;
+    if (this.finPausaResultado === null) return retardo;
+    const restante = this.finPausaResultado - this.reloj.ahora();
+    if (restante <= 0) {
+      this.finPausaResultado = null;
+      return retardo;
+    }
+    return Math.max(retardo, restante);
   }
 
   private hayTrabajoParaBots(): boolean {

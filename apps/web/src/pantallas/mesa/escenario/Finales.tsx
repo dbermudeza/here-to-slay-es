@@ -44,16 +44,16 @@ export type Final =
 
 /** Cuánto se queda cada resultado en pantalla (ms). */
 export function duracionFinal(f: Final, reducir: boolean): number {
-  if (reducir) return 1600;
+  if (reducir) return 2800;
   switch (f.tipo) {
     case 'duelo':
-      return 2800;
+      return 4300;
     case 'tirada':
-      return 2400;
+      return 3900;
     case 'jugada':
-      return 1900;
+      return 3000;
     case 'anulada':
-      return 2100;
+      return 3300;
   }
 }
 
@@ -146,6 +146,10 @@ function CartaDestino({
   const reducir = useReducirAnimaciones();
   const [hasta] = useState(() => desplazamiento(destino));
   const s = duracion / 1000;
+  // La entrada y la salida duran siempre lo mismo; lo que crece es la permanencia en el centro.
+  const entrada = Math.min(0.3, 300 / duracion);
+  const salida = 1 - Math.min(0.3, 500 / duracion);
+  const medio = entrada + (salida - entrada) * 0.67;
   return (
     <motion.div
       initial={reducir ? false : { opacity: 0, scale: 0.8 }}
@@ -162,7 +166,7 @@ function CartaDestino({
       }
       transition={{
         duration: s,
-        times: reducir ? [0, 0.8, 1] : [0, 0.15, 0.55, 0.75, 1],
+        times: reducir ? [0, 1 - Math.min(0.3, 400 / duracion), 1] : [0, entrada, medio, salida, 1],
         ease: 'easeInOut',
       }}
     >

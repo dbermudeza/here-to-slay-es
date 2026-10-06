@@ -1,22 +1,33 @@
 /**
  * Arranque del servidor: `pnpm servidor` (compila la web y la sirve) o `pnpm --filter @hts/server start`.
  * Variables: PUERTO (por defecto 3000); DIR_WEB (carpeta de la web compilada, por defecto
- * apps/web/dist), RETARDO_BOT_MS (pausa antes de que actúe un bot) y CELEBRACION_MS (pausa al matar
- * un Monstruo), que usan las pruebas e2e.
+ * apps/web/dist) y, para las pruebas e2e, RETARDO_BOT_MS (pausa antes de que actúe un bot),
+ * CELEBRACION_MS (pausa al matar un Monstruo) y PAUSA_RESULTADO_MS (espera de los bots tras un
+ * resultado).
  */
 import { resolve } from 'node:path';
+import type { OpcionesAnfitrion } from '@hts/anfitrion';
 import { RAIZ, RUTA_CARTAS_JSON } from '../../../packages/cards/src/rutas';
 import { apagarAlSalir, arrancar, mostrarDirecciones } from './arranque';
 
-const retardoBot = process.env['RETARDO_BOT_MS'];
-const celebracion = process.env['CELEBRACION_MS'];
+/** Opciones del anfitrión que se pueden fijar por variable de entorno (milisegundos). */
+const VARIABLES = {
+  retardoBotMs: 'RETARDO_BOT_MS',
+  celebracionMs: 'CELEBRACION_MS',
+  pausaResultadoMs: 'PAUSA_RESULTADO_MS',
+} as const satisfies Partial<Record<keyof OpcionesAnfitrion, string>>;
+
+const opcionesAnfitrion: OpcionesAnfitrion = {};
+for (const [opcion, variable] of Object.entries(VARIABLES)) {
+  const valor = process.env[variable];
+  if (valor !== undefined) opcionesAnfitrion[opcion as keyof typeof VARIABLES] = Number(valor);
+}
 
 const { servidor, puerto } = await arrancar({
   rutaCartas: RUTA_CARTAS_JSON,
   dirWeb: resolve(RAIZ, process.env['DIR_WEB'] ?? 'apps/web/dist'),
   puerto: Number(process.env['PUERTO'] ?? 3000),
-  ...(retardoBot === undefined ? {} : { retardoBotMs: Number(retardoBot) }),
-  ...(celebracion === undefined ? {} : { celebracionMs: Number(celebracion) }),
+  opcionesAnfitrion,
 });
 mostrarDirecciones(puerto, 'Ctrl+C para detener.');
 apagarAlSalir(servidor);
