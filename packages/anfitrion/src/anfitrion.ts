@@ -13,8 +13,8 @@
  * - Pausa de resultado: tras una tirada, un desafío, un ataque o una jugada que se resuelve, la
  *   partida se detiene un momento para todos, como en la celebración pero sin animación propia,
  *   para que el resultado se vea antes de la siguiente pregunta o ventana.
- * - Presentación del Líder: la primera vez en cada turno que se activa la habilidad del Líder de un
- *   jugador (evento `liderActivado`), la partida se detiene igual para que todos vean la animación.
+ * - Presentación del Líder: cada vez que se activa la habilidad del Líder de un jugador (evento
+ *   `liderActivado`), la partida se detiene igual para que todos vean la animación.
  * - Las detenciones nunca se solapan: van una tras otra, en el orden de los eventos (presentación
  *   del Líder → celebración del Monstruo → pausa de resultado; la celebración tapa al resultado).
  *
@@ -64,15 +64,15 @@ export interface OpcionesAnfitrion {
    */
   pausaResultadoMs?: number;
   /**
-   * Pausa para presentar la activación de la habilidad de un Líder (solo la primera de cada Líder
-   * en cada turno). Por defecto 2500 ms; 0 la desactiva.
+   * Pausa para presentar cada activación de la habilidad de un Líder. Por defecto 4000 ms; 0 la
+   * desactiva.
    */
   presentacionLiderMs?: number;
 }
 
 export const CELEBRACION_POR_DEFECTO_MS = 4000;
 export const PAUSA_RESULTADO_POR_DEFECTO_MS = 3000;
-export const PRESENTACION_LIDER_POR_DEFECTO_MS = 2500;
+export const PRESENTACION_LIDER_POR_DEFECTO_MS = 4000;
 export const RETARDO_BOT_POR_DEFECTO_MS = 700;
 
 /** Monstruo derrotado que se está celebrando: mientras dura, nadie puede jugar. */
@@ -159,9 +159,6 @@ export class Anfitrion {
   private readonly colaPresentaciones: PresentacionLider[] = [];
   private temporizadorPresentacion: unknown = null;
   private ultimaPresentacion = 0;
-  /** Turno (`turno.numero`) de `lideresPresentados` y Líderes ya presentados en él. */
-  private turnoPresentados: number;
-  private readonly lideresPresentados = new Set<string>();
   /**
    * Con la partida detenida (celebración o pausa de resultado): lo que les quedaba a la ventana y
    * a la decisión, y el traspaso.
@@ -188,18 +185,9 @@ export class Anfitrion {
   ) {
     this.estado = estado;
     this.eventos.push(...eventosPrevios);
-    // Los Monstruos matados antes de crear el anfitrión (partida cargada) no se celebran.
+    // Los eventos anteriores a crear el anfitrión (partida cargada) no se revisan: ni se celebran
+    // sus Monstruos ni se presentan sus activaciones de Líder.
     this.eventosVistos = this.eventos.length;
-    // Tampoco se presentan sus activaciones de Líder. Si `eventosPrevios` incluye el `turnoIniciado`
-    // del turno en curso, las activaciones posteriores a él cuentan como ya presentadas (no se
-    // repiten tras cargar); si no lo incluye (sin historial, o recortado), el turno empieza limpio y
-    // la siguiente activación de cada Líder se presenta.
-    this.turnoPresentados = -1;
-    this.detectarPresentaciones(this.eventos, false);
-    if (this.turnoPresentados !== estado.turno.numero) {
-      this.turnoPresentados = estado.turno.numero;
-      this.lideresPresentados.clear();
-    }
     // Todos tienen generador propio: los humanos también, por si un bot tiene que decidir por ellos.
     for (const j of config.jugadores) {
       let rng = crearRng(`${config.semilla}:${j.id}`);
@@ -631,23 +619,15 @@ export class Anfitrion {
   }
 
   /**
-   * Encola la presentación de cada Líder que se activa por primera vez en el turno. Las siguientes
-   * activaciones del mismo Líder en ese turno no detienen la partida (la interfaz las ve por el
-   * evento). Con la partida ganada no se presenta nada: la victoria pasa por delante. Con
-   * `encolar` a false solo se anotan como vistas (historial de una partida cargada).
+   * Encola una presentación por cada activación de Líder en los eventos nuevos, en orden (también
+   * si el mismo Líder se activa varias veces en el turno). Con la partida ganada no se presenta
+   * nada: la victoria pasa por delante.
    */
-  private detectarPresentaciones(nuevos: readonly Evento[], encolar = true): void {
+  private detectarPresentaciones(nuevos: readonly Evento[]): void {
     const duracionMs = this.opciones.presentacionLiderMs ?? PRESENTACION_LIDER_POR_DEFECTO_MS;
+    if (duracionMs <= 0 || this.terminado || this.estado.ganador !== null) return;
     for (const e of nuevos) {
-      if (e.tipo === 'turnoIniciado' && e.numero !== this.turnoPresentados) {
-        this.turnoPresentados = e.numero;
-        this.lideresPresentados.clear();
-      }
       if (e.tipo !== 'liderActivado') continue;
-      const clave = `${e.jugador}:${e.carta}`;
-      if (this.lideresPresentados.has(clave)) continue;
-      this.lideresPresentados.add(clave);
-      if (!encolar || duracionMs <= 0 || this.terminado || this.estado.ganador !== null) continue;
       this.ultimaPresentacion += 1;
       this.colaPresentaciones.push({
         id: this.ultimaPresentacion,

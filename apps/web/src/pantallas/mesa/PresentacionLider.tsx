@@ -3,16 +3,20 @@ import { useEffect, useState } from 'react';
 import { useReducirAnimaciones } from '../../estado/app';
 import { useCarta } from '../../estado/contexto';
 import { t } from '../../i18n';
-import { PRESENTACION_LIDER_MS } from '../../juego/fuente';
 import { Carta } from '../../ui/Carta';
 import { CAPA } from '../../ui/capas';
 
-/** Instantes de la secuencia (ms) sobre la duración nominal de 2,5 s. */
+/**
+ * Instantes de la secuencia (ms). El giro dura siempre lo mismo (salvo que la presentación sea más
+ * corta que ~4 s): el tiempo restante es la permanencia con rayos, chispas y texto.
+ */
 const FIN_GIRO = 1200;
-const INICIO_TEXTO = 1400;
+const INICIO_TEXTO = 1300;
+/** Velocidad de giro de los rayos (grados por segundo). */
+const GRADOS_RAYOS_POR_S = 12;
 /** Con "Reducir animaciones": la carta y, enseguida, el texto. */
 const INICIO_TEXTO_REDUCIDO = 500;
-/** Vueltas completas sobre el eje X al entrar. */
+/** Vueltas completas sobre el eje Y al entrar. */
 const VUELTAS = 2;
 
 /** Chispas: [x %, y %, tamaño (rem), retardo (s), duración (s)]. Posiciones fijas, sin azar. */
@@ -47,7 +51,7 @@ interface Props {
 }
 
 /**
- * Presentación de la habilidad de un Líder: la carta entra girando sobre su eje X, estalla un
+ * Presentación de la habilidad de un Líder: la carta entra girando sobre su eje Y, estalla un
  * destello con rayos de luz y chispas, y aparece "¡X activa la habilidad de su Líder!". Tapa y
  * bloquea la mesa (nadie juega mientras dure). Es solo visual (`aria-hidden`): el historial ya
  * anuncia el evento. Solo se anima `transform` y `opacity`.
@@ -62,21 +66,24 @@ export function PresentacionLider({
   const reducir = useReducirAnimaciones();
   const carta = useCarta(cartaId);
   const efecto = carta?.tipo === 'lider' ? carta.texto : '';
-  const factor = Math.min(1, Math.max(duracionMs, 1) / PRESENTACION_LIDER_MS);
+  const total = Math.max(duracionMs, 1);
+  const finGiro = Math.min(FIN_GIRO, total * 0.3);
   const transcurrido = Math.max(0, duracionMs - restanteMs);
   /** Si se monta con la secuencia ya avanzada (reconexión), se salta el giro. */
-  const yaGirada = transcurrido >= FIN_GIRO * factor;
+  const yaGirada = transcurrido >= finGiro;
+  /** Segundos que quedan de permanencia (con rayos) desde que arranca el brillo. */
+  const permanenciaS = Math.max((total - Math.max(finGiro, transcurrido)) / 1000, 0.05);
   const [brillo, setBrillo] = useState(yaGirada);
 
   useEffect(() => {
     if (reducir || brillo) return undefined;
-    const id = window.setTimeout(() => setBrillo(true), FIN_GIRO * factor - transcurrido);
+    const id = window.setTimeout(() => setBrillo(true), finGiro - transcurrido);
     return () => window.clearTimeout(id);
     // Solo al montar (o si cambia el modo de animación): el tiempo corre por el temporizador.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reducir]);
 
-  const inicioTexto = (reducir ? INICIO_TEXTO_REDUCIDO : INICIO_TEXTO) * factor;
+  const inicioTexto = reducir ? INICIO_TEXTO_REDUCIDO : Math.min(INICIO_TEXTO, total * 0.33);
   const retardoTexto = Math.max(0, inicioTexto - transcurrido) / 1000;
   const textoYaVisible = transcurrido >= inicioTexto;
   const anchoCarta = 'w-[min(18rem,50vw,32vh)]!';
@@ -108,21 +115,21 @@ export function PresentacionLider({
           data-carta-lider=""
           data-giro=""
           className="relative"
-          style={{ transformStyle: 'preserve-3d' }}
-          initial={yaGirada ? false : { rotateX: -360 * VUELTAS, scale: 0.45, opacity: 0 }}
-          animate={{ rotateX: 0, scale: [null, 1.1, 1], opacity: 1 }}
+          style={{ transformStyle: 'preserve-3d', willChange: 'transform' }}
+          initial={yaGirada ? false : { rotateY: -360 * VUELTAS, scale: 0.45, opacity: 0 }}
+          animate={{ rotateY: 0, scale: [null, 1.1, 1], opacity: 1 }}
           transition={{
-            duration: (FIN_GIRO * factor) / 1000,
+            duration: finGiro / 1000,
             ease: [0.22, 0.7, 0.3, 1],
-            scale: { times: [0, 0.8, 1], duration: (FIN_GIRO * factor) / 1000 },
-            opacity: { duration: 0.25 * factor },
+            scale: { times: [0, 0.8, 1], duration: finGiro / 1000 },
+            opacity: { duration: 0.25 },
           }}
         >
           <div style={{ backfaceVisibility: 'hidden' }}>{frente}</div>
           {/* Dorso: se ve mientras la carta está de espaldas. */}
           <div
             className="absolute inset-0"
-            style={{ backfaceVisibility: 'hidden', transform: 'rotateX(180deg)' }}
+            style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
           >
             <Carta
               cartaId={null}
@@ -137,7 +144,7 @@ export function PresentacionLider({
                 className="absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/70 to-transparent"
                 initial={{ x: '-50%' }}
                 animate={{ x: '350%' }}
-                transition={{ duration: 0.7 * factor, ease: 'easeInOut' }}
+                transition={{ duration: 0.7, ease: 'easeInOut' }}
               />
             </div>
           )}
@@ -168,7 +175,7 @@ export function PresentacionLider({
             }}
             initial={{ opacity: 0, scale: 0.4 }}
             animate={{ opacity: [0, 1, 0.45], scale: [0.4, 1.15, 1] }}
-            transition={{ duration: 0.9 * factor, times: [0, 0.35, 1], ease: 'easeOut' }}
+            transition={{ duration: 0.9, times: [0, 0.35, 1], ease: 'easeOut' }}
           />
           {/* Rayos de luz que giran despacio mientras dura la presentación. */}
           <motion.div
@@ -182,10 +189,10 @@ export function PresentacionLider({
               willChange: 'transform',
             }}
             initial={{ opacity: 0, rotate: 0 }}
-            animate={{ opacity: 1, rotate: 60 }}
+            animate={{ opacity: 1, rotate: GRADOS_RAYOS_POR_S * permanenciaS }}
             transition={{
-              opacity: { duration: 0.5 * factor },
-              rotate: { duration: Math.max(duracionMs / 1000, 0.05), ease: 'linear' },
+              opacity: { duration: 0.5 },
+              rotate: { duration: permanenciaS, ease: 'linear' },
             }}
           />
           {/* Chispas. */}
@@ -203,7 +210,12 @@ export function PresentacionLider({
               }}
               initial={{ opacity: 0, scale: 0.3 }}
               animate={{ opacity: [0, 1, 0], scale: [0.3, 1, 0.3], rotate: [0, 45] }}
-              transition={{ duration: dur, delay: retardo * factor, repeat: 1 }}
+              transition={{
+                duration: dur,
+                delay: retardo,
+                // Repite mientras dure la permanencia, un número finito de veces.
+                repeat: Math.max(0, Math.ceil((permanenciaS - retardo) / dur) - 1),
+              }}
             />
           ))}
         </>
@@ -219,7 +231,7 @@ export function PresentacionLider({
         }
         animate={reducir ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
         transition={{
-          duration: reducir ? 0.2 : 0.45 * factor,
+          duration: reducir ? 0.2 : 0.45,
           delay: retardoTexto,
           ease: 'easeOut',
         }}

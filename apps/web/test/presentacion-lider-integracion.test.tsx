@@ -1,7 +1,7 @@
 /**
  * Presentación del Líder de extremo a extremo: Anfitrión real (DirectorVivo), motor y catálogo
  * reales, reloj manual y la mesa pintada. La Canción Carismática actúa en cada tirada de Héroe
- * (R-082, R-104): solo la primera de cada turno lleva la presentación; las demás, un destello.
+ * (R-082, R-104): cada activación lleva la presentación completa (también la segunda del mismo turno).
  */
 import { SISTEMA } from '@hts/engine';
 import { act, cleanup, render } from '@testing-library/react';
@@ -45,7 +45,7 @@ vi.mock('framer-motion', async () => {
 
 afterEach(cleanup);
 
-const PRESENTACION = 2500;
+const PRESENTACION = 4000;
 const config: ConfigLocal = {
   modo: 'bots', // observa ana; los tres juegan como humanos
   reglas: 'normal',
@@ -55,7 +55,7 @@ const config: ConfigLocal = {
 };
 
 describe.skipIf(!HAY_CATALOGO)('Presentación del Líder en la mesa (motor real)', () => {
-  it('R-082: la primera tirada presenta al Líder, la segunda destella y el turno siguiente vuelve a presentar', () => {
+  it('R-082: cada tirada presenta al Líder, también la segunda del mismo turno', () => {
     const s = mesa({ [A]: 'lider_la_cancion_carismatica', [B]: 'lider_la_flecha_divina' });
     const h1 = heroe(s, A, 'heroe_peanut');
     const h2 = heroe(s, A, 'heroe_napping_nibbles');
@@ -103,22 +103,24 @@ describe.skipIf(!HAY_CATALOGO)('Presentación del Líder en la mesa (motor real)
     expect(presentacion()).toBeNull();
     expect(destellos()).toBe(0);
 
-    // 2.ª activación en el mismo turno: no pausa y la zona de ana destella una vez.
+    // 2.ª activación en el mismo turno: también presentación, y sin destellos.
     tirar(h2);
     expect(director.eventos.filter((e) => e.tipo === 'liderActivado')).toHaveLength(2);
-    expect(director.presentacionLider).toBeNull();
+    expect(director.presentacionLider).toMatchObject({ id: 2, jugador: A });
+    expect(presentacion()).not.toBeNull();
+    expect(destellos()).toBe(0);
+    act(() => reloj.avanzar(PRESENTACION));
     expect(presentacion()).toBeNull();
-    expect(destellos()).toBe(1);
 
-    // Turno siguiente de ana (tras B y C): vuelve la presentación y no suma otro destello.
+    // Turno siguiente de ana (tras B y C): vuelve la presentación.
     act(() => {
       for (const id of [A, B, C]) expect(director.enviar(id, { tipo: 'FIN_TURNO' })).toBeNull();
     });
     expect(director.estado.turno.jugador).toBe(A);
     tirar(h1);
-    expect(director.presentacionLider).toMatchObject({ id: 2, jugador: A });
+    expect(director.presentacionLider).toMatchObject({ id: 3, jugador: A });
     expect(presentacion()).not.toBeNull();
-    expect(destellos()).toBe(1);
+    expect(destellos()).toBe(0);
     act(() => reloj.avanzar(PRESENTACION));
     expect(presentacion()).toBeNull();
   });

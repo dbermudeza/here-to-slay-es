@@ -63,8 +63,5 @@ export interface FuenteMesa {
   confirmarTraspaso(): void;
 }
 
-/** Duración nominal de la presentación de la habilidad de un Líder (la de la animación completa). */
-export const PRESENTACION_LIDER_MS = 2500;
-
 /** Duración nominal de la celebración de un Monstruo derrotado (la de la animación completa). */
 export const CELEBRACION_MS = CELEBRACION_POR_DEFECTO_MS;

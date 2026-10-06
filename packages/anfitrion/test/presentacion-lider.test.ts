@@ -1,10 +1,10 @@
 /**
- * Presentación del Líder: la primera vez en cada turno que se activa la habilidad del Líder de un
- * jugador (evento `liderActivado`, R-082/R-103), la partida se detiene para todos
- * `presentacionLiderMs`, como en la celebración. Las demás activaciones de ese Líder en el turno no
- * detienen nada. Usa el catálogo real (se salta si falta Referencias/).
+ * Presentación del Líder: cada vez que se activa la habilidad del Líder de un jugador (evento
+ * `liderActivado`, R-082/R-103), la partida se detiene para todos `presentacionLiderMs`, como en la
+ * celebración. Varias activaciones seguidas se presentan una tras otra. Usa el catálogo real (se
+ * salta si falta Referencias/).
  */
-import { SISTEMA, type Evento, type GameState } from '@hts/engine';
+import { SISTEMA, type Evento, type GameState, type Motor } from '@hts/engine';
 import { expect, it } from 'vitest';
 import {
   A,
@@ -46,10 +46,11 @@ function anfitrion(
   opciones: OpcionesAnfitrion = {},
   extra: Partial<ConfigAnfitrion> = {},
   previos: readonly Evento[] = [],
+  m: Motor = motor,
 ) {
   const reloj = new RelojManual();
   const a = new Anfitrion(
-    motor,
+    m,
     config(extra),
     s,
     reloj,
@@ -95,9 +96,25 @@ function flecha(monstruosPrevios: string[] = []): { s: GameState; objetivo: stri
   return { s: forzarDados(s, 5, 5), objetivo };
 }
 
+/**
+ * Motor que repite cada `liderActivado` en el mismo lote de eventos: simula dos activaciones del
+ * mismo Líder en una sola acción.
+ */
+const motorDoble: Motor = {
+  ...motor,
+  reducer: (s, a) => {
+    const r = motor.reducer(s, a);
+    if (!r.ok) return r;
+    return {
+      ...r,
+      events: r.events.flatMap((e): Evento[] => (e.tipo === 'liderActivado' ? [e, e] : [e])),
+    };
+  },
+};
+
 describeReal('Anfitrión: presentación del Líder', () => {
-  it('R-082: la primera activación detiene la partida 2,5 s para todos', () => {
-    expect(PRESENTACION_LIDER_POR_DEFECTO_MS).toBe(2500);
+  it('R-082: la activación detiene la partida 4 s para todos', () => {
+    expect(PRESENTACION_LIDER_POR_DEFECTO_MS).toBe(4000);
     const s = mesa({ [A]: 'lider_la_garra_sombria' });
     mano(s, B, 'desafio');
     mano(s, C, 'desafio');
@@ -137,7 +154,7 @@ describeReal('Anfitrión: presentación del Líder', () => {
     expect(a.legalesDe(A).length).toBeGreaterThan(0);
   });
 
-  it('R-082: otra activación del mismo Líder en el turno no detiene; en el siguiente turno, sí', () => {
+  it('R-082: dos activaciones seguidas del mismo Líder en el turno dan dos presentaciones', () => {
     const { s, heroes } = cancion();
     const { a, reloj } = anfitrion(s);
     tirarHeroe(a, heroes[0]);
@@ -147,14 +164,37 @@ describeReal('Anfitrión: presentación del Líder', () => {
 
     tirarHeroe(a, heroes[1]);
     expect(activaciones(a)).toHaveLength(2);
+    expect(a.estado.turno.numero).toBe(s.turno.numero);
+    expect(a.presentacionLider).toEqual({
+      id: 2,
+      jugador: A,
+      carta: 'lider_la_cancion_carismatica',
+      duracionMs: PRESENTACION,
+    });
+    expect(a.enviar(A, { tipo: 'FIN_TURNO' })).toBe('PRESENTACION_LIDER');
+    reloj.avanzar(PRESENTACION);
     expect(a.presentacionLider).toBeNull();
     expect(a.legalesDe(A)).toContainEqual({ tipo: 'FIN_TURNO' });
+  });
 
-    for (const id of [A, B, C]) expect(a.enviar(id, { tipo: 'FIN_TURNO' })).toBeNull();
-    expect(a.estado.turno).toMatchObject({ jugador: A, numero: s.turno.numero + 3 });
+  it('R-082: dos activaciones en el mismo lote se presentan en orden, una tras otra', () => {
+    const { s, heroes } = cancion();
+    const { a, reloj } = anfitrion(s, { pausaResultadoMs: 3000 }, {}, [], motorDoble);
     tirarHeroe(a, heroes[0]);
-    expect(activaciones(a)).toHaveLength(3);
+    expect(activaciones(a)).toHaveLength(2);
+    expect(a.presentacionLider).toMatchObject({ id: 1, jugador: A });
+    expect(a.pausaResultado).toBeNull();
+    reloj.avanzar(PRESENTACION);
     expect(a.presentacionLider).toMatchObject({ id: 2, jugador: A });
+    expect(a.restantePresentacionLiderMs()).toBe(PRESENTACION);
+    expect(a.pausaResultado).toBeNull();
+    expect(a.enviar(A, { tipo: 'FIN_TURNO' })).toBe('PRESENTACION_LIDER');
+    reloj.avanzar(PRESENTACION);
+    expect(a.presentacionLider).toBeNull();
+    // La pausa de resultado llega después de todas las presentaciones.
+    expect(a.restantePausaResultadoMs()).toBe(3000);
+    reloj.avanzar(3000);
+    expect(a.enviar(A, { tipo: 'FIN_TURNO' })).toBeNull();
   });
 
   it('R-104: tras la presentación viene la pausa de resultado completa', () => {
@@ -283,47 +323,23 @@ describeReal('Anfitrión: presentación del Líder', () => {
     expect(reloj.pendientes).toBe(0);
   });
 
-  it('una partida cargada no presenta las activaciones del historial ni las repite en su turno', () => {
+  it('una partida cargada no presenta las activaciones del historial; las nuevas, sí', () => {
     const { s, heroes } = cancion();
     const previos: Evento[] = [
+      { tipo: 'liderActivado', jugador: B, carta: 'lider_la_flecha_divina' },
       { tipo: 'turnoIniciado', jugador: A, numero: s.turno.numero },
       { tipo: 'liderActivado', jugador: A, carta: 'lider_la_cancion_carismatica' },
     ];
-    const { a } = anfitrion(s, {}, {}, previos);
+    const { a, reloj } = anfitrion(s, {}, {}, previos);
     expect(a.presentacionLider).toBeNull();
+    expect(reloj.pendientes).toBe(0);
     tirarHeroe(a, heroes[0]);
-    expect(activaciones(a)).toHaveLength(2);
-    expect(a.presentacionLider).toBeNull();
-  });
-
-  it('al cargar, las activaciones de turnos anteriores no cuentan para el turno en curso', () => {
-    const { s, heroes } = cancion();
-    const n = s.turno.numero;
-    const garra = 'lider_la_garra_sombria';
-    const previos: Evento[] = [
-      // Historial recortado: empieza a mitad de un turno anterior, sin su turnoIniciado.
-      { tipo: 'liderActivado', jugador: A, carta: 'lider_la_cancion_carismatica' },
-      { tipo: 'turnoIniciado', jugador: A, numero: n },
-      // Otro Líder ya activado en el turno en curso: ese sí cuenta como presentado.
-      { tipo: 'liderActivado', jugador: B, carta: garra },
-    ];
-    const { a } = anfitrion(s, {}, {}, previos);
-    expect(a.presentacionLider).toBeNull();
-    tirarHeroe(a, heroes[0]);
-    expect(a.presentacionLider).toMatchObject({
+    expect(activaciones(a)).toHaveLength(3);
+    expect(a.presentacionLider).toEqual({
+      id: 1,
       jugador: A,
       carta: 'lider_la_cancion_carismatica',
+      duracionMs: PRESENTACION,
     });
-  });
-
-  it('al cargar sin el turnoIniciado del turno en curso, el turno empieza limpio', () => {
-    const { s, heroes } = cancion();
-    const previos: Evento[] = [
-      { tipo: 'liderActivado', jugador: A, carta: 'lider_la_cancion_carismatica' },
-    ];
-    const { a } = anfitrion(s, {}, {}, previos);
-    expect(a.presentacionLider).toBeNull();
-    tirarHeroe(a, heroes[0]);
-    expect(a.presentacionLider).toMatchObject({ jugador: A });
   });
 });
