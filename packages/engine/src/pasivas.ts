@@ -253,7 +253,14 @@ export function notificar(
       if (m !== null) marcos.push(m);
     }
   }
-  for (const m of marcos)
+  // `disparadorActivado` y `liderActivado` se emiten al apilar el disparador, no cuando su programa
+  // actúa: el efecto se resuelve a continuación (o después del efecto de la carta, D-37), sin
+  // posibilidad de cancelarlo, así que el anuncio va en el orden del suceso que lo activa.
+  for (const m of marcos) {
     emitir({ tipo: 'disparadorActivado', jugador: m.jugador, carta: m.carta });
+    if (d.jugadores.some((j) => j.id === m.jugador && j.lider === m.fuente)) {
+      emitir({ tipo: 'liderActivado', jugador: m.jugador, carta: m.carta });
+    }
+  }
   for (const m of [...marcos].reverse()) apilarMarco(d, m);
 }

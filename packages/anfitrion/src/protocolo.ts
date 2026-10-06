@@ -205,6 +205,17 @@ export interface EstadoPartida {
    * pausa se alarga por otro resultado; `duracionMs` es la configurada en el anfitrión.
    */
   pausaResultado: { id: number; duracionMs: number; restanteMs: number } | null;
+  /**
+   * Activación de la habilidad de un Líder que se está presentando (la primera de cada Líder en
+   * cada turno; nadie puede jugar mientras dure), o null. `duracionMs` es la configurada.
+   */
+  presentacionLider: {
+    id: number;
+    jugador: JugadorId;
+    carta: string;
+    duracionMs: number;
+    restanteMs: number;
+  } | null;
   conexiones: Record<JugadorId, EstadoConexion>;
 }
 

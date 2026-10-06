@@ -126,6 +126,8 @@ export function describirEvento(e: Evento, n: Nombres): string | null {
       return `Se activa la habilidad de ${C(e.carta)} (${J(e.jugador)}).`;
     case 'habilidadUsada':
       return `${J(e.jugador)} usa la habilidad de ${C(e.carta)}.`;
+    case 'liderActivado':
+      return `${J(e.jugador)} ha activado la habilidad de su Líder, ${C(e.carta)}.`;
     case 'sinObjetivos':
       return `${C(e.carta)}: no hay objetivos válidos.`;
     case 'heroeDestruido':

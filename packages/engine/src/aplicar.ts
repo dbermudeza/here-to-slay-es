@@ -94,6 +94,8 @@ export function aplicar(ctx: Ctx, d: GameState, { actor, accion }: Envio, emitir
       d.turno.pa -= hab.pasiva.costePa;
       d.turno.habilidadesUsadas.push(accion.uid);
       emitir({ tipo: 'habilidadUsada', jugador: j.id, carta: hab.carta });
+      if (accion.uid === j.lider)
+        emitir({ tipo: 'liderActivado', jugador: j.id, carta: hab.carta });
       apilarMarco(d, { jugador: j.id, fuente: accion.uid, carta: hab.carta, pasiva: hab.indice });
       return;
     }

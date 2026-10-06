@@ -22,6 +22,7 @@ import { Vuelos } from './Vuelos';
 import { DialogoDecision } from './DialogoDecision';
 import { Anunciador, Historial } from './Historial';
 import { Mano } from './Mano';
+import { PresentacionLider } from './PresentacionLider';
 import { RotuloTurno } from './RotuloTurno';
 import { Traspaso, Victoria } from './Superposiciones';
 import { ZonaJugador } from './ZonaJugador';
@@ -116,7 +117,10 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
   // Monstruo derrotado: la mesa queda tapada, bloqueada e inerte hasta que acaba la celebración.
   const celebracion = director.celebracion;
   const restanteCelebracion = director.restanteCelebracionMs();
-  const hayCelebracion = celebracion !== null;
+  // Habilidad de un Líder: misma idea (el anfitrión garantiza que nunca coincide con la celebración).
+  const presentacion = director.presentacionLider;
+  const restantePresentacion = director.restantePresentacionLiderMs();
+  const hayCelebracion = celebracion !== null || presentacion !== null;
   // Quien tenía el foco antes de la celebración lo recupera al acabar (la mesa está inerte).
   const foco = useRef<HTMLElement | null>(null);
   useEffect(() => {
@@ -417,6 +421,16 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
             nombreMonstruo={valor.nombreCarta(celebracion.carta)}
             duracionMs={celebracion.duracionMs}
             restanteMs={restanteCelebracion ?? 0}
+          />
+        )}
+        {presentacion !== null && (
+          <PresentacionLider
+            key={presentacion.id}
+            cartaId={presentacion.carta}
+            nombreJugador={valor.nombreJugador(presentacion.jugador)}
+            nombreLider={valor.nombreCarta(presentacion.carta)}
+            duracionMs={presentacion.duracionMs}
+            restanteMs={restantePresentacion ?? 0}
           />
         )}
       </div>

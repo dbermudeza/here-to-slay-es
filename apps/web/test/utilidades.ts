@@ -41,6 +41,7 @@ export function directorEn(
     retardoBotMs: 100,
     celebracionMs: 0,
     pausaResultadoMs: 0,
+    presentacionLiderMs: 0,
   });
   return { director, reloj };
 }

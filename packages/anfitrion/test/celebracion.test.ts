@@ -37,6 +37,7 @@ function preparado(c: ConfigAnfitrion, opciones: OpcionesAnfitrion = {}) {
   const a = new Anfitrion(motor, c, forzarDados(s, 4, 4), reloj, {
     retardoBotMs: 100,
     pausaResultadoMs: 0,
+    presentacionLiderMs: 0,
     ...opciones,
   });
   return { a, reloj, monstruo };

@@ -2,8 +2,8 @@
  * Arranque del servidor: `pnpm servidor` (compila la web y la sirve) o `pnpm --filter @hts/server start`.
  * Variables: PUERTO (por defecto 3000); DIR_WEB (carpeta de la web compilada, por defecto
  * apps/web/dist) y, para las pruebas e2e, RETARDO_BOT_MS (pausa antes de que actúe un bot),
- * CELEBRACION_MS (pausa al matar un Monstruo) y PAUSA_RESULTADO_MS (pausa de la partida tras un
- * resultado, para que se pueda leer).
+ * CELEBRACION_MS (pausa al matar un Monstruo), PAUSA_RESULTADO_MS (pausa de la partida tras un
+ * resultado, para que se pueda leer) y PRESENTACION_LIDER_MS (pausa al activarse un Líder).
  */
 import { resolve } from 'node:path';
 import type { OpcionesAnfitrion } from '@hts/anfitrion';
@@ -15,6 +15,7 @@ const VARIABLES = {
   retardoBotMs: 'RETARDO_BOT_MS',
   celebracionMs: 'CELEBRACION_MS',
   pausaResultadoMs: 'PAUSA_RESULTADO_MS',
+  presentacionLiderMs: 'PRESENTACION_LIDER_MS',
 } as const satisfies Partial<Record<keyof OpcionesAnfitrion, string>>;
 
 const opcionesAnfitrion: OpcionesAnfitrion = {};

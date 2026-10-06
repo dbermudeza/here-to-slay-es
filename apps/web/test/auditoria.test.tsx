@@ -35,6 +35,7 @@ function montar(estado: ReturnType<typeof mesa>) {
   const director = new DirectorVivo(motor, cfg(), estado, reloj, {
     retardoBotMs: 100,
     celebracionMs: 0,
+    presentacionLiderMs: 0,
   });
   const ui = render(
     <ProveedorCatalogo motor={motor} cartas={CARTAS}>

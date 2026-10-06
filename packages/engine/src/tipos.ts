@@ -330,6 +330,13 @@ export type Evento =
   | { tipo: 'efectoActivado'; jugador: JugadorId; carta: string }
   | { tipo: 'disparadorActivado'; jugador: JugadorId; carta: string }
   | { tipo: 'habilidadUsada'; jugador: JugadorId; carta: string }
+  /**
+   * La habilidad del Líder de un jugador actúa de verdad: su bono se suma a una tirada (justo antes
+   * de su `tiradaFinal`), su disparador se activa (justo después de `disparadorActivado`, al apilarse;
+   * su programa se resuelve después) o se usa su habilidad (tras `habilidadUsada`). Es información
+   * pública.
+   */
+  | { tipo: 'liderActivado'; jugador: JugadorId; carta: string }
   | { tipo: 'esperandoDecision'; jugador: JugadorId; carta: string; motivo: MotivoPregunta }
   | { tipo: 'sinObjetivos'; jugador: JugadorId; carta: string }
   | { tipo: 'ataque'; jugador: JugadorId; monstruo: string }
@@ -422,7 +429,12 @@ export type CodigoError =
    * Lo usa solo el anfitrión: la partida se detiene un momento para que todos vean un resultado
    * (tirada, desafío, ataque o jugada resuelta) y nadie puede jugar.
    */
-  | 'PAUSA_RESULTADO';
+  | 'PAUSA_RESULTADO'
+  /**
+   * Lo usa solo el anfitrión: se presenta la activación de la habilidad de un Líder (la primera de
+   * cada Líder en cada turno) y nadie puede jugar.
+   */
+  | 'PRESENTACION_LIDER';
 
 export interface ErrorMotor {
   codigo: CodigoError;

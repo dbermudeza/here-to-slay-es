@@ -43,6 +43,7 @@ export default defineConfig({
       RETARDO_BOT_MS: '40',
       CELEBRACION_MS: '300',
       PAUSA_RESULTADO_MS: '50',
+      PRESENTACION_LIDER_MS: '50',
     },
   },
 });

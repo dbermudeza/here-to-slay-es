@@ -13,6 +13,10 @@
  * - Pausa de resultado: tras una tirada, un desafío, un ataque o una jugada que se resuelve, la
  *   partida se detiene un momento para todos, como en la celebración pero sin animación propia,
  *   para que el resultado se vea antes de la siguiente pregunta o ventana.
+ * - Presentación del Líder: la primera vez en cada turno que se activa la habilidad del Líder de un
+ *   jugador (evento `liderActivado`), la partida se detiene igual para que todos vean la animación.
+ * - Las detenciones nunca se solapan: van una tras otra, en el orden de los eventos (presentación
+ *   del Líder → celebración del Monstruo → pausa de resultado; la celebración tapa al resultado).
  *
  * No depende de React ni de la red: se observa con `suscribir` y `version`.
  */
@@ -59,10 +63,16 @@ export interface OpcionesAnfitrion {
    * desactiva.
    */
   pausaResultadoMs?: number;
+  /**
+   * Pausa para presentar la activación de la habilidad de un Líder (solo la primera de cada Líder
+   * en cada turno). Por defecto 2500 ms; 0 la desactiva.
+   */
+  presentacionLiderMs?: number;
 }
 
 export const CELEBRACION_POR_DEFECTO_MS = 4000;
 export const PAUSA_RESULTADO_POR_DEFECTO_MS = 3000;
+export const PRESENTACION_LIDER_POR_DEFECTO_MS = 2500;
 export const RETARDO_BOT_POR_DEFECTO_MS = 700;
 
 /** Monstruo derrotado que se está celebrando: mientras dura, nadie puede jugar. */
@@ -70,6 +80,16 @@ export interface Celebracion {
   /** Correlativo por anfitrión (distingue dos celebraciones seguidas de la misma carta). */
   id: number;
   jugador: JugadorId;
+  carta: string;
+  duracionMs: number;
+}
+
+/** Activación de la habilidad de un Líder que se está presentando: mientras dura, nadie juega. */
+export interface PresentacionLider {
+  /** Correlativo por anfitrión. */
+  id: number;
+  jugador: JugadorId;
+  /** Id de catálogo del Líder. */
   carta: string;
   duracionMs: number;
 }
@@ -131,6 +151,17 @@ export class Anfitrion {
   private pausaActual: { pausa: PausaResultado; fin: number } | null = null;
   private temporizadorPausa: unknown = null;
   private ultimaPausa = 0;
+  /** Pausa de resultado que espera a que termine la presentación del Líder. */
+  private pausaPendiente = false;
+  /** Presentación del Líder en curso e instante (ms) en que termina. */
+  private presentacionActual: { presentacion: PresentacionLider; fin: number } | null = null;
+  /** Activaciones de Líder que esperan su presentación (una tras otra). */
+  private readonly colaPresentaciones: PresentacionLider[] = [];
+  private temporizadorPresentacion: unknown = null;
+  private ultimaPresentacion = 0;
+  /** Turno (`turno.numero`) de `lideresPresentados` y Líderes ya presentados en él. */
+  private turnoPresentados: number;
+  private readonly lideresPresentados = new Set<string>();
   /**
    * Con la partida detenida (celebración o pausa de resultado): lo que les quedaba a la ventana y
    * a la decisión, y el traspaso.
@@ -159,6 +190,16 @@ export class Anfitrion {
     this.eventos.push(...eventosPrevios);
     // Los Monstruos matados antes de crear el anfitrión (partida cargada) no se celebran.
     this.eventosVistos = this.eventos.length;
+    // Tampoco se presentan sus activaciones de Líder. Si `eventosPrevios` incluye el `turnoIniciado`
+    // del turno en curso, las activaciones posteriores a él cuentan como ya presentadas (no se
+    // repiten tras cargar); si no lo incluye (sin historial, o recortado), el turno empieza limpio y
+    // la siguiente activación de cada Líder se presenta.
+    this.turnoPresentados = -1;
+    this.detectarPresentaciones(this.eventos, false);
+    if (this.turnoPresentados !== estado.turno.numero) {
+      this.turnoPresentados = estado.turno.numero;
+      this.lideresPresentados.clear();
+    }
     // Todos tienen generador propio: los humanos también, por si un bot tiene que decidir por ellos.
     for (const j of config.jugadores) {
       let rng = crearRng(`${config.semilla}:${j.id}`);
@@ -322,11 +363,26 @@ export class Anfitrion {
     return Math.max(0, this.pausaActual.fin - this.reloj.ahora());
   }
 
+  /** Activación de un Líder que se está presentando, o null. */
+  get presentacionLider(): PresentacionLider | null {
+    return this.presentacionActual?.presentacion ?? null;
+  }
+
+  /** Milisegundos que quedan de la presentación del Líder (null si no hay). */
+  restantePresentacionLiderMs(): number | null {
+    if (this.presentacionActual === null) return null;
+    return Math.max(0, this.presentacionActual.fin - this.reloj.ahora());
+  }
+
   /**
-   * Si la partida está detenida (celebración o pausa de resultado; nunca las dos a la vez), el
-   * código con el que se rechazan las acciones y el instante en que se reanuda; si no, null.
+   * Si la partida está detenida (presentación de un Líder, celebración o pausa de resultado; nunca
+   * dos a la vez), el código con el que se rechazan las acciones y el instante en que se reanuda;
+   * si no, null.
    */
   private detenida(): { codigo: CodigoError; fin: number } | null {
+    if (this.presentacionActual !== null) {
+      return { codigo: 'PRESENTACION_LIDER', fin: this.presentacionActual.fin };
+    }
     if (this.celebracionActual !== null) {
       return { codigo: 'CELEBRACION', fin: this.celebracionActual.fin };
     }
@@ -423,6 +479,8 @@ export class Anfitrion {
     this.temporizadorCelebracion = null;
     if (this.temporizadorPausa !== null) this.reloj.cancelar(this.temporizadorPausa);
     this.temporizadorPausa = null;
+    if (this.temporizadorPresentacion !== null) this.reloj.cancelar(this.temporizadorPresentacion);
+    this.temporizadorPresentacion = null;
     for (const t of this.desconectados.values()) this.reloj.cancelar(t);
     this.desconectados.clear();
     this.escuchas.clear();
@@ -449,26 +507,44 @@ export class Anfitrion {
     const nuevos = this.eventos.slice(this.eventosVistos);
     this.eventosVistos = this.eventos.length;
     const hayResultado = this.detectarResultados(nuevos);
+    this.detectarPresentaciones(nuevos);
     this.detectarCelebraciones(nuevos);
-    // La celebración manda: si está en curso (o acaba de empezar), no hay pausa de resultado. Con la
-    // partida ganada tampoco: no queda nada que detener (la interfaz pasa a la victoria).
+    // La celebración manda: si está en curso (o en espera), no hay pausa de resultado. Con la
+    // partida ganada tampoco: no queda nada que detener (la interfaz pasa a la victoria). Si hay una
+    // presentación de Líder, la pausa espera a que termine (y entonces dura lo configurado entero).
     const pausa = this.opciones.pausaResultadoMs ?? PAUSA_RESULTADO_POR_DEFECTO_MS;
     if (
       hayResultado &&
       pausa > 0 &&
       this.celebracionActual === null &&
+      this.colaCelebraciones.length === 0 &&
       this.estado.ganador === null &&
       !this.terminado
     ) {
-      this.empezarPausa(pausa);
+      if (this.presentacionActual !== null || this.colaPresentaciones.length > 0) {
+        this.pausaPendiente = true;
+      } else {
+        this.empezarPausa(pausa);
+      }
+    }
+    if (this.presentacionActual === null && this.celebracionActual === null) {
+      this.siguienteDetencion();
     }
     if (this.estado.ganador !== null) {
       // La celebración del Monstruo que da la victoria sigue su curso; la victoria va después.
-      // Una pausa de resultado en curso se cancela: al acabar la partida no queda temporizador.
+      // Una pausa de resultado o una presentación de Líder se cancelan: al acabar la partida no
+      // queda más temporizador que el de la celebración.
       this.cancelar();
       if (this.temporizadorPausa !== null) this.reloj.cancelar(this.temporizadorPausa);
       this.temporizadorPausa = null;
       this.pausaActual = null;
+      this.pausaPendiente = false;
+      if (this.temporizadorPresentacion !== null) {
+        this.reloj.cancelar(this.temporizadorPresentacion);
+      }
+      this.temporizadorPresentacion = null;
+      this.presentacionActual = null;
+      this.colaPresentaciones.length = 0;
       this.plazo = null;
       this.plazoDecision = null;
       this.restantePlazoCongelado = null;
@@ -554,6 +630,34 @@ export class Anfitrion {
     return hayResultado;
   }
 
+  /**
+   * Encola la presentación de cada Líder que se activa por primera vez en el turno. Las siguientes
+   * activaciones del mismo Líder en ese turno no detienen la partida (la interfaz las ve por el
+   * evento). Con la partida ganada no se presenta nada: la victoria pasa por delante. Con
+   * `encolar` a false solo se anotan como vistas (historial de una partida cargada).
+   */
+  private detectarPresentaciones(nuevos: readonly Evento[], encolar = true): void {
+    const duracionMs = this.opciones.presentacionLiderMs ?? PRESENTACION_LIDER_POR_DEFECTO_MS;
+    for (const e of nuevos) {
+      if (e.tipo === 'turnoIniciado' && e.numero !== this.turnoPresentados) {
+        this.turnoPresentados = e.numero;
+        this.lideresPresentados.clear();
+      }
+      if (e.tipo !== 'liderActivado') continue;
+      const clave = `${e.jugador}:${e.carta}`;
+      if (this.lideresPresentados.has(clave)) continue;
+      this.lideresPresentados.add(clave);
+      if (!encolar || duracionMs <= 0 || this.terminado || this.estado.ganador !== null) continue;
+      this.ultimaPresentacion += 1;
+      this.colaPresentaciones.push({
+        id: this.ultimaPresentacion,
+        jugador: e.jugador,
+        carta: e.carta,
+        duracionMs,
+      });
+    }
+  }
+
   /** Encola una celebración por cada Monstruo matado en los eventos nuevos. */
   private detectarCelebraciones(nuevos: readonly Evento[]): void {
     const duracionMs = this.opciones.celebracionMs ?? CELEBRACION_POR_DEFECTO_MS;
@@ -569,7 +673,62 @@ export class Anfitrion {
         });
       }
     }
-    if (this.celebracionActual === null) this.empezarCelebracion();
+  }
+
+  /**
+   * Sin presentación ni celebración en curso, empieza la siguiente detención en espera, en el orden
+   * de sus eventos: las presentaciones de Líder (el bono va antes que el resultado de la tirada y que
+   * el Monstruo matado), luego las celebraciones y por último la pausa de resultado aplazada.
+   * Devuelve si ha empezado alguna.
+   */
+  private siguienteDetencion(): boolean {
+    if (this.terminado) return false;
+    if (this.colaPresentaciones.length > 0) {
+      this.empezarPresentacion();
+      return true;
+    }
+    if (this.colaCelebraciones.length > 0) {
+      this.empezarCelebracion();
+      return true;
+    }
+    if (this.pausaPendiente) {
+      this.pausaPendiente = false;
+      const pausa = this.opciones.pausaResultadoMs ?? PAUSA_RESULTADO_POR_DEFECTO_MS;
+      if (pausa > 0 && this.estado.ganador === null) {
+        this.empezarPausa(pausa);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Empieza la siguiente presentación de la cola: congela la ventana, la decisión y los bots. */
+  private empezarPresentacion(): void {
+    const presentacion = this.colaPresentaciones.shift();
+    if (presentacion === undefined) return;
+    const fin = this.reloj.ahora() + presentacion.duracionMs;
+    // Una pausa de resultado en curso se aplaza entera hasta después de la presentación.
+    if (this.pausaActual !== null) {
+      if (this.temporizadorPausa !== null) this.reloj.cancelar(this.temporizadorPausa);
+      this.temporizadorPausa = null;
+      this.pausaActual = null;
+      this.pausaPendiente = true;
+    }
+    this.presentacionActual = { presentacion, fin };
+    this.temporizadorPresentacion = this.reloj.programar(
+      () => this.terminarPresentacion(),
+      presentacion.duracionMs,
+    );
+    this.detener(fin);
+  }
+
+  /** Fin de una presentación: la siguiente detención en espera o, si no hay, se reanuda. */
+  private terminarPresentacion(): void {
+    this.temporizadorPresentacion = null;
+    this.presentacionActual = null;
+    if (this.terminado) return;
+    if (!this.siguienteDetencion()) this.reanudar();
+    this.notificar();
   }
 
   /** Empieza la siguiente celebración de la cola: congela la ventana, la decisión y los bots. */
@@ -578,10 +737,11 @@ export class Anfitrion {
     if (celebracion === undefined) return;
     const fin = this.reloj.ahora() + celebracion.duracionMs;
     // La celebración tapa el resultado (la interfaz lo descarta) y ya detiene la partida: sustituye
-    // a la pausa de resultado en curso, si la hay (lo congelado pasa a la celebración).
+    // a la pausa de resultado en curso o aplazada, si la hay (lo congelado pasa a la celebración).
     if (this.temporizadorPausa !== null) this.reloj.cancelar(this.temporizadorPausa);
     this.temporizadorPausa = null;
     this.pausaActual = null;
+    this.pausaPendiente = false;
     this.celebracionActual = { celebracion, fin };
     this.temporizadorCelebracion = this.reloj.programar(
       () => this.terminarCelebracion(),
@@ -591,7 +751,7 @@ export class Anfitrion {
   }
 
   /**
-   * Detiene la partida hasta `fin` (celebración o pausa de resultado): congela la cuenta de la
+   * Detiene la partida hasta `fin` (presentación, celebración o pausa): congela la cuenta de la
    * ventana y el límite por decisión, difiere el traspaso y para a los bots. Si ya estaba detenida
    * (cola de celebraciones, pausa alargada), lo congelado se conserva y solo se mueve el fin.
    */
@@ -621,12 +781,7 @@ export class Anfitrion {
     this.temporizadorCelebracion = null;
     this.celebracionActual = null;
     if (this.terminado) return;
-    if (this.colaCelebraciones.length > 0) {
-      this.empezarCelebracion();
-      this.notificar();
-      return;
-    }
-    this.reanudar();
+    if (!this.siguienteDetencion()) this.reanudar();
     this.notificar();
   }
 

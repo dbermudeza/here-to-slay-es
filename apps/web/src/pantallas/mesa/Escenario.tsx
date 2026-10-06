@@ -165,7 +165,10 @@ export function Escenario({ onActivo }: { onActivo: (activo: boolean) => void })
   // Pausa tras un resultado: el anfitrión mantiene la ventana o la pregunta siguiente ya abiertas,
   // pero nadie puede actuar. Durante la pausa se sigue enseñando el resultado (ni se descarta ni se
   // tapa con la escena nueva); al terminar, sigue el flujo normal. La celebración manda sobre ella.
-  const hayPausa = director.pausaResultado !== null;
+  // La presentación de la habilidad de un Líder cuenta igual: no descarta la cola ni abre ventanas
+  // nuevas por debajo, y el resultado no empieza a contar su tiempo hasta que acaba.
+  const presentando = director.presentacionLider !== null;
+  const hayPausa = director.pausaResultado !== null || presentando;
   const otraCosa = (ventana || hayPregunta) && !hayPausa;
   const actual = otraCosa || tapado ? undefined : cola[0];
   useEffect(() => {
@@ -177,10 +180,10 @@ export function Escenario({ onActivo }: { onActivo: (activo: boolean) => void })
   // queda hasta el final de la pausa; así nunca queda un hueco vacío con la mesa bloqueada).
   const [vencido, setVencido] = useState<number | null>(null);
   useEffect(() => {
-    if (actualId === undefined) return undefined;
+    if (actualId === undefined || presentando) return undefined;
     const t = window.setTimeout(() => setVencido(actualId), duracion);
     return () => window.clearTimeout(t);
-  }, [actualId, duracion]);
+  }, [actualId, duracion, presentando]);
   useEffect(() => {
     if (actualId === undefined || vencido !== actualId || hayPausa) return;
     setCola((c) => c.filter((f) => f.id !== actualId));

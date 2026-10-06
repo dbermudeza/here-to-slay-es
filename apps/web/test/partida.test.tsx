@@ -15,7 +15,7 @@ describe.skipIf(!HAY_CATALOGO)('Partida completa en la interfaz (catálogo real)
       motor,
       { ...config('bots', ['normal', 'normal', 'facil', 'normal'], 'interfaz'), reglas: 'normal' },
       reloj,
-      { retardoBotMs: 50, celebracionMs: 0 },
+      { retardoBotMs: 50, celebracionMs: 0, presentacionLiderMs: 0 },
     );
     render(
       <ProveedorCatalogo motor={motor} cartas={CARTAS}>

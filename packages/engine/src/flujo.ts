@@ -218,6 +218,12 @@ function totalesFinales(
 ): number[] {
   return tiradas.map((t) => {
     const bonos = bonosDeTirada(ctx, d, t, contexto);
+    // El bono del Líder (R-082) se anuncia antes del total en el que se suma.
+    const lider = d.jugadores.find((j) => j.id === t.jugador)?.lider;
+    const cartaLider = lider === undefined ? null : idCarta(d, lider);
+    if (cartaLider !== null && bonos.some((b) => b.carta === cartaLider)) {
+      emitir({ tipo: 'liderActivado', jugador: t.jugador, carta: cartaLider });
+    }
     const base = totalTirada(t);
     const total = base + bonos.reduce((s, b) => s + b.valor, 0);
     emitir({

@@ -191,7 +191,7 @@ export function DialogoDecision() {
   const cima = m.vista.pila[m.vista.pila.length - 1];
   if (cima === undefined || !('jugador' in cima) || cima.jugador !== m.yo) return null;
   // Mientras se enseña un resultado nadie actúa: la pregunta aparece al terminar la pausa.
-  if (m.director.pausaResultado !== null) return null;
+  if (m.director.pausaResultado !== null || m.director.presentacionLider !== null) return null;
 
   if (cima.tipo === 'tiradaInmediata') {
     return (

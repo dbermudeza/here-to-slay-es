@@ -18,7 +18,7 @@ import {
 } from '@hts/anfitrion';
 import type { Accion, CodigoError, Evento, JugadorId, VistaJugador } from '@hts/engine';
 import { io, type Socket } from 'socket.io-client';
-import type { FuenteMesa, PausaResultado } from '../juego/fuente';
+import type { FuenteMesa, PausaResultado, PresentacionLider } from '../juego/fuente';
 import { guardarSesion, leerSesion } from './sesion';
 
 export { leerSesion } from './sesion';
@@ -58,6 +58,15 @@ export class ClienteEnLinea implements FuenteMesa {
   private pausaActual: { id: number; duracionMs: number; fin: number } | null = null;
   /** Avisa a la mesa cuando vence la pausa tras un resultado. */
   private temporizadorPausa: ReturnType<typeof setTimeout> | null = null;
+  private presentacionActual: {
+    id: number;
+    jugador: JugadorId;
+    carta: string;
+    duracionMs: number;
+    fin: number;
+  } | null = null;
+  /** Avisa a la mesa cuando vence la presentación de la habilidad de un Líder. */
+  private temporizadorPresentacion: ReturnType<typeof setTimeout> | null = null;
 
   constructor(url?: string, sesion: Sesion | null = leerSesion()) {
     this.sesion = sesion;
@@ -112,6 +121,18 @@ export class ClienteEnLinea implements FuenteMesa {
           ? null
           : { id: pr.id, duracionMs: pr.duracionMs, fin: this.recibido + pr.restanteMs };
       this.programarFinPausa();
+      const pl = p.presentacionLider ?? null; // un servidor antiguo no lo manda
+      this.presentacionActual =
+        pl === null
+          ? null
+          : {
+              id: pl.id,
+              jugador: pl.jugador,
+              carta: pl.carta,
+              duracionMs: pl.duracionMs,
+              fin: this.recibido + pl.restanteMs,
+            };
+      this.programarFinPresentacion();
       if (p.reinicio) this.eventos = [...p.eventos];
       else this.eventos.push(...p.eventos);
       this.notificar();
@@ -238,6 +259,8 @@ export class ClienteEnLinea implements FuenteMesa {
     this.cancelarFinCelebracion();
     this.pausaActual = null;
     this.cancelarFinPausa();
+    this.presentacionActual = null;
+    this.cancelarFinPresentacion();
     this.eventos = [];
     guardarSesion(null);
   }
@@ -246,6 +269,7 @@ export class ClienteEnLinea implements FuenteMesa {
   cerrar(): void {
     this.cancelarFinCelebracion();
     this.cancelarFinPausa();
+    this.cancelarFinPresentacion();
     this.socket.disconnect();
     this.escuchas.clear();
   }
@@ -323,6 +347,36 @@ export class ClienteEnLinea implements FuenteMesa {
     );
   }
 
+  get presentacionLider(): PresentacionLider | null {
+    const p = this.presentacionActual;
+    if (p === null || Date.now() >= p.fin) return null;
+    return { id: p.id, jugador: p.jugador, carta: p.carta, duracionMs: p.duracionMs };
+  }
+
+  restantePresentacionLiderMs(): number | null {
+    const p = this.presentacionActual;
+    if (p === null || Date.now() >= p.fin) return null;
+    return Math.max(0, p.fin - Date.now());
+  }
+
+  private programarFinPresentacion(): void {
+    this.cancelarFinPresentacion();
+    const p = this.presentacionActual;
+    if (p === null) return;
+    this.temporizadorPresentacion = setTimeout(
+      () => {
+        this.temporizadorPresentacion = null;
+        this.notificar();
+      },
+      Math.max(0, p.fin - Date.now()) + 20,
+    );
+  }
+
+  private cancelarFinPresentacion(): void {
+    if (this.temporizadorPresentacion !== null) clearTimeout(this.temporizadorPresentacion);
+    this.temporizadorPresentacion = null;
+  }
+
   private cancelarFinPausa(): void {
     if (this.temporizadorPausa !== null) clearTimeout(this.temporizadorPausa);
     this.temporizadorPausa = null;
@@ -385,7 +439,9 @@ export class ClienteEnLinea implements FuenteMesa {
     // Durante la celebración el servidor tiene la cuenta congelada: aquí tampoco avanza.
     const congelado = this.partida?.decision?.restanteMs;
     const enPausa =
-      this.restanteCelebracionMs() !== null || this.restantePausaResultadoMs() !== null;
+      this.restanteCelebracionMs() !== null ||
+      this.restantePausaResultadoMs() !== null ||
+      this.restantePresentacionLiderMs() !== null;
     if (enPausa && congelado !== undefined) return congelado;
     return Math.max(0, d.fin - Date.now());
   }

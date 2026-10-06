@@ -7,10 +7,11 @@ import type {
   PausaResultado,
   Plazo,
   PlazoDecision,
+  PresentacionLider,
 } from '@hts/anfitrion';
 import type { Accion, CodigoError, Evento, JugadorId, VistaJugador } from '@hts/engine';
 
-export type { PausaResultado };
+export type { PausaResultado, PresentacionLider };
 
 /**
  * Lo que necesita la mesa para funcionar. Lo cumplen el director local (Anfitrion) y el cliente en
@@ -30,6 +31,11 @@ export interface FuenteMesa {
   readonly celebracion: Celebracion | null;
   /** Pausa tras un resultado (nadie actúa y las cuentas atrás se congelan), o null. */
   readonly pausaResultado: PausaResultado | null;
+  /**
+   * Presentación de la habilidad de un Líder (nadie puede jugar mientras dure, las cuentas atrás se
+   * congelan), o null. La completa solo sale la primera vez que cada Líder se activa en un turno.
+   */
+  readonly presentacionLider: PresentacionLider | null;
   vista(): VistaJugador;
   legales(): Accion[];
   /** null si la acción es legal; si no, el motivo. */
@@ -45,6 +51,8 @@ export interface FuenteMesa {
   restanteCelebracionMs(): number | null;
   /** Milisegundos que quedan de la pausa tras un resultado; null si no hay. */
   restantePausaResultadoMs(): number | null;
+  /** Milisegundos que quedan de la presentación del Líder; null si no hay. */
+  restantePresentacionLiderMs(): number | null;
 
   // Solo en modo "este dispositivo" (en línea no hacen nada).
   readonly traspaso: JugadorId | null;
@@ -54,6 +62,9 @@ export interface FuenteMesa {
   terminarRespuesta(): void;
   confirmarTraspaso(): void;
 }
+
+/** Duración nominal de la presentación de la habilidad de un Líder (la de la animación completa). */
+export const PRESENTACION_LIDER_MS = 2500;
 
 /** Duración nominal de la celebración de un Monstruo derrotado (la de la animación completa). */
 export const CELEBRACION_MS = CELEBRACION_POR_DEFECTO_MS;

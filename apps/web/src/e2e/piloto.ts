@@ -63,6 +63,8 @@ function sugerencia({ director: d, motor }: MesaRegistrada): Paso {
   if (d.celebracion !== null) return { tipo: 'esperar' };
   // Se está enseñando un resultado: nadie actúa hasta que acabe la pausa.
   if (d.pausaResultado !== null) return { tipo: 'esperar' };
+  // La habilidad de un Líder se está presentando: nadie actúa hasta que acabe.
+  if (d.presentacionLider !== null) return { tipo: 'esperar' };
   if (vista.ganador !== null) return { tipo: 'fin', ganador: vista.ganador.jugador };
   if (d.traspaso !== null) return { tipo: 'traspaso', jugador: d.traspaso };
 

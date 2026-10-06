@@ -27,7 +27,11 @@ function anfitrionEn(c: ConfigAnfitrion) {
   const reloj = new RelojManual();
   const s = escenario(motor.crearPartida(aConfigPartida(c)).state, { turnoDe: 'j1' });
   return {
-    a: new Anfitrion(motor, c, s, reloj, { retardoBotMs: 100, pausaResultadoMs: 0 }),
+    a: new Anfitrion(motor, c, s, reloj, {
+      retardoBotMs: 100,
+      pausaResultadoMs: 0,
+      presentacionLiderMs: 0,
+    }),
     reloj,
   };
 }

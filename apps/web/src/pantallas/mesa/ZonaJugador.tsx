@@ -1,10 +1,13 @@
 import { desgloseClases, type JugadorVista } from '@hts/engine';
+import { motion } from 'framer-motion';
+import { useReducirAnimaciones } from '../../estado/app';
 import { useCatalogo } from '../../estado/contexto';
 import { t } from '../../i18n';
 import { Boton } from '../../ui/Boton';
 import { Carta, type Tamano } from '../../ui/Carta';
 import { ContadorClases } from './ContadorClases';
 import { clave, useMesa } from './contexto';
+import { useDestelloLider } from './useDestelloLider';
 
 /** Grupo de un jugador: Líder, Héroes (con su Objeto) y Monstruos matados. */
 export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia: boolean }) {
@@ -14,6 +17,8 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
   const control = director.config.jugadores.find((j) => j.id === jugador.id)?.control;
   const tam: Tamano = propia ? 'md' : 'sm';
   const { motor } = useCatalogo();
+  const reducir = useReducirAnimaciones();
+  const destellos = useDestelloLider(director, jugador.id);
   const desglose = desgloseClases(motor.catalogo, m.idDe, jugador.lider, jugador.grupo);
 
   return (
@@ -61,12 +66,39 @@ export function ZonaJugador({ jugador, propia }: { jugador: JugadorVista; propia
         />
       </header>
       <div className="flex items-end gap-2 overflow-x-auto pb-1">
-        <Carta
-          cartaId={m.idDe(jugador.lider)}
-          tamano={tam}
-          onZoom={m.ampliar}
-          onClick={() => m.detalleDe(jugador.lider)}
-        />
+        <div className="relative shrink-0">
+          <Carta
+            cartaId={m.idDe(jugador.lider)}
+            tamano={tam}
+            onZoom={m.ampliar}
+            onClick={() => m.detalleDe(jugador.lider)}
+          />
+          {destellos > 0 && (
+            // Otra activación del Líder en el mismo turno: destello breve, sin bloquear nada.
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 overflow-hidden rounded-lg"
+            >
+              <motion.div
+                key={destellos}
+                data-destello-lider=""
+                className="absolute inset-0 rounded-lg ring-4 ring-inset ring-amber-300 dark:ring-amber-200"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: reducir ? [0, 1, 0] : [0, 1, 0.8, 0] }}
+                transition={{ duration: reducir ? 0.5 : 0.8, ease: 'easeOut' }}
+              />
+              {!reducir && (
+                <motion.div
+                  key={`r${destellos}`}
+                  className="absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-amber-100/80 to-transparent"
+                  initial={{ x: '-50%' }}
+                  animate={{ x: '350%' }}
+                  transition={{ duration: 0.8, ease: 'easeInOut' }}
+                />
+              )}
+            </div>
+          )}
+        </div>
         {jugador.grupo.length === 0 && (
           <span className="self-center px-2 text-xs text-stone-600 dark:text-stone-400">
             {t('mesa.sinHeroes')}

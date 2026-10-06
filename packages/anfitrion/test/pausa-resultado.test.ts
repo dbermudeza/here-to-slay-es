@@ -69,6 +69,7 @@ function preparado(
   const a = new Anfitrion(motor, c, forzarDados(s, ...dados), reloj, {
     retardoBotMs: RETARDO,
     celebracionMs: 0,
+    presentacionLiderMs: 0,
     ...opciones,
   });
   return { a, reloj, heroe: uids[0] ?? '', monstruo };

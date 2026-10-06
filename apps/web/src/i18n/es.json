@@ -82,6 +82,9 @@
   "celebracion": {
     "titulo": "¡{nombre} ha derrotado a {monstruo}!"
   },
+  "presentacionLider": {
+    "titulo": "¡{nombre} activa la habilidad de su Líder!"
+  },
   "mesa": {
     "turnoDe": "Turno de {nombre}",
     "tuTurno": "Tu turno",
@@ -285,6 +288,7 @@
   "errores": {
     "CELEBRACION": "Espera a que termine la celebración.",
     "PAUSA_RESULTADO": "Espera a que termine de mostrarse el resultado.",
+    "PRESENTACION_LIDER": "Espera a que termine la presentación de la habilidad del Líder.",
     "PARTIDA_TERMINADA": "La partida ha terminado.",
     "JUGADOR_DESCONOCIDO": "Jugador desconocido.",
     "SOLO_SISTEMA": "Solo el sistema puede hacer esto.",
