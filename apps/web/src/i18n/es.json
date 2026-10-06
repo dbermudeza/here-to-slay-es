@@ -179,7 +179,30 @@
     "desafioTitulo": "{nombre} intenta jugar {carta}",
     "desafioPregunta": "¿Alguien quiere desafiarla?",
     "desafiar": "Desafiar",
-    "pasar": "Pasar",
+    "pasar": "Dejar pasar",
+    "esperandoDesafios": "Esperando desafíos…",
+    "desafiaTitulo": "¡{nombre} desafía!",
+    "desafiante": "Desafiante",
+    "desafiado": "Desafiado",
+    "versus": "VS",
+    "dado": "Dado: {n}",
+    "modificadorDe": "{valor} de {nombre}",
+    "cuentaAtras": "Tiempo restante",
+    "final": {
+      "jugada": "Jugada",
+      "juega": "{nombre} juega {carta}",
+      "heroe": "Entra en el Grupo de {nombre}.",
+      "objeto": "{carta} queda equipado.",
+      "magia": "Se resuelve la Magia.",
+      "anulada": "¡Anulada!",
+      "anuladaTexto": "{carta} de {nombre} no se juega y va al descarte.",
+      "ganaDuelo": "¡{nombre} gana el desafío!",
+      "exito": "¡Éxito!",
+      "fracaso": "Fracaso",
+      "nada": "Sin efecto",
+      "tiradaHeroe": "{nombre} saca {total} con {carta}.",
+      "tiradaAtaque": "{nombre} saca {total} contra {carta}."
+    },
     "yaPasaste": "Has pasado.",
     "contexto": {
       "heroe": "{nombre} tira por {carta} (necesita {n}+)",
@@ -191,6 +214,7 @@
     "sinModificadores": "Ninguno todavía",
     "total": "Total",
     "jugarModificador": "{valor} a {nombre}",
+    "aJugador": "a {nombre}",
     "tusModificadores": "Tus Modificadores",
     "sinTusModificadores": "No tienes Modificadores en la mano.",
     "responde": "Responde {nombre}",
@@ -241,10 +265,6 @@
     "titulo": "Pásale el dispositivo a {nombre}",
     "texto": "Que nadie más mire la pantalla.",
     "soy": "Soy {nombre}"
-  },
-  "dados": {
-    "titulo": "Tirada de dados",
-    "suma": "= {n}"
   },
   "victoria": {
     "titulo": "¡{nombre} gana la partida!",

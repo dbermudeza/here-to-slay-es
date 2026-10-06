@@ -15,8 +15,8 @@ import { ContenidoReglas } from '../Reglas';
 import { AccionesTurno } from './AccionesTurno';
 import { CelebracionMonstruo } from './CelebracionMonstruo';
 import { Centro } from './Centro';
+import { Escenario } from './Escenario';
 import { MesaContexto, mismaAccion, type ValorMesa } from './contexto';
-import { Dados } from './Dados';
 import { TiempoDecision } from './TiempoDecision';
 import { Vuelos } from './Vuelos';
 import { DialogoDecision } from './DialogoDecision';
@@ -24,7 +24,6 @@ import { Anunciador, Historial } from './Historial';
 import { Mano } from './Mano';
 import { RotuloTurno } from './RotuloTurno';
 import { Traspaso, Victoria } from './Superposiciones';
-import { VentanaRespuesta } from './VentanaRespuesta';
 import { ZonaJugador } from './ZonaJugador';
 
 interface Props {
@@ -45,6 +44,8 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
   const [menu, setMenu] = useState(false);
   const [reglas, setReglas] = useState(false);
   const [historialMovil, setHistorialMovil] = useState(false);
+  /** El escenario central (ventana de respuesta o su resultado) está en pantalla. */
+  const [escenarioActivo, setEscenarioActivo] = useState(false);
   /** Rendirse (D-43): pedir confirmación y, una vez hecho, ofrecer ver la partida o salir. */
   const [rendicion, setRendicion] = useState<'confirmar' | 'hecha' | null>(null);
   const [rendido, setRendido] = useState<string>('');
@@ -231,10 +232,9 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
             </div>
           </div>
 
-          <VentanaRespuesta />
+          <Escenario onActivo={setEscenarioActivo} />
           <DialogoDecision />
-          <Dados />
-          <Vuelos />
+          <Vuelos pausado={escenarioActivo} />
           <Traspaso />
           <RotuloTurno
             numero={vista.turno.numero}
@@ -245,6 +245,7 @@ export function Mesa({ director, onSalir, onRevancha, onTutorial, textoRevancha 
                 : t('mesa.turnoDe', { nombre: valor.nombreJugador(vista.turno.jugador) })
             }
             pausado={director.traspaso !== null || hayCelebracion}
+            compacto={escenarioActivo}
             // Solo al montar: el primer turno intacto de una partida recién creada.
             anunciarAlMontar={
               vista.turno.numero === 1 && vista.turno.pa === 3 && vista.ganador === null

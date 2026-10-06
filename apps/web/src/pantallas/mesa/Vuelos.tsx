@@ -5,6 +5,7 @@ import { agruparVuelos, verVuelo, type Vuelo } from '../../juego/vuelos';
 import { Carta } from '../../ui/Carta';
 import { CAPA } from '../../ui/capas';
 import { useMesa } from './contexto';
+import { desplazamiento } from './zonas';
 
 /** Duración de un vuelo; más corta si hay cola, para no quedarse atrás. */
 const DURACION_MS = 1900;
@@ -13,29 +14,24 @@ const DURACION_RAPIDA_MS = 1000;
 const DURACION_REDUCIDA_MS = 1200;
 /** Vuelos pendientes como máximo (si se acumulan más, se descartan los más antiguos). */
 const MAX_COLA = 4;
+/** Un vuelo que espera más que esto (porque el escenario central ocupaba el centro) ya no es actual. */
+const OBSOLETO_MS = 3000;
 
-/** Desplazamiento desde el centro de la pantalla hasta el centro de una zona de la mesa. */
-function desplazamiento(zona: string): { x: number; y: number } {
-  const el = document.querySelector<HTMLElement>(`[data-zona="${zona}"]`);
-  const r = el?.getBoundingClientRect();
-  if (r === undefined || (r.width === 0 && r.height === 0)) return { x: 0, y: 0 };
-  return {
-    x: r.left + r.width / 2 - window.innerWidth / 2,
-    y: r.top + r.height / 2 - window.innerHeight / 2,
-  };
+interface VueloEnCola extends Vuelo {
+  llegada: number;
 }
 
 /**
  * Animación de cartas que cambian de sitio: salen de su origen, se detienen en el centro con un texto
  * que explica qué ha pasado (y qué carta es, si el que mira puede verla) y vuelan a su destino.
  */
-export function Vuelos() {
+export function Vuelos({ pausado = false }: { pausado?: boolean }) {
   const m = useMesa();
   const { director } = m;
   const n = director.eventos.length;
   const visto = useRef(n);
   const siguienteId = useRef(1);
-  const [cola, setCola] = useState<Vuelo[]>([]);
+  const [cola, setCola] = useState<VueloEnCola[]>([]);
 
   // Nuevos eventos → nuevos vuelos en la cola.
   useEffect(() => {
@@ -44,12 +40,26 @@ export function Vuelos() {
     const vuelos = agruparVuelos(nuevos, siguienteId.current);
     if (vuelos.length === 0) return;
     siguienteId.current += vuelos.length;
-    setCola((c) => [...c, ...vuelos].slice(-MAX_COLA));
+    const llegada = Date.now();
+    setCola((c) => [...c, ...vuelos.map((v) => ({ ...v, llegada }))].slice(-MAX_COLA));
   }, [director, n]);
 
   // En modo "este dispositivo" no se anima nada mientras se pasa el dispositivo.
-  const enPausa = director.traspaso !== null;
-  const actual = enPausa ? undefined : cola[0];
+  // Con el escenario central en pantalla no empieza ningún vuelo nuevo (el que ya volaba termina).
+  const [iniciado, setIniciado] = useState<number | null>(null);
+  const primero = cola[0];
+  const enPausa = director.traspaso !== null || (pausado && primero?.id !== iniciado);
+  // Lo que ha esperado demasiado (por el escenario central) no llega a pintarse: el historial lo recoge.
+  const obsoleto =
+    primero !== undefined && primero.id !== iniciado && Date.now() - primero.llegada > OBSOLETO_MS;
+  const actual = enPausa || obsoleto ? undefined : primero;
+  const idObsoleto = obsoleto ? primero.id : undefined;
+  useEffect(() => {
+    if (actual !== undefined) setIniciado(actual.id);
+  }, [actual]);
+  useEffect(() => {
+    if (idObsoleto !== undefined) setCola((c) => c.filter((v) => v.id !== idObsoleto));
+  }, [idObsoleto]);
   const reducir = useReducirAnimaciones();
   const duracion = reducir
     ? DURACION_REDUCIDA_MS

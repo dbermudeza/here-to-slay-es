@@ -76,3 +76,23 @@ describe('RotuloTurno', () => {
     expect(container.textContent).toBe('');
   });
 });
+
+describe('RotuloTurno con escenario central', () => {
+  it('se hace pequeño y sube a la parte superior para no tapar la carta', () => {
+    const { container, rerender } = render(<RotuloTurno {...base} />);
+    rerender(<RotuloTurno {...base} numero={4} jugador="j2" titulo="Turno de Ana" compacto />);
+    const raiz = container.querySelector('[data-rotulo-turno]');
+    expect(raiz?.hasAttribute('data-compacto')).toBe(true);
+    expect(raiz?.className).toContain('items-start');
+    expect(container.querySelector('p')?.className).toContain('text-xl');
+  });
+
+  it('sin escenario conserva su tamaño grande y centrado', () => {
+    const { container, rerender } = render(<RotuloTurno {...base} />);
+    rerender(<RotuloTurno {...base} numero={4} jugador="j2" titulo="Turno de Ana" />);
+    const raiz = container.querySelector('[data-rotulo-turno]');
+    expect(raiz?.hasAttribute('data-compacto')).toBe(false);
+    expect(raiz?.className).toContain('items-center');
+    expect(container.querySelector('p')?.className).toContain('text-4xl');
+  });
+});

@@ -7,8 +7,7 @@ describe('jerarquía de capas', () => {
   it('va de la animación de cartas al aviso crítico', () => {
     const orden = [
       CAPA.vuelos,
-      CAPA.dados,
-      CAPA.ventanaRespuesta,
+      CAPA.escenario,
       CAPA.rotulo,
       CAPA.modal,
       CAPA.celebracion,

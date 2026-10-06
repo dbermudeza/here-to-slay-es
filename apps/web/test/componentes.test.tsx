@@ -101,7 +101,8 @@ describe('Mesa', () => {
     montar(director);
     fireEvent.click(screen.getByRole('button', { name: 'Héroe mago' }));
     fireEvent.click(screen.getByRole('button', { name: /^Jugar/ }));
-    expect(screen.getByText('¿Alguien quiere desafiarla?')).toBeInTheDocument();
+    // Quien juega la carta no puede desafiarse: espera a los demás.
+    expect(screen.getByText('Esperando desafíos…')).toBeInTheDocument();
     act(() => reloj.avanzar(100));
     expect(director.estado.pila[director.estado.pila.length - 1]).toMatchObject({
       tipo: 'tiradaInmediata',

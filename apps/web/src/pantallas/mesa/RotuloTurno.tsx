@@ -17,6 +17,8 @@ interface Props {
   titulo: string;
   /** Hay una pantalla de traspaso encima: el rótulo espera a que se cierre. */
   pausado: boolean;
+  /** Hay un escenario central en pantalla: el rótulo se hace pequeño y sube, para no tapar la carta. */
+  compacto?: boolean;
   /** Anunciar también el turno que ya está en curso al montar (solo el primero de la partida). */
   anunciarAlMontar: boolean;
 }
@@ -32,7 +34,14 @@ interface Anuncio {
  * pantalla ya oyen "Turno N: le toca a X" por la región `Anunciador` del historial.
  * No intercepta el ratón ni el foco, y un turno nuevo sustituye al anterior.
  */
-export function RotuloTurno({ numero, jugador, titulo, pausado, anunciarAlMontar }: Props) {
+export function RotuloTurno({
+  numero,
+  jugador,
+  titulo,
+  pausado,
+  compacto = false,
+  anunciarAlMontar,
+}: Props) {
   const reducir = useReducirAnimaciones();
   const clave = `${numero}:${jugador}`;
   const ultima = useRef(clave);
@@ -64,7 +73,10 @@ export function RotuloTurno({ numero, jugador, titulo, pausado, anunciarAlMontar
     <div
       aria-hidden="true"
       data-rotulo-turno=""
-      className={`pointer-events-none fixed inset-0 ${CAPA.rotulo} flex items-center justify-center p-4`}
+      data-compacto={compacto ? '' : undefined}
+      className={`pointer-events-none fixed inset-0 ${CAPA.rotulo} flex justify-center p-4 ${
+        compacto ? 'items-start pt-16' : 'items-center'
+      }`}
     >
       <AnimatePresence mode="wait">
         {visible && (
@@ -74,12 +86,22 @@ export function RotuloTurno({ numero, jugador, titulo, pausado, anunciarAlMontar
             animate={reducir ? { opacity: 1 } : { opacity: 1, scale: 1 }}
             exit={reducir ? { opacity: 0 } : { opacity: 0, scale: 1.03 }}
             transition={{ duration: reducir ? 0.12 : 0.35, ease: 'easeOut' }}
-            className="max-w-full rounded-3xl border border-amber-700/30 bg-white/85 px-10 py-6 text-center shadow-2xl backdrop-blur-md dark:border-amber-400/30 dark:bg-stone-900/85"
+            className={`max-w-full border border-amber-700/30 bg-white/85 text-center shadow-2xl backdrop-blur-md dark:border-amber-400/30 dark:bg-stone-900/85 ${
+              compacto ? 'rounded-2xl px-5 py-2' : 'rounded-3xl px-10 py-6'
+            }`}
           >
-            <p className="font-titulo text-4xl font-bold text-amber-800 sm:text-6xl dark:text-amber-300">
+            <p
+              className={`font-titulo font-bold text-amber-800 dark:text-amber-300 ${
+                compacto ? 'text-xl sm:text-2xl' : 'text-4xl sm:text-6xl'
+              }`}
+            >
               {anuncio.titulo}
             </p>
-            <p className="mt-1 text-base text-stone-700 sm:text-lg dark:text-stone-300">
+            <p
+              className={`text-stone-700 dark:text-stone-300 ${
+                compacto ? 'text-xs' : 'mt-1 text-base sm:text-lg'
+              }`}
+            >
               {t('mesa.turnoNumero', { n: anuncio.numero })}
             </p>
           </motion.div>
