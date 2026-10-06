@@ -431,8 +431,8 @@ export type CodigoError =
    */
   | 'PAUSA_RESULTADO'
   /**
-   * Lo usa solo el anfitrión: se presenta la activación de la habilidad de un Líder (la primera de
-   * cada Líder en cada turno) y nadie puede jugar.
+   * Lo usa solo el anfitrión: se presenta la activación de la habilidad de un Líder (cada activación) y
+   * nadie puede jugar.
    */
   | 'PRESENTACION_LIDER';
 

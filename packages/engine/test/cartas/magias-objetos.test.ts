@@ -48,7 +48,7 @@ describeReal('Magias', () => {
     expect(r.state.descarte).toEqual(expect.arrayContaining([desafio, x]));
   });
 
-  it('magia_hechizo_encantado: +2 a todas tus tiradas hasta el final del turno', () => {
+  it('magia_hechizo_encantado: bono temporal de +2 a las tiradas propias durante el turno', () => {
     let r = jugarMagia(mesa(), 'magia_hechizo_encantado');
     expect(r.state.temporales).toEqual([
       {

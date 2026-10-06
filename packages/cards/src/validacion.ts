@@ -120,6 +120,20 @@ export function validarCartas(
       });
     }
 
+    // El motor busca la definición por el id de la carta (`definiciones[idCarta]`), no por la
+    // clave: una clave distinta pasaría el resto de comprobaciones y la carta quedaría sin efecto.
+    if (
+      carta.efecto !== null &&
+      carta.efecto.tipo !== 'ninguno' &&
+      carta.efecto.clave !== carta.id
+    ) {
+      problemas.push({
+        severidad: 'error',
+        donde: carta.id,
+        mensaje: `la clave de efecto "${carta.efecto.clave}" no coincide con el id de la carta`,
+      });
+    }
+
     const sevEfecto: Severidad = opciones.efectosObligatorios ? 'error' : 'aviso';
     if (carta.efecto === null) {
       problemas.push({ severidad: sevEfecto, donde: carta.id, mensaje: 'efecto sin mapear' });

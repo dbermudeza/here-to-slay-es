@@ -213,12 +213,12 @@ export class Anfitrion {
 
   // ------------------------------------------------------------------ consultas
 
-  /** Jugadores controlados por personas (según la configuración). */
   /** Humanos que no se han rendido (D-43). */
   private get humanosEnJuego(): JugadorId[] {
     return this.humanos.filter((id) => !this.estado.rendidos.includes(id));
   }
 
+  /** Jugadores controlados por personas (según la configuración). */
   get humanos(): JugadorId[] {
     return this.config.jugadores.filter((j) => j.control === 'humano').map((j) => j.id);
   }

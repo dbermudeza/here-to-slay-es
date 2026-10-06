@@ -53,19 +53,42 @@ describe('validarCartas', () => {
   it('detecta efectos referenciados pero no registrados', () => {
     const datos = {
       version: 1,
-      cartas: [heroe('heroe_a', { efecto: { tipo: 'dsl', clave: 'robar' } })],
+      cartas: [heroe('heroe_a', { efecto: { tipo: 'dsl', clave: 'heroe_a' } })],
     };
     expect(
-      validarCartas(datos, { efectosRegistrados: new Set(['robar']) }).problemas,
+      validarCartas(datos, { efectosRegistrados: new Set(['heroe_a']) }).problemas,
     ).not.toContainEqual(
       expect.objectContaining({ donde: 'heroe_a', mensaje: expect.stringContaining('efecto') }),
     );
     expect(validarCartas(datos, { efectosRegistrados: new Set() }).problemas).toContainEqual(
       expect.objectContaining({
         donde: 'heroe_a',
-        mensaje: 'efecto "dsl:robar" no está registrado',
+        mensaje: 'efecto "dsl:heroe_a" no está registrado',
       }),
     );
+  });
+
+  it('exige que la clave del efecto sea el id de la carta (el motor busca por id)', () => {
+    const conClave = (clave: string) => ({
+      version: 1,
+      cartas: [heroe('heroe_a', { efecto: { tipo: 'dsl', clave } })],
+    });
+    const error = {
+      severidad: 'error',
+      donde: 'heroe_a',
+      mensaje: 'la clave de efecto "heroe_b" no coincide con el id de la carta',
+    };
+    const registrados = new Set(['heroe_a', 'heroe_b']);
+    expect(
+      validarCartas(conClave('heroe_b'), { efectosRegistrados: registrados }).problemas,
+    ).toContainEqual(error);
+    expect(
+      validarCartas(conClave('heroe_a'), { efectosRegistrados: registrados }).problemas,
+    ).not.toContainEqual(expect.objectContaining({ mensaje: expect.stringContaining('clave') }));
+    expect(
+      validarCartas({ version: 1, cartas: [heroe('heroe_a', { efecto: { tipo: 'ninguno' } })] })
+        .problemas,
+    ).not.toContainEqual(expect.objectContaining({ mensaje: expect.stringContaining('clave') }));
   });
 
   it('avisa de imágenes inexistentes y de cartas marcadas para revisar', () => {

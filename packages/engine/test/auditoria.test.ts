@@ -24,7 +24,7 @@ import {
 } from './cartas/reales';
 
 describeReal('Auditoría: elecciones automáticas e información visible', () => {
-  // --- Silent Shadow («Mira la mano de otro jugador. Elige una carta y añádela a tu mano.») ---
+  // --- Silent Shadow (ve la mano de un rival y se queda una carta elegida) ---
 
   it('heroe_silent_shadow [FALLO 1]: con 1 sola carta en la mano rival, el jugador debe verla antes de quedársela', () => {
     const s = mesa();
@@ -74,7 +74,7 @@ describeReal('Auditoría: elecciones automáticas e información visible', () =>
     expect(decision(r.state)).toMatchObject({ jugador: A, motivo: 'elegirJugador' });
   });
 
-  // --- Sharp Fox («Mira la mano de otro jugador.») ---
+  // --- Sharp Fox (solo ve la mano de un rival) ---
 
   it('heroe_sharp_fox: con 1 carta en la mano rival sí se muestra (pregunta "ver")', () => {
     const s = mesa();

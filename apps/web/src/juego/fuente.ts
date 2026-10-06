@@ -33,7 +33,7 @@ export interface FuenteMesa {
   readonly pausaResultado: PausaResultado | null;
   /**
    * Presentación de la habilidad de un Líder (nadie puede jugar mientras dure, las cuentas atrás se
-   * congelan), o null. La completa solo sale la primera vez que cada Líder se activa en un turno.
+   * congelan), o null. Sale en cada activación del Líder.
    */
   readonly presentacionLider: PresentacionLider | null;
   vista(): VistaJugador;

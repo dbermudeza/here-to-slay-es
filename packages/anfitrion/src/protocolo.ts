@@ -206,8 +206,8 @@ export interface EstadoPartida {
    */
   pausaResultado: { id: number; duracionMs: number; restanteMs: number } | null;
   /**
-   * Activación de la habilidad de un Líder que se está presentando (la primera de cada Líder en
-   * cada turno; nadie puede jugar mientras dure), o null. `duracionMs` es la configurada.
+   * Activación de la habilidad de un Líder que se está presentando (se presenta cada activación,
+   * una tras otra; nadie puede jugar mientras dure), o null. `duracionMs` es la configurada.
    */
   presentacionLider: {
     id: number;

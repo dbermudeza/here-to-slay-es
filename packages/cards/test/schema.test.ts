@@ -9,8 +9,8 @@ const heroe = {
   clase: 'luchador',
   tirada: 8,
   copias: 1,
-  texto: 'DESTRUYE una carta de Héroe.',
-  textoOriginal: 'DESTROY a Hero card.',
+  texto: 'Texto de prueba del efecto.',
+  textoOriginal: 'Test effect text.',
 };
 
 const monstruo = {
