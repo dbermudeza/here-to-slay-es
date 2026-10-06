@@ -310,7 +310,7 @@ describe('Escenario central: pausa tras un resultado', () => {
       heroe = darCarta(s, 'j1', 'heroe_mago');
     });
     const ctx = conPausa(director);
-    ctx.poner({ id: 1, duracionMs: 4300 });
+    ctx.poner({ id: 1, duracionMs: 3000 });
     montar(ctx.fuente);
     act(() => {
       director.enviar('j1', { tipo: 'JUGAR_CARTA', uid: heroe });

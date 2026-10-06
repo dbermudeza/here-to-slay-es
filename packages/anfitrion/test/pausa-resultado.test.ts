@@ -113,8 +113,8 @@ function de(a: Anfitrion, jugador: string, desde: number): number {
 }
 
 describe('Anfitrión: pausa de resultado para todos', () => {
-  it('el valor por defecto es 4300 ms (la escena del duelo)', () => {
-    expect(PAUSA_RESULTADO_POR_DEFECTO_MS).toBe(4300);
+  it('el valor por defecto es 3000 ms (la escena del duelo)', () => {
+    expect(PAUSA_RESULTADO_POR_DEFECTO_MS).toBe(3000);
   });
 
   it('tras una tirada de Héroe nadie puede jugar hasta que termina la pausa', () => {

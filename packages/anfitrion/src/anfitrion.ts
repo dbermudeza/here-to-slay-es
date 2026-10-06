@@ -55,14 +55,14 @@ export interface OpcionesAnfitrion {
   /**
    * Pausa para todos tras un evento que la interfaz enseña como resultado (tirada, duelo, ataque,
    * jugada resuelta o anulada). Mientras dura nadie puede jugar y las cuentas regresivas se
-   * congelan, como en la celebración. Por defecto 4300 ms (la escena más larga, el duelo); 0 la
+   * congelan, como en la celebración. Por defecto 3000 ms (la escena más larga, el duelo); 0 la
    * desactiva.
    */
   pausaResultadoMs?: number;
 }
 
 export const CELEBRACION_POR_DEFECTO_MS = 4000;
-export const PAUSA_RESULTADO_POR_DEFECTO_MS = 4300;
+export const PAUSA_RESULTADO_POR_DEFECTO_MS = 3000;
 export const RETARDO_BOT_POR_DEFECTO_MS = 700;
 
 /** Monstruo derrotado que se está celebrando: mientras dura, nadie puede jugar. */

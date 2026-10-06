@@ -44,16 +44,16 @@ export type Final =
 
 /** Cuánto se queda cada resultado en pantalla (ms). */
 export function duracionFinal(f: Final, reducir: boolean): number {
-  if (reducir) return 2800;
+  if (reducir) return 2500;
   switch (f.tipo) {
     case 'duelo':
-      return 4300;
-    case 'tirada':
-      return 3900;
-    case 'jugada':
       return 3000;
+    case 'tirada':
+      return 2800;
+    case 'jugada':
+      return 2500;
     case 'anulada':
-      return 3300;
+      return 2700;
   }
 }
 
