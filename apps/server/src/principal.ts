@@ -1,6 +1,7 @@
 /**
  * Arranque del servidor: `pnpm servidor` (compila la web y la sirve) o `pnpm --filter @hts/server start`.
- * Variables: PUERTO (por defecto 3000); DIR_WEB (carpeta de la web compilada, por defecto
+ * Variables: PUERTO (o PORT, la que ponen alojamientos como Render; por defecto 3000);
+ * CLAVE_ACCESO (contraseña para entrar; imprescindible si el servidor está en internet); DIR_WEB (carpeta de la web compilada, por defecto
  * apps/web/dist) y, para las pruebas e2e, RETARDO_BOT_MS (pausa antes de que actúe un bot),
  * CELEBRACION_MS (pausa al matar un Monstruo), PAUSA_RESULTADO_MS (pausa de la partida tras un
  * resultado, para que se pueda leer) y PRESENTACION_LIDER_MS (pausa al activarse un Líder).
@@ -27,8 +28,9 @@ for (const [opcion, variable] of Object.entries(VARIABLES)) {
 const { servidor, puerto } = await arrancar({
   rutaCartas: RUTA_CARTAS_JSON,
   dirWeb: resolve(RAIZ, process.env['DIR_WEB'] ?? 'apps/web/dist'),
-  puerto: Number(process.env['PUERTO'] ?? 3000),
+  puerto: Number(process.env['PUERTO'] ?? process.env['PORT'] ?? 3000),
   opcionesAnfitrion,
+  ...(process.env['CLAVE_ACCESO'] ? { claveAcceso: process.env['CLAVE_ACCESO'] } : {}),
 });
 mostrarDirecciones(puerto, 'Ctrl+C para detener.');
 apagarAlSalir(servidor);

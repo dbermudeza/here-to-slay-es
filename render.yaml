@@ -1,0 +1,29 @@
+# Despliegue del servidor en línea en Render (Blueprint). Guía completa: docs/DESPLIEGUE.md.
+#
+# Las cartas y el arte no están en este repositorio (es público): la compilación los descarga del
+# repositorio privado de recursos con HTS_RECURSOS_TOKEN, y CLAVE_ACCESO protege la web desplegada.
+services:
+  - type: web
+    name: here-to-slay
+    runtime: node
+    plan: free
+    # La región más cercana a los jugadores (oregon, ohio, virginia, frankfurt o singapore).
+    region: virginia
+    branch: main
+    autoDeploy: true
+    buildCommand: >-
+      corepack enable &&
+      pnpm install --frozen-lockfile --prod=false &&
+      pnpm recursos &&
+      pnpm build
+    startCommand: pnpm --filter @hts/server start
+    healthCheckPath: /salud
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      # Contraseña para entrar a la web (se pide al crear el servicio; no se guarda aquí).
+      - key: CLAVE_ACCESO
+        sync: false
+      # Token de GitHub de solo lectura del repositorio privado de recursos.
+      - key: HTS_RECURSOS_TOKEN
+        sync: false

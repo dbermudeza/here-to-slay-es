@@ -33,6 +33,7 @@ import {
 import { eventoParaJugador, type GameState, type JugadorId, type Motor } from '@hts/engine';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { Server, type Socket } from 'socket.io';
+import { crearAcceso, protegerConClave, tieneAcceso } from './acceso';
 import { GestorSalas, MAX_ASIENTOS, MIN_ASIENTOS, type Sala } from './salas';
 import { ipRedLocal } from './red';
 import { Tunel, type OpcionesTunel } from './tunel';
@@ -74,6 +75,11 @@ export interface OpcionesServidor {
   /** Túnel de Cloudflare (en los tests, un ejecutable falso). */
   tunel?: OpcionesTunel;
   registro?: boolean;
+  /**
+   * Contraseña de acceso (servidor desplegado en internet): sin ella no se ve la web ni se conecta
+   * nadie. Sin definir, el servidor queda abierto como siempre (red local, túnel, ejecutable).
+   */
+  claveAcceso?: string;
 }
 
 export interface ServidorHts {
@@ -95,8 +101,20 @@ type Responder<T> = (r: Ack<T>) => void;
 
 export function crearServidor(o: OpcionesServidor): ServidorHts {
   const reloj = o.reloj ?? RELOJ_REAL;
-  const app = Fastify({ logger: o.registro ?? false });
-  const io = new Server(app.server, { serveClient: false });
+  const acceso =
+    o.claveAcceso === undefined || o.claveAcceso === '' ? null : crearAcceso(o.claveAcceso);
+  // Desplegado detrás de un proxy (p. ej. Render), la IP del cliente viene en X-Forwarded-For. Solo
+  // se usa para el límite de intentos por IP, que además tiene un tope total (acceso.ts).
+  const app = Fastify({ logger: o.registro ?? false, trustProxy: acceso !== null });
+  const io = new Server(app.server, {
+    serveClient: false,
+    ...(acceso === null
+      ? {}
+      : { allowRequest: (req, aceptar) => aceptar(null, tieneAcceso(req, acceso)) }),
+  });
+  if (acceso !== null) protegerConClave(app, acceso);
+  // Las imágenes y la web con contraseña no deben quedar en cachés compartidas.
+  const cache = acceso === null ? 'public' : 'private';
   const salas = new GestorSalas();
   /** Índice del siguiente evento que hay que enviar a cada conexión. */
   const indices = new Map<string, number>();
@@ -115,9 +133,9 @@ export function crearServidor(o: OpcionesServidor): ServidorHts {
         const normal = ruta.split(sep).join('/');
         if (normal.includes('/assets/')) {
           // Nombres con hash: no cambian nunca.
-          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          res.setHeader('Cache-Control', `${cache}, max-age=31536000, immutable`);
         } else if (normal.includes('/cartas/')) {
-          res.setHeader('Cache-Control', 'public, max-age=86400');
+          res.setHeader('Cache-Control', `${cache}, max-age=86400`);
         } else {
           res.setHeader('Cache-Control', 'no-cache');
         }
@@ -125,6 +143,8 @@ export function crearServidor(o: OpcionesServidor): ServidorHts {
     });
   }
   app.get('/api/estado', async () => ({ ok: true, salas: salas.total }));
+  /** Chequeo de salud del alojamiento: siempre público (no dice nada de las partidas). */
+  app.get('/salud', async () => ({ ok: true }));
 
   // ---------------------------------------------------------------- envío de estados
 

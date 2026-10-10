@@ -31,7 +31,8 @@ apps/server       Fastify + Socket.IO, servidor autoritativo                — 
 apps/web          React + Vite + Zustand + Tailwind + Framer Motion         — Fase 4/5
 apps/e2e          Playwright: partidas completas, accesibilidad y rendimiento — Fase 6
 docs/             Documentación (índice en docs/README.md): arquitectura, motor, cartas, anfitrión,
-                  servidor, web, escritorio, pruebas, glosario; REGLAS.md y DUDAS_REGLAS.md
+                  servidor, web, escritorio, despliegue, pruebas, glosario; REGLAS.md y DUDAS_REGLAS.md
+render.yaml       Despliegue del servidor en Render (plan gratuito; docs/DESPLIEGUE.md)
 ```
 
 ## Comandos
@@ -45,7 +46,8 @@ pnpm typecheck        # tsc en todos los paquetes
 pnpm test             # Vitest en todos los paquetes
 pnpm e2e              # Playwright (necesita Referencias/; no va en el CI), ~5 min
 pnpm validate:cards   # valida Referencias/cartas.es.json (errores → exit 1)
-pnpm recursos         # instala Referencias/ y assets/cartas/ (repo privado de recursos o --desde <carpeta>)
+pnpm recursos         # instala Referencias/ y assets/cartas/ (repo privado de recursos o --desde <carpeta>;
+                      # sin sesión de Git, con HTS_RECURSOS_TOKEN)
 pnpm copy:images      # copia Referencias/Imagenes/Cartas/** → assets/cartas/<id>.png
 pnpm sim [n] [semilla] # simula n partidas entre bots y muestra estadísticas
 ```
@@ -141,6 +143,9 @@ Comandos: `/verificar [e2e]` (todas las comprobaciones), `/nueva-carta <id>`, `/
   - `crearServidor` (Fastify + Socket.IO) gestiona salas en memoria (código de 5 caracteres, token por asiento) y sirve `apps/web/dist`.
   - El actor de una acción es siempre el jugador de la conexión; cada cliente recibe solo su vista filtrada.
   - Tests con clientes reales de socket.io-client contra un servidor en un puerto aleatorio.
+  - Desplegado en internet (Render, `render.yaml`), `CLAVE_ACCESO` protege todo con contraseña
+    (`acceso.ts`: página `/acceso`, cookie firmada; Socket.IO con `allowRequest`); `/salud` es
+    público. Las cartas y el arte nunca se publican sin esa contraseña.
 - **E2E** (`apps/e2e`):
   - `pnpm e2e` compila la web en modo `e2e` (`apps/web/dist-e2e`) y arranca el servidor en el puerto 3100.
   - El **piloto** (`apps/web/src/e2e/piloto.ts`, solo existe en la compilación `--mode e2e`) expone `window.__hts.sugerencia()`: lo que haría el bot normal. `apps/e2e/src/piloto.ts` lo ejecuta pulsando la interfaz y espera a que cambie la versión del estado antes del siguiente paso.

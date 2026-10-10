@@ -12,6 +12,8 @@ export interface OpcionesArranque {
   puerto: number;
   /** Opciones de cada partida (retardo de los bots, pausas…); por defecto, las del anfitrión. */
   opcionesAnfitrion?: OpcionesAnfitrion;
+  /** Contraseña de acceso (ver acceso.ts); sin ella, el servidor queda abierto. */
+  claveAcceso?: string;
 }
 
 export interface ServidorArrancado {
@@ -26,6 +28,7 @@ export async function arrancar(o: OpcionesArranque): Promise<ServidorArrancado> 
     motor: crearMotor(cartas),
     dirWeb: o.dirWeb,
     ...(o.opcionesAnfitrion === undefined ? {} : { opcionesAnfitrion: o.opcionesAnfitrion }),
+    ...(o.claveAcceso === undefined ? {} : { claveAcceso: o.claveAcceso }),
   });
   try {
     return { servidor, puerto: await servidor.escuchar(o.puerto) };

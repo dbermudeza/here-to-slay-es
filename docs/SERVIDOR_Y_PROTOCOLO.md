@@ -178,7 +178,8 @@ Detalles de validación (`protocolo.ts`):
 `AsientoPublico = { id, nombre, control, listo, conectado }` (un bot siempre cuenta como conectado).
 
 `EstadoTunel`: `fase` es `apagado`, `conectando`, `activo` o `error`; `url` es la dirección
-`https://….trycloudflare.com` cuando está activo; `error` es `NO_INSTALADO`, `FALLO` o `TIEMPO`.
+`https://….trycloudflare.com` cuando está activo; `error` es `NO_INSTALADO`, `FALLO`, `TIEMPO` o `RED_BLOQUEADA` (la red no deja salir por el
+puerto 7844, el que usa `cloudflared`).
 
 ### `EstadoPartida`, campo a campo
 
@@ -239,9 +240,46 @@ resultado a la vez**.
   por el túnel también llegan desde localhost (las reenvía `cloudflared`), pero con las cabeceras de
   Cloudflare, así que no cuentan como equipo del servidor. Solo él recibe `redLocal` y puede usar
   `tunel:abrir`/`tunel:cerrar` (si no, `SOLO_EQUIPO_SERVIDOR`).
+- **Contraseña de acceso opcional** (`CLAVE_ACCESO`): ver
+  [Protección por contraseña](#protección-por-contraseña).
 - **Lo que no hay:** autenticación de usuarios ni HTTPS propio (en internet, el túnel de Cloudflare
   pone HTTPS). El servidor sirve las imágenes y textos de las cartas a quien tenga la dirección: es
   para jugar con amigos.
+
+## Protección por contraseña
+
+Si la variable `CLAVE_ACCESO` está definida, el servidor exige haber entrado antes por la página
+`/acceso` para servir **la web, la API, las imágenes de las cartas y la conexión Socket.IO**. Al
+introducir la contraseña correcta guarda una cookie `HttpOnly` firmada, válida 30 días. Los enlaces
+de invitación (`?sala=…`) piden la contraseña y luego llevan a la sala. La ruta `/salud` es pública
+(la usa el chequeo de Render; responde `{ ok: true }`). Sin la variable, no se protege nada
+(`pnpm servidor`, el `.exe`). Se usa en el despliegue en la nube: ver [DESPLIEGUE.md](DESPLIEGUE.md).
+
+Detalles de `apps/server/src/acceso.ts` (`protegerConClave`, `tieneAcceso`):
+
+- La cookie se llama `hts_acceso` y su valor es `caducidad.firma`. La firma es un HMAC cuya clave
+  se deriva de la contraseña con `scrypt` (lento a propósito), así que una cookie filtrada no sirve
+  para adivinar la contraseña sin conexión. La caducidad (30 días) se comprueba **en el servidor**,
+  aunque el navegador conserve la cookie. **Cambiar `CLAVE_ACCESO` invalida todas las sesiones.**
+- Sin cookie válida, un `GET` que acepta HTML se redirige a `/acceso?volver=<ruta>`; el resto
+  responde `401` con `{ ok: false, error: 'SIN_ACCESO' }`. `rutaSegura` solo admite rutas internas
+  en `volver`: rechaza los caracteres de control y la barra invertida, e interpreta la ruta con
+  `URL` para comprobar que el origen sigue siendo el interno (y que no apunta a `/acceso`).
+- Socket.IO no pasa por las rutas de Fastify: se protege con `allowRequest` y `tieneAcceso`.
+- **Límite de intentos** (`POST /acceso`, respuesta `429`): máximo de **10 fallos por IP** cada 10
+  minutos y, además, un **tope total de 50 fallos cada 10 minutos**, sea cual sea la IP. Con la
+  protección activa se activa `trustProxy`, de modo que tras el proxy de Render la IP sale de
+  `X-Forwarded-For`; pero esa cabecera **puede inventarla el cliente**, y por eso existe el tope
+  total (el límite por IP, por sí solo, se saltaría cambiando la cabecera). Se recuerdan como mucho
+  1000 IP. Consecuencia: quien pruebe muchas contraseñas puede **bloquear durante 10 minutos las
+  entradas nuevas de todos**; las sesiones ya abiertas (cookie válida) siguen funcionando. Una
+  contraseña larga lo hace inútil como ataque de adivinación. Un acierto borra los fallos de esa IP.
+- **Caché:** con contraseña, un hook `onSend` hace que toda respuesta lleve `Cache-Control` con
+  `private` (`private, no-store` si no traía cabecera; si traía otra, se le antepone `private`).
+  Además, `/assets` y `/cartas` pasan de `public` a `private` (tabla de abajo).
+- **Página `/acceso`:** lleva `X-Frame-Options: DENY` y `Content-Security-Policy: frame-ancestors
+'none'` para que no se pueda incrustar en otra web. La cookie es `HttpOnly; SameSite=Lax` y
+  `Secure` cuando la petición llega por HTTPS (directo o por `X-Forwarded-Proto`).
 
 ## Web estática y caché
 
@@ -273,7 +311,9 @@ el servidor (`serveClient: false`): va dentro de la web compilada.
 
 | Variable                | Por defecto     | Efecto                                                                                           |
 | ----------------------- | --------------- | ------------------------------------------------------------------------------------------------ |
-| `PUERTO`                | `3000`          | Puerto en el que escucha.                                                                        |
+| `PUERTO`                | `3000`          | Puerto en el que escucha. Si no existe, se lee `PORT`.                                           |
+| `PORT`                  | —               | Puerto que define la plataforma (Render). Solo se usa si no hay `PUERTO`.                        |
+| `CLAVE_ACCESO`          | sin definir     | Contraseña de acceso. Si existe, activa la protección (ver más abajo).                           |
 | `DIR_WEB`               | `apps/web/dist` | Carpeta de la web compilada, relativa a la raíz del repositorio. El e2e usa `apps/web/dist-e2e`. |
 | `RETARDO_BOT_MS`        | 700             | `retardoBotMs` del anfitrión.                                                                    |
 | `CELEBRACION_MS`        | 4000            | `celebracionMs` (0 la desactiva).                                                                |

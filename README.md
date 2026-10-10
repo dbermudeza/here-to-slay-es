@@ -109,7 +109,9 @@ las cartas:
 
    Descarga `dbermudeza/here-to-slay-recursos` con tu sesión de Git (si falla, inicia sesión con
    `gh auth login`). Para usar otro repositorio: `pnpm recursos --repo <url>` o la variable
-   `HTS_RECURSOS_REPO`.
+   `HTS_RECURSOS_REPO`. Para descargarlos sin sesión de Git, como en un servidor, define
+   `HTS_RECURSOS_TOKEN` con un token de GitHub de solo lectura (más en
+   [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md#cómo-usa-el-token-pnpm-recursos)).
 
 2. **Desde una carpeta** (una copia de seguridad, un disco externo…):
 
@@ -166,7 +168,9 @@ Compila la aplicación y arranca el servidor en el puerto 3000. Desde ese equipo
 `http://localhost:3000` y **crea la sala**. En "Invitar a jugar" tienes enlaces para copiar y enviar,
 con el código ya puesto: uno para la red de casa y, con el botón **Abrir acceso por internet**, otro
 para jugar por internet mediante un túnel de Cloudflare (sin contratar ningún servidor ni tocar el
-router). Los detalles están en **[docs/EN_LINEA.md](docs/EN_LINEA.md)**.
+router). Los detalles están en **[docs/EN_LINEA.md](docs/EN_LINEA.md)**. Si tu red bloquea el túnel
+o quieres una dirección fija, puedes desplegar el servidor en la nube (Render, plan gratuito, con
+contraseña): **[docs/DESPLIEGUE.md](docs/DESPLIEGUE.md)**.
 
 ### Con doble clic (ejecutable de escritorio)
 
@@ -223,7 +227,8 @@ El servidor (`pnpm servidor`) acepta estas variables de entorno (en PowerShell:
 
 | Variable                | Por defecto     | Qué hace                                                         |
 | ----------------------- | --------------- | ---------------------------------------------------------------- |
-| `PUERTO`                | `3000`          | Puerto del servidor                                              |
+| `PUERTO`                | `3000`          | Puerto del servidor (si no está, se lee `PORT`)                  |
+| `CLAVE_ACCESO`          | sin definir     | Contraseña de acceso (para el despliegue en la nube)             |
 | `CLOUDFLARED`           | se busca solo   | Ruta del ejecutable de `cloudflared` si no lo encuentra          |
 | `DIR_WEB`               | `apps/web/dist` | Carpeta de la web compilada que se sirve                         |
 | `RETARDO_BOT_MS`        | `700`           | Pausa antes de que actúe un bot (las pruebas e2e la acortan)     |
@@ -232,7 +237,8 @@ El servidor (`pnpm servidor`) acepta estas variables de entorno (en PowerShell:
 | `PRESENTACION_LIDER_MS` | `4000`          | Presentación de la habilidad de un Líder (`0`: sin ella)         |
 
 `HTS_TRAZA=1` muestra en `pnpm e2e` cada paso del piloto (para depurar pruebas) y
-`HTS_RECURSOS_REPO` cambia el repositorio de `pnpm recursos`. El ejecutable de escritorio solo lee
+`HTS_RECURSOS_REPO` cambia el repositorio de `pnpm recursos` (y `HTS_RECURSOS_TOKEN` aporta un
+token de solo lectura, como en el despliegue en la nube). El ejecutable de escritorio solo lee
 `CLOUDFLARED`. Más en [docs/SERVIDOR_Y_PROTOCOLO.md](docs/SERVIDOR_Y_PROTOCOLO.md).
 
 ## Arquitectura
@@ -263,7 +269,7 @@ lo que puede ver. El detalle, con diagramas, está en [docs/ARQUITECTURA.md](doc
 Todo está en [docs/](docs/README.md), con un índice y un mapa de lectura según lo que quieras hacer:
 las reglas ([REGLAS.md](docs/REGLAS.md), [DUDAS_REGLAS.md](docs/DUDAS_REGLAS.md)), cada pieza del
 sistema (motor, cartas y efectos, bots, anfitrión, servidor y protocolo, web), el
-[modo en línea](docs/EN_LINEA.md), el [ejecutable de escritorio](docs/ESCRITORIO.md), la
+[modo en línea](docs/EN_LINEA.md), el [despliegue en la nube](docs/DESPLIEGUE.md), el [ejecutable de escritorio](docs/ESCRITORIO.md), la
 [estrategia de pruebas](docs/PRUEBAS.md) y un [glosario](docs/GLOSARIO.md).
 
 ## Desarrollo

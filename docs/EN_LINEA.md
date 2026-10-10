@@ -56,7 +56,7 @@ Si Windows pregunta por el **cortafuegos** la primera vez, permite el acceso en 
 
 ## 3. Jugar por internet
 
-El servidor está en tu casa, así que hay que hacerlo accesible desde fuera. Dos opciones:
+El servidor está en tu casa, así que hay que hacerlo accesible desde fuera. Dos opciones (y una tercera, si tu red bloquea el túnel: el [servidor en la nube](DESPLIEGUE.md)):
 
 ### Opción A: túnel de Cloudflare desde la propia sala (recomendada)
 
@@ -89,6 +89,14 @@ Aparecerá una dirección del tipo `https://palabras-al-azar.trycloudflare.com`.
 demás jugadores: funciona mientras esa terminal siga abierta.
 
 En los dos casos es un túnel temporal y gratuito; cada vez que lo abres cambia la dirección.
+
+#### Si la red bloquea el túnel (`RED_BLOQUEADA`)
+
+El túnel solo muestra el enlace cuando ya funciona. Si `cloudflared` no consigue conectar porque la
+red no deja salir por el puerto **7844** (habitual en redes de universidad, empresa o wifi
+pública), la sala avisa con el error `RED_BLOQUEADA` y no ofrece ningún enlace. Opciones: conectar
+el equipo a otra red (la de casa o los datos del móvil), o desplegar el servidor en la nube con
+**[DESPLIEGUE.md](DESPLIEGUE.md)**, que no depende de tu red.
 
 ### Opción B: abrir un puerto en el router
 
