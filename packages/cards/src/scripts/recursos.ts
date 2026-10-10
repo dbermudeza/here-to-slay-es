@@ -5,6 +5,11 @@
  * repositorio porque son ilustraciones y textos de Unstable Games:
  * - Por defecto los descarga del repositorio privado de recursos (hace falta acceso a él y tener la
  *   sesión de Git iniciada). Otro repositorio: `--repo <url>` o la variable HTS_RECURSOS_REPO.
+ * - Sin sesión de Git (p. ej. en la compilación de un servidor), con la variable HTS_RECURSOS_TOKEN:
+ *   un token de GitHub de solo lectura del repositorio de recursos. No va en la URL ni en los
+ *   argumentos de git: se pasa como cabecera HTTP por el entorno del proceso hijo
+ *   (GIT_CONFIG_COUNT/KEY/VALUE) y nunca se imprime. Las credenciales que traiga una URL se
+ *   muestran como `***`.
  * - Con `--desde <carpeta>` los copia de una carpeta: la que contiene `Referencias/` (y, si la tiene,
  *   `assets/cartas/`) o la propia carpeta `Referencias`.
  * Después prepara las imágenes en assets/cartas/ y valida cartas.es.json.
@@ -14,6 +19,7 @@ import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } fr
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { copiarImagenes } from '../imagenes';
+import { cabeceraAutorizacion, limpiarSalida, ordenClon, type OrdenClon } from '../recursos-git';
 import { RAIZ, RUTA_ASSETS_CARTAS, RUTA_CARTAS_JSON } from '../rutas';
 import { ArchivoCartasSchema, IMAGENES_RESERVADAS } from '../schema';
 
@@ -47,19 +53,50 @@ function origenDesdeCarpeta(carpeta: string): { referencias: string; assets: str
 }
 
 function descargar(repo: string): { referencias: string; assets: string | null; temporal: string } {
+  const crudo = process.env['HTS_RECURSOS_TOKEN']?.trim() ?? '';
+  const token = crudo.length > 0 ? crudo : undefined;
+  const secretos = token === undefined ? [] : [token, cabeceraAutorizacion(token)];
+  const limpiar = (texto: string): string => limpiarSalida(texto, secretos);
   const temporal = mkdtempSync(join(tmpdir(), 'hts-recursos-'));
-  console.log(`Descargando los recursos de ${repo}…`);
+  let orden: OrdenClon;
   try {
-    execFileSync('git', ['clone', '--depth', '1', '--quiet', repo, temporal], { stdio: 'inherit' });
-  } catch {
+    orden = ordenClon(repo, temporal, token, process.env);
+  } catch (e) {
     rmSync(temporal, { recursive: true, force: true });
+    return fallar(limpiar(e instanceof Error ? e.message : String(e)));
+  }
+  const conToken = token !== undefined ? ' (con HTS_RECURSOS_TOKEN)' : '';
+  console.log(`Descargando los recursos de ${limpiar(repo)}${conToken}…`);
+  try {
+    // La salida de error de git se captura para limpiarla antes de mostrarla: puede repetir la URL.
+    execFileSync('git', orden.args, {
+      env: orden.env,
+      stdio: ['ignore', 'inherit', 'pipe'],
+      encoding: 'utf8',
+    });
+  } catch (e) {
+    rmSync(temporal, { recursive: true, force: true });
+    const stderr =
+      typeof e === 'object' && e !== null && 'stderr' in e && typeof e.stderr === 'string'
+        ? e.stderr.trim()
+        : '';
+    if (stderr.length > 0) console.error(limpiar(stderr));
     return fallar(
-      [
-        'No se pudieron descargar los recursos. Comprueba que:',
-        '  - tienes acceso al repositorio privado de recursos (pide al propietario que te invite), y',
-        '  - Git tiene tu sesión de GitHub iniciada (por ejemplo, con `gh auth login`).',
-        'Si tienes los archivos en otra carpeta: pnpm recursos --desde <carpeta>',
-      ].join('\n'),
+      (token !== undefined
+        ? [
+            'No se pudieron descargar los recursos con HTS_RECURSOS_TOKEN. Comprueba que:',
+            '  - el token no ha caducado ni se ha revocado,',
+            '  - tiene acceso de lectura al repositorio de recursos (permiso "Contents: Read-only"), y',
+            `  - el repositorio es ${limpiar(repo)}.`,
+          ]
+        : [
+            'No se pudieron descargar los recursos. Comprueba que:',
+            '  - tienes acceso al repositorio privado de recursos (pide al propietario que te invite), y',
+            '  - Git tiene tu sesión de GitHub iniciada (por ejemplo, con `gh auth login`).',
+            'Sin sesión de Git (p. ej. en un servidor): define HTS_RECURSOS_TOKEN con un token de solo lectura.',
+            'Si tienes los archivos en otra carpeta: pnpm recursos --desde <carpeta>',
+          ]
+      ).join('\n'),
     );
   }
   const { referencias, assets } = origenDesdeCarpeta(temporal);
