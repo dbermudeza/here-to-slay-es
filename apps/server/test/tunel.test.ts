@@ -6,14 +6,22 @@ import { crearServidor, esDelEquipoServidor, type ServidorHts } from '../src/ser
 import type { OpcionesTunel } from '../src/tunel';
 import { esperar } from './utilidades';
 
-/** Un "cloudflared" falso: escribe una dirección como la real y se queda abierto. */
-const FALSO: OpcionesTunel = {
+/**
+ * Un "cloudflared" falso: escribe la dirección como el real y, `retrasoMs` después, la línea con la
+ * que confirma la conexión; luego se queda abierto.
+ */
+const cloudflaredFalso = (retrasoMs = 0): Pick<OpcionesTunel, 'comando' | 'argumentos'> => ({
   comando: process.execPath,
   argumentos: (puerto) => [
     '-e',
-    `console.error('INF |  https://prueba-${puerto}.trycloudflare.com  |'); setInterval(() => {}, 1000);`,
+    `console.error('INF |  https://prueba-${puerto}.trycloudflare.com  |');` +
+      `setTimeout(() => console.error('INF Registered tunnel connection connIndex=0'), ${retrasoMs});` +
+      'setInterval(() => {}, 1000);',
   ],
-};
+});
+
+/** La dirección pública responde siempre (en los tests no se sale a internet). */
+const FALSO: OpcionesTunel = { ...cloudflaredFalso(), comprobar: () => Promise.resolve(true) };
 
 let servidor: ServidorHts | null = null;
 const sockets: Socket[] = [];
@@ -79,6 +87,59 @@ describe('Túnel de Cloudflare desde la app', () => {
     expect(await pedir(invitado, MENSAJES.cerrarTunel)).toMatchObject({ ok: false });
     expect(await pedir(anfitrion, MENSAJES.cerrarTunel)).toEqual({ ok: true });
     await esperar(() => invitado.tunel?.fase === 'apagado');
+  });
+
+  it('no da el túnel por activo hasta que cloudflared conecta y la dirección responde', async () => {
+    // El caso del «Error 1033»: la dirección aparece antes de que el túnel funcione.
+    let comprobaciones = 0;
+    const puerto = await arrancar({
+      ...cloudflaredFalso(1500),
+      reintentoMs: 50,
+      comprobar: () => Promise.resolve(++comprobaciones >= 3),
+    });
+    const c = conectar(puerto);
+    await esperar(() => c.info !== null);
+    await pedir(c, MENSAJES.abrirTunel);
+    // Con la dirección ya escrita pero sin la conexión confirmada, sigue conectando y sin enlace.
+    await new Promise((fin) => setTimeout(fin, 800));
+    expect(c.tunel).toEqual({ fase: 'conectando', url: null, error: null });
+    expect(comprobaciones).toBe(0);
+    // Tras la confirmación, comprueba la dirección hasta que responde.
+    await esperar(() => c.tunel?.fase === 'activo', 10_000);
+    expect(c.tunel?.url).toBe(`https://prueba-${puerto}.trycloudflare.com`);
+    expect(comprobaciones).toBe(3);
+  });
+
+  it('si la dirección pública nunca responde, se rinde con TIEMPO', async () => {
+    const puerto = await arrancar({
+      ...cloudflaredFalso(),
+      esperaMs: 600,
+      reintentoMs: 50,
+      comprobar: () => Promise.resolve(false),
+    });
+    const c = conectar(puerto);
+    await esperar(() => c.info !== null);
+    await pedir(c, MENSAJES.abrirTunel);
+    await esperar(() => c.tunel?.fase === 'error', 10_000);
+    expect(c.tunel?.error).toBe('TIEMPO');
+  });
+
+  it('si la red bloquea el puerto de cloudflared, lo dice (RED_BLOQUEADA)', async () => {
+    const puerto = await arrancar({
+      comando: process.execPath,
+      argumentos: (p) => [
+        '-e',
+        `console.error('INF |  https://prueba-${p}.trycloudflare.com  |');` +
+          "console.error('INF |  ERROR: Allow outbound TCP on port 7844.  |');" +
+          'setTimeout(() => process.exit(1), 100);',
+      ],
+      comprobar: () => Promise.resolve(true),
+    });
+    const c = conectar(puerto);
+    await esperar(() => c.info !== null);
+    await pedir(c, MENSAJES.abrirTunel);
+    await esperar(() => c.tunel?.fase === 'error', 10_000);
+    expect(c.tunel).toEqual({ fase: 'error', url: null, error: 'RED_BLOQUEADA' });
   });
 
   it('si cloudflared no está instalado, lo dice', async () => {

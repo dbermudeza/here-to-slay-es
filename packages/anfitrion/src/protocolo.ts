@@ -141,7 +141,8 @@ export interface EstadoTunel {
   fase: 'apagado' | 'conectando' | 'activo' | 'error';
   /** Dirección pública (https://….trycloudflare.com) cuando está activo. */
   url: string | null;
-  error: 'NO_INSTALADO' | 'FALLO' | 'TIEMPO' | null;
+  /** RED_BLOQUEADA: la red no deja salir por el puerto 7844, el que usa cloudflared. */
+  error: 'NO_INSTALADO' | 'FALLO' | 'TIEMPO' | 'RED_BLOQUEADA' | null;
 }
 
 /** Lo que el servidor cuenta a cada conexión al conectarse. */

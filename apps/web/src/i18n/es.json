@@ -534,7 +534,8 @@
       "errores": {
         "NO_INSTALADO": "No se encuentra cloudflared en este equipo. Instálalo con este comando en una terminal y vuelve a arrancar el servidor:",
         "FALLO": "No se pudo abrir el túnel (o se ha cerrado). Comprueba la conexión a internet y vuelve a intentarlo.",
-        "TIEMPO": "Cloudflare no ha respondido a tiempo. Vuelve a intentarlo."
+        "TIEMPO": "Cloudflare no ha respondido a tiempo. Vuelve a intentarlo.",
+        "RED_BLOQUEADA": "Esta red bloquea los túneles de Cloudflare (no deja salir por el puerto 7844, algo habitual en redes de universidad, empresa o wifi pública). Conecta este equipo a otra red, por ejemplo la de tu casa o los datos del móvil, y vuelve a intentarlo."
       }
     }
   }
