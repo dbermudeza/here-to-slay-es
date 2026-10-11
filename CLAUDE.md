@@ -50,6 +50,7 @@ pnpm recursos         # instala Referencias/ y assets/cartas/ (repo privado de r
                       # sin sesión de Git, con HTS_RECURSOS_TOKEN)
 pnpm copy:images      # copia Referencias/Imagenes/Cartas/** → assets/cartas/<id>.png
 pnpm sim [n] [semilla] # simula n partidas entre bots y muestra estadísticas
+pnpm empaquetar       # genera dist-app/HereToSlay/HereToSlay.exe: lanzador sin consola que abre la web desplegada
 ```
 
 Una fase está terminada cuando `pnpm lint`, `pnpm typecheck` y `pnpm test` pasan, y se cierra con

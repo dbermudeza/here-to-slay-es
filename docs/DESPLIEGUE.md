@@ -56,7 +56,7 @@ archivo no afecta al servicio existente. Para cambiar la región hay que borrar 
 introducir las dos variables secretas. Cambiar el nombre también cambia la dirección: avisa a tus
 amigos.
 
-**Si cambia la dirección**, el ejecutable de escritorio sigue abriendo la antigua: la dirección
+**Si cambia la dirección**, el lanzador `HereToSlay.exe` sigue abriendo la antigua: la dirección
 está escrita en el código como `URL_EN_LINEA` en
 [`apps/server/src/escritorio.ts`](../apps/server/src/escritorio.ts). Cámbiala y vuelve a ejecutar
 `pnpm empaquetar` (ver [ESCRITORIO.md](ESCRITORIO.md#si-cambia-la-dirección-de-render)).

@@ -1,82 +1,50 @@
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
-import { createServer } from 'node:http';
-import type { AddressInfo } from 'node:net';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { RUTA_CARTAS_JSON } from '../../../packages/cards/src/rutas';
-import { arrancar } from '../src/arranque';
 import {
-  estaEnMarcha,
-  modoDeArgumento,
-  modoDeRespuesta,
-  rutasEscritorio,
-  URL_EN_LINEA,
-} from '../src/escritorio';
+  posicionSubsistema,
+  aSubsistemaGrafico,
+  SUBSISTEMA_CONSOLA,
+  SUBSISTEMA_GRAFICO,
+} from '../scripts/subsistema';
+import { ordenNavegador, URL_EN_LINEA } from '../src/escritorio';
 
-describe('Ejecutable de escritorio', () => {
-  it('al abrirlo se elige web (Intro o 1) o servidor local (2); otra respuesta vuelve a preguntar', () => {
-    expect(modoDeRespuesta('')).toBe('web');
-    expect(modoDeRespuesta(' 1 ')).toBe('web');
-    expect(modoDeRespuesta('2')).toBe('local');
-    expect(modoDeRespuesta('3')).toBeNull();
-    expect(modoDeRespuesta('si')).toBeNull();
-  });
-
-  it('el modo se puede dar como argumento (accesos directos)', () => {
-    expect(modoDeArgumento('web')).toBe('web');
-    expect(modoDeArgumento('WEB')).toBe('web');
-    expect(modoDeArgumento('en-linea')).toBe('web');
-    expect(modoDeArgumento('local')).toBe('local');
-    expect(modoDeArgumento(undefined)).toBeNull();
-    expect(modoDeArgumento('otra')).toBeNull();
-  });
-
-  it('la dirección en línea es https', () => {
+describe('Lanzador de escritorio', () => {
+  it('abre la dirección del juego en línea (https)', () => {
     expect(new URL(URL_EN_LINEA).protocol).toBe('https:');
   });
 
-  it('busca la web y las cartas junto al ejecutable', () => {
-    const base = join('C:', 'Juegos', 'HereToSlay');
-    expect(rutasEscritorio(base)).toEqual({
-      rutaCartas: join(base, 'cartas.es.json'),
-      dirWeb: join(base, 'web'),
-    });
+  it('usa la orden del sistema para abrir el navegador', () => {
+    const url = 'https://ejemplo.test/';
+    expect(ordenNavegador(url, 'win32')).toEqual([
+      'rundll32',
+      ['url.dll,FileProtocolHandler', url],
+    ]);
+    expect(ordenNavegador(url, 'darwin')).toEqual(['open', [url]]);
+    expect(ordenNavegador(url, 'linux')).toEqual(['xdg-open', [url]]);
   });
+});
 
-  it('no detecta servidor en un puerto libre', async () => {
-    const libre = createServer();
-    await new Promise<void>((fin) => libre.listen(0, '127.0.0.1', fin));
-    const { port } = libre.address() as AddressInfo;
-    await new Promise<void>((fin) => libre.close(() => fin()));
-    expect(await estaEnMarcha(port, 500)).toBe(false);
+describe.skipIf(process.platform !== 'win32')('Ejecutable sin consola', () => {
+  it('marca un ejecutable de Windows (node.exe) como aplicación gráfica', () => {
+    const exe = readFileSync(process.execPath);
+    const pos = posicionSubsistema(exe);
+    expect(exe.readUInt16LE(pos)).toBe(SUBSISTEMA_CONSOLA);
+    const grafico = aSubsistemaGrafico(exe);
+    expect(grafico.readUInt16LE(pos)).toBe(SUBSISTEMA_GRAFICO);
+    // Solo cambia ese campo; el original queda intacto.
+    expect(exe.readUInt16LE(pos)).toBe(SUBSISTEMA_CONSOLA);
+    let distintos = 0;
+    for (let i = 0; i < exe.length; i++) if (exe[i] !== grafico[i]) distintos++;
+    expect(distintos).toBe(1);
   });
+});
 
-  it('no confunde otro programa con Here to Slay', async () => {
-    const otro = createServer((_, res) => res.end('<html>otra cosa</html>'));
-    await new Promise<void>((fin) => otro.listen(0, '127.0.0.1', fin));
-    const { port } = otro.address() as AddressInfo;
-    try {
-      expect(await estaEnMarcha(port, 500)).toBe(false);
-    } finally {
-      await new Promise<void>((fin) => otro.close(() => fin()));
-    }
-  });
-
-  describe.skipIf(!existsSync(RUTA_CARTAS_JSON))('con las cartas', () => {
-    it('arranca el servidor y lo detecta ya en marcha', async () => {
-      const dirWeb = mkdtempSync(join(tmpdir(), 'hts-web-'));
-      const { servidor, puerto } = await arrancar({
-        rutaCartas: RUTA_CARTAS_JSON,
-        dirWeb,
-        puerto: 0,
-      });
-      try {
-        expect(await estaEnMarcha(puerto)).toBe(true);
-      } finally {
-        await servidor.cerrar();
-        rmSync(dirWeb, { recursive: true, force: true });
-      }
-    });
+describe('Cabecera de ejecutables', () => {
+  it('rechaza lo que no es un ejecutable de Windows', () => {
+    expect(() => posicionSubsistema(Buffer.from('no soy un exe'))).toThrow(/MZ/);
+    const soloMz = Buffer.alloc(0x80);
+    soloMz.write('MZ', 0, 'latin1');
+    soloMz.writeUInt32LE(0x40, 0x3c);
+    expect(() => posicionSubsistema(soloMz)).toThrow(/PE/);
   });
 });

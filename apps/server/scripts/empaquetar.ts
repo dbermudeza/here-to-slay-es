@@ -1,19 +1,16 @@
 /**
- * `pnpm empaquetar`: genera dist-app/HereToSlay/, una carpeta para jugar sin Node ni pnpm:
+ * `pnpm empaquetar`: genera dist-app/HereToSlay/HereToSlay.exe, el lanzador de escritorio. Al
+ * abrirlo, abre en el navegador el juego desplegado en internet (src/escritorio.ts) y termina, sin
+ * ventana de consola.
  *
- *   HereToSlay.exe   el servidor (src/principal-escritorio.ts) como ejecutable único de Node (SEA),
- *                    con el logo del juego como icono en Windows
- *   web/             la aplicación compilada (apps/web/dist, con las imágenes en web/cartas)
- *   cartas.es.json   copia de Referencias/
- *
- * Contiene arte y textos oficiales: es personal y no se versiona (dist-app/ está en .gitignore).
- * La web ya debe estar compilada (el script raíz ejecuta antes `pnpm build`).
+ * Es un ejecutable único de Node (SEA) con el logo del juego como icono en Windows y marcado como
+ * aplicación gráfica. No lleva la web ni las cartas: el juego se sirve desde el despliegue. Para
+ * jugar con un servidor en este equipo, `pnpm servidor`.
  */
 import { execFileSync } from 'node:child_process';
 import {
   closeSync,
   copyFileSync,
-  cpSync,
   existsSync,
   mkdirSync,
   openSync,
@@ -27,46 +24,34 @@ import { IMAGEN_LOGO } from '@hts/cards';
 import { build } from 'esbuild';
 import pngToIco from 'png-to-ico';
 import { rcedit } from 'rcedit';
-import { RAIZ, RUTA_CARTAS_JSON } from '../../../packages/cards/src/rutas';
+import { RAIZ, RUTA_ASSETS_CARTAS } from '../../../packages/cards/src/rutas';
 import { iconoDesdeLogo } from './icono';
+import { aSubsistemaGrafico } from './subsistema';
 
-const DIR_WEB = resolve(RAIZ, 'apps/web/dist');
 const DESTINO = resolve(RAIZ, 'dist-app/HereToSlay');
 const TEMPORAL = resolve(RAIZ, 'dist-app/.temporal');
 const NOMBRE = process.platform === 'win32' ? 'HereToSlay.exe' : 'HereToSlay';
 /** Marca que Node busca en su binario para saber que lleva una aplicación (documentación de SEA). */
 const FUSIBLE = 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2';
 
-for (const [ruta, falta] of [
-  [RUTA_CARTAS_JSON, 'instálalo con pnpm recursos'],
-  [DIR_WEB, 'compílala con pnpm build'],
-] as const) {
-  if (!existsSync(ruta)) {
-    console.error(`Falta ${ruta}: ${falta}.`);
-    process.exit(1);
-  }
-}
-
-// Con el ejecutable abierto, Windows no deja borrarlo, pero sí lo que hay a su lado: se borraría
-// parte de web/ y el servidor en marcha dejaría de servir imágenes. Se comprueba antes de tocar nada.
+// Un ejecutable en uso no se puede reemplazar: se avisa antes de tocar nada.
 const ejecutable = join(DESTINO, NOMBRE);
 try {
   if (existsSync(ejecutable)) closeSync(openSync(ejecutable, 'r+'));
 } catch {
-  console.error(
-    `${NOMBRE} está abierto: ciérralo (su ventana) y vuelve a ejecutar pnpm empaquetar.`,
-  );
+  console.error(`${NOMBRE} está en uso: espera a que termine y vuelve a ejecutar pnpm empaquetar.`);
   process.exit(1);
 }
 
+// La carpeta se recrea entera (también borra web/ y cartas.es.json de versiones anteriores).
 rmSync(DESTINO, { recursive: true, force: true });
 rmSync(TEMPORAL, { recursive: true, force: true });
 mkdirSync(DESTINO, { recursive: true });
 mkdirSync(TEMPORAL, { recursive: true });
 
-// 1. El servidor completo en un único archivo CommonJS (lo que admite SEA).
-console.log('Empaquetando el servidor…');
-const codigo = join(TEMPORAL, 'servidor.cjs');
+// 1. El lanzador en un único archivo CommonJS (lo que admite SEA).
+console.log('Empaquetando el lanzador…');
+const codigo = join(TEMPORAL, 'lanzador.cjs');
 await build({
   entryPoints: [resolve(import.meta.dirname, '../src/principal-escritorio.ts')],
   outfile: codigo,
@@ -80,7 +65,7 @@ await build({
 
 // 2. El código como recurso del ejecutable de Node.
 console.log('Creando el ejecutable…');
-const blob = join(TEMPORAL, 'servidor.blob');
+const blob = join(TEMPORAL, 'lanzador.blob');
 const config = join(TEMPORAL, 'sea-config.json');
 writeFileSync(
   config,
@@ -91,7 +76,7 @@ execFileSync(process.execPath, ['--experimental-sea-config', config], { stdio: '
 copyFileSync(process.execPath, ejecutable);
 // Icono y datos del ejecutable, antes de inyectar el código (rcedit reescribe los recursos).
 if (process.platform === 'win32') {
-  const logo = join(DIR_WEB, 'cartas', IMAGEN_LOGO);
+  const logo = join(RUTA_ASSETS_CARTAS, IMAGEN_LOGO);
   const datos = {
     'version-string': { ProductName: 'Here to Slay', FileDescription: 'Here to Slay' },
   };
@@ -119,10 +104,10 @@ execFileSync(
   { stdio: 'inherit' },
 );
 
-// 3. La web y las cartas, junto al ejecutable.
-console.log('Copiando la web y las cartas…');
-cpSync(DIR_WEB, join(DESTINO, 'web'), { recursive: true });
-copyFileSync(RUTA_CARTAS_JSON, join(DESTINO, 'cartas.es.json'));
+// 3. Aplicación gráfica: al abrirlo no aparece ninguna ventana de consola.
+if (process.platform === 'win32') {
+  writeFileSync(ejecutable, aSubsistemaGrafico(readFileSync(ejecutable)));
+}
 rmSync(TEMPORAL, { recursive: true, force: true });
 
 // El Explorador guarda los iconos en caché: sin esto seguiría mostrando el icono anterior.
@@ -137,4 +122,4 @@ if (process.platform === 'win32') {
 }
 
 console.log(`\nListo: ${ejecutable}`);
-console.log('Ábrelo con doble clic (puedes crear un acceso directo en el escritorio).');
+console.log('Ábrelo con doble clic: abre el juego en el navegador.');

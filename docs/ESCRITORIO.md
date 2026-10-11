@@ -1,197 +1,124 @@
 # Ejecutable de escritorio (`HereToSlay.exe`)
 
-**Resumen.** `pnpm empaquetar` genera la carpeta `dist-app/HereToSlay/`, con la que se puede jugar
-sin Node ni pnpm. Al abrir `HereToSlay.exe`, la consola pregunta cómo jugar: **jugar en internet**
-(abre el juego desplegado en Render, [DESPLIEGUE.md](DESPLIEGUE.md)) o **servidor en este equipo**
-(arranca el [servidor en línea](SERVIDOR_Y_PROTOCOLO.md) en el puerto 3000 y abre el navegador; sirve
-para jugar en este equipo o hacer de servidor de una partida en línea, [EN_LINEA.md](EN_LINEA.md)).
-La pregunta se puede saltar con un argumento (`web` o `local`). El ejecutable es
-el propio Node con el código del servidor dentro (_Single Executable Application_, SEA); la web y
-las cartas van en archivos junto a él.
+**Resumen.** `pnpm empaquetar` genera `dist-app/HereToSlay/HereToSlay.exe`, un **lanzador**: al
+hacer doble clic abre en el navegador el juego desplegado en Render (`URL_EN_LINEA`,
+[DESPLIEGUE.md](DESPLIEGUE.md)) y termina. No arranca ningún servidor, no pregunta nada y no
+muestra ventana de consola (está marcado como aplicación gráfica de Windows). Para jugar con un
+servidor en este equipo (misma Wi-Fi o sin internet) se usa `pnpm servidor`
+([EN_LINEA.md](EN_LINEA.md)). La carpeta `dist-app/HereToSlay/` contiene **solo** `HereToSlay.exe`.
 
-Código: `apps/server/scripts/empaquetar.ts` (empaquetado), `apps/server/scripts/icono.ts` (icono),
-`apps/server/src/principal-escritorio.ts` y `apps/server/src/escritorio.ts` (arranque). Tests:
-`apps/server/test/escritorio.test.ts` e `icono.test.ts`.
+Código: `apps/server/src/escritorio.ts` (el lanzador), `apps/server/src/principal-escritorio.ts`
+(punto de entrada), `apps/server/scripts/empaquetar.ts` (empaquetado),
+`apps/server/scripts/subsistema.ts` (subsistema PE) y `apps/server/scripts/icono.ts` (icono).
+Tests: `apps/server/test/escritorio.test.ts` e `icono.test.ts`.
 
 ## Requisitos
 
-- Haber instalado los recursos (`pnpm recursos`): sin `Referencias/cartas.es.json` no se puede
-  empaquetar.
+- Haber instalado los recursos (`pnpm recursos`): el icono sale de `assets/cartas/logo.png`. Sin él
+  el script avisa y el ejecutable lleva el icono de Node.
 - Node ≥ 20.12 (el de `engines` en `package.json`). El ejecutable copia **el Node con el que se
-  ejecuta el script**, así que lleva esa versión.
-- Pensado para Windows. En macOS y Linux el script genera `HereToSlay` (sin `.exe`, y en macOS con el
-  segmento `NODE_SEA`), pero sin icono ni los pasos propios de Windows.
+  ejecuta el script**, así que pesa unos 90 MB.
+- Pensado para Windows. En macOS y Linux el script genera `HereToSlay` (sin `.exe`, y en macOS con
+  el segmento `NODE_SEA`), pero sin icono ni subsistema gráfico.
+
+## Qué hace el lanzador
+
+`principal-escritorio.ts` llama a `principal()` (`escritorio.ts`) y, cuando termina, `process.exit(0)`.
+`principal()` solo ejecuta `abrirNavegador(URL_EN_LINEA)`:
+
+| Plataforma | Orden (`ordenNavegador`)                     |
+| ---------- | -------------------------------------------- |
+| Windows    | `rundll32 url.dll,FileProtocolHandler <url>` |
+| macOS      | `open <url>`                                 |
+| Linux      | `xdg-open <url>`                             |
+
+La orden se lanza desacoplada (`detached`, `stdio: 'ignore'`, `windowsHide`) y la promesa se
+resuelve en cuanto el proceso arranca. Si la orden falla no hay a quién avisar (no hay consola): el
+lanzador simplemente termina. Render pide la contraseña al entrar y, en el plan gratuito, el primer
+acceso tras un rato inactivo tarda en cargar.
+
+## Subsistema gráfico (apartado técnico)
+
+`node.exe`, y por tanto el ejecutable SEA, es una aplicación de **consola**: Windows le abriría una
+ventana negra al hacer doble clic. La cabecera PE de todo ejecutable de Windows tiene un campo
+**Subsystem** que indica cómo se ejecuta: `3` (`WINDOWS_CUI`, consola) o `2` (`WINDOWS_GUI`,
+gráfico). `aSubsistemaGrafico` (`scripts/subsistema.ts`) lo cambia de 3 a 2 en una copia del búfer:
+
+1. En el desplazamiento `0x3C` del archivo está la posición de la cabecera `PE\0\0`.
+2. Tras ella van 4 bytes de firma, 20 de cabecera COFF y la cabecera opcional; el campo Subsystem
+   (2 bytes, little endian) está en el byte 68 de la cabecera opcional, igual en PE32 y PE32+.
+   `posicionSubsistema` devuelve `pe + 24 + 68`.
+3. Si falta la firma `MZ` o `PE\0\0`, lanza un error (no es un ejecutable de Windows).
+
+Se aplica **después** de inyectar el código con postject, y solo en Windows.
 
 ## Qué hace `pnpm empaquetar`
 
-El script raíz es `pnpm build && pnpm --filter @hts/server empaquetar`: primero compila la web
-(`apps/web/dist`) y después ejecuta `apps/server/scripts/empaquetar.ts`.
+El script raíz es `pnpm --filter @hts/server empaquetar`: **ya no compila la web** (`pnpm build`),
+porque el ejecutable no lleva ni web ni cartas.
 
 ```mermaid
 flowchart TD
-    A[pnpm build: apps/web/dist] --> B{¿Existen cartas.es.json<br/>y apps/web/dist?}
-    B -- no --> X[Error y salida]
-    B -- sí --> C{¿HereToSlay.exe abierto?}
-    C -- sí --> Y[Error: ciérralo y repite]
-    C -- no --> D[Borra dist-app/HereToSlay y dist-app/.temporal]
-    D --> E[esbuild: servidor.cjs]
-    E --> F[node --experimental-sea-config: servidor.blob]
-    F --> G[Copia node.exe como HereToSlay.exe]
-    G --> H[rcedit: icono y datos del exe]
-    H --> I[postject: inyecta NODE_SEA_BLOB]
-    I --> J[Copia web/ y cartas.es.json]
-    J --> K[ie4uinit -show: refresca la caché de iconos]
+    A{¿HereToSlay.exe en uso?} -- sí --> X[Error: espera y repite]
+    A -- no --> B[Borra dist-app/HereToSlay y dist-app/.temporal]
+    B --> C[esbuild: lanzador.cjs]
+    C --> D[node --experimental-sea-config: lanzador.blob]
+    D --> E[Copia node.exe como HereToSlay.exe]
+    E --> F[rcedit: icono y datos del exe]
+    F --> G[postject: inyecta NODE_SEA_BLOB]
+    G --> H[aSubsistemaGrafico: Subsystem 3 a 2]
+    H --> I[ie4uinit -show: refresca la caché de iconos]
 ```
 
-Paso a paso:
-
-1. **Comprobaciones.** Que existan `Referencias/cartas.es.json` ("instálalo con pnpm recursos") y
-   `apps/web/dist` ("compílala con pnpm build").
-2. **Protección con el exe abierto.** Intenta abrir `HereToSlay.exe` en escritura (`openSync(…,
-'r+')`). Si está en marcha, Windows no deja hacerlo y el script se detiene **antes de borrar
-   nada**: Windows no deja borrar un ejecutable abierto, pero sí los archivos de su lado, así que sin
-   esta comprobación se borraría parte de `web/` y el servidor en marcha dejaría de servir imágenes.
-3. **Limpieza.** Borra y vuelve a crear `dist-app/HereToSlay/` y la carpeta de trabajo
-   `dist-app/.temporal/`.
-4. **esbuild.** Empaqueta `src/principal-escritorio.ts` y todas sus dependencias (motor, cartas,
-   bots, anfitrión, Fastify, Socket.IO…) en **un único archivo CommonJS** minificado
-   (`servidor.cjs`), con `platform: 'node'` y como objetivo la versión mayor del Node actual. SEA
-   solo admite un script CommonJS.
-5. **Blob SEA.** Escribe `sea-config.json` (`main`, `output`, `disableExperimentalSEAWarning`) y
-   ejecuta `node --experimental-sea-config`, que produce `servidor.blob`.
-6. **Copia de Node.** Copia el ejecutable de Node actual (`process.execPath`) como
-   `HereToSlay.exe`.
-7. **Icono (solo Windows).** Antes de inyectar el código, porque `rcedit` reescribe los recursos del
-   ejecutable:
-   - Lee el logo de la web compilada (`apps/web/dist/cartas/logo.png`, `IMAGEN_LOGO` de
-     `@hts/cards`).
-   - `iconoDesdeLogo` (`scripts/icono.ts`) genera un PNG de 256 × 256 (`LADO_ICONO`): recorta el
-     margen transparente del logo (`cajaVisible`), lo escala con interpolación bilineal y
-     supermuestreo 3 × 3, y lo coloca sobre un cuadrado redondeado oscuro (el `stone-900` de la web),
-     con el borde suavizado. Hace falta porque el logo es texto claro sobre fondo transparente con
-     mucho margen: como icono apenas se vería. La imagen original no se modifica.
-   - `png-to-ico` lo convierte en `logo.ico` (con los tamaños menores derivados).
-   - `rcedit` pone el icono y los datos `ProductName`/`FileDescription` ("Here to Slay"). Sin logo
-     (recursos no instalados), avisa y deja el icono de Node.
-8. **postject.** Inyecta `servidor.blob` como recurso `NODE_SEA_BLOB` en el ejecutable y activa el
-   fusible de SEA (`NODE_SEA_FUSE_…`), que es lo que hace que Node arranque ese código en lugar de
-   comportarse como `node`.
-9. **Archivos de al lado.** Copia `apps/web/dist` como `web/` y `Referencias/cartas.es.json` como
-   `cartas.es.json`. Borra `dist-app/.temporal/`.
-10. **Caché de iconos (solo Windows).** Ejecuta `ie4uinit.exe -show` para que el Explorador
-    olvide el icono anterior. Si falla, solo avisa: el icono nuevo puede tardar en verse.
+1. **Protección con el exe en uso.** Intenta abrir `HereToSlay.exe` en escritura; si Windows no lo
+   permite, el script se detiene antes de borrar nada con «está en uso».
+2. **Limpieza.** Borra y recrea `dist-app/HereToSlay/` (así desaparecen también `web/` y
+   `cartas.es.json` de versiones anteriores) y la carpeta de trabajo `dist-app/.temporal/`.
+3. **esbuild.** Empaqueta `src/principal-escritorio.ts` en **un único archivo CommonJS** minificado
+   (`lanzador.cjs`), que es lo único que admite SEA.
+4. **Blob SEA.** Escribe `sea-config.json` y ejecuta `node --experimental-sea-config`, que produce
+   `lanzador.blob`.
+5. **Copia de Node e icono (solo Windows).** Copia `process.execPath` como `HereToSlay.exe`. Antes
+   de inyectar el código (porque `rcedit` reescribe los recursos), `iconoDesdeLogo`
+   (`scripts/icono.ts`) toma `assets/cartas/logo.png` (`IMAGEN_LOGO` de `@hts/cards`) y genera un
+   PNG de 256 × 256 (`LADO_ICONO`): recorta el margen transparente (`cajaVisible`), lo escala con
+   supermuestreo 3 × 3 y lo coloca sobre un cuadrado redondeado oscuro (el logo es texto claro con
+   mucho margen y apenas se vería). `png-to-ico` lo convierte en `.ico` y `rcedit` lo aplica junto con
+   `ProductName`/`FileDescription` («Here to Slay»).
+6. **postject.** Inyecta el blob como `NODE_SEA_BLOB` y activa el fusible `NODE_SEA_FUSE_…`, que
+   hace que Node arranque ese código en lugar de comportarse como `node`.
+7. **Subsistema gráfico** (solo Windows): ver el apartado anterior. Después borra `.temporal/`.
+8. **Caché de iconos** (solo Windows): `ie4uinit.exe -show`, para que el Explorador olvide el
+   icono anterior. Si falla, solo avisa.
 
 ## Qué contiene `dist-app/HereToSlay/`
 
 ```
 dist-app/HereToSlay/
-├── HereToSlay.exe     Node + el servidor (SEA), con el icono del juego
-├── web/               la aplicación web compilada; las imágenes, en web/cartas/
-└── cartas.es.json     los datos de las cartas
+└── HereToSlay.exe     Node + el lanzador (SEA), con el icono del juego, sin consola
 ```
 
-La carpeta se puede mover o copiar entera a otro equipo con Windows (las tres piezas deben ir
-juntas). **No se versiona** (`dist-app/` está en `.gitignore`): contiene el arte y los textos
-oficiales de las cartas, que son personales y no pueden ir al repositorio público, y además pesa
-bastante (incluye un Node completo). Se regenera con `pnpm empaquetar`.
+Se puede copiar a cualquier equipo con Windows y internet, sin Node ni pnpm. **No se versiona**
+(`dist-app/` está en `.gitignore`); ya no contiene arte ni textos de cartas, pero el icono se
+construye con el logo, que es un recurso personal.
 
-## Qué hace el exe al arrancar
-
-`principal-escritorio.ts` decide dónde están los archivos: si se ejecuta como SEA (`isSea()` de
-`node:sea`), junto al ejecutable (`rutasEscritorio(dirname(process.execPath))`); si se ejecuta con
-`tsx` en el repositorio, los del repositorio (`Referencias/cartas.es.json` y `apps/web/dist`).
-Después llama a `principal(rutas, process.argv[2])` (`escritorio.ts`). Con el ejecutable empaquetado
-`argv[0]` y `argv[1]` son el propio `.exe`, así que el argumento del usuario es `argv[2]`.
-
-### Los dos modos
-
-```mermaid
-flowchart TD
-    A[Abrir HereToSlay.exe] --> B{¿Argumento válido?<br/>modoDeArgumento}
-    B -- sí --> M{Modo}
-    B -- no --> P[Pregunta: 1 internet / 2 local<br/>Intro = 1; otra cosa, repite]
-    P --> M
-    M -- web --> W1[Abre URL_EN_LINEA en el navegador]
-    W1 --> W2[Espera 6 s y la ventana se cierra]
-    M -- local --> L[Servidor en este equipo: ver abajo]
-```
-
-| Modo    | Qué hace                                                                                                                   |
-| ------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `web`   | Abre `URL_EN_LINEA` (`jugarEnInternet`), avisa de la contraseña y de la carga lenta, y termina a los 6 s. No arranca nada. |
-| `local` | `servidorLocal`: lo de la sección siguiente (necesita `web/` y `cartas.es.json`).                                          |
-
-**Argumentos** (`modoDeArgumento`, sin distinguir mayúsculas ni espacios):
-
-| Argumento              | Modo                   |
-| ---------------------- | ---------------------- |
-| `web`, `en-linea`, `1` | `web`                  |
-| `local`, `2`           | `local`                |
-| ausente u otro valor   | pregunta en la consola |
-
-**Pregunta de la consola** (`modoDeRespuesta`): `1` o Intro → `web`; `2` → `local`; cualquier otra
-respuesta vuelve a preguntar.
-
-**Accesos directos en Windows.** Para tener dos iconos con la pregunta ya resuelta:
-
-1. En el Explorador, clic derecho sobre `HereToSlay.exe` → **Mostrar más opciones** → **Crear
-   acceso directo** (o **Enviar a → Escritorio**).
-2. Renómbralo «Here to Slay (web)».
-3. Clic derecho → **Propiedades** → pestaña **Acceso directo** → campo **Destino**: deja la ruta
-   entre comillas y añade el argumento detrás, p. ej. `"…\HereToSlay\HereToSlay.exe" web`.
-4. Repite para «Here to Slay (local)» con el argumento `local`.
-
-Los accesos directos conservan el icono del juego. Si mueves la carpeta, hay que rehacerlos.
-
-### Si cambia la dirección de Render
+## Si cambia la dirección de Render
 
 La dirección va escrita en el código a propósito: `URL_EN_LINEA` en
 `apps/server/src/escritorio.ts`. Si el servicio de Render cambia de dirección
 ([DESPLIEGUE.md](DESPLIEGUE.md)), cambia esa constante y ejecuta `pnpm empaquetar`: el `.exe` ya
 generado seguirá abriendo la dirección antigua.
 
-### Modo local
-
-```mermaid
-flowchart TD
-    A[Modo local] --> B{¿Existen cartas.es.json y web/?}
-    B -- no --> E1[Error: Falta … vuelve a generarlo con pnpm empaquetar]
-    B -- sí --> C{¿/api/estado en el 3000<br/>responde como Here to Slay?}
-    C -- sí --> N1[Abre el navegador en localhost:3000 y termina]
-    C -- no --> D[arrancar en el puerto 3000]
-    D -- EADDRINUSE --> F[arrancar en un puerto libre]
-    D -- ok --> G[Muestra direcciones y abre el navegador]
-    F --> G
-    D -- otro error --> E2[Mensaje de error]
-    E1 --> W[Pulsa Intro para cerrar]
-    E2 --> W
-```
-
-- **Ya en marcha:** `estaEnMarcha(3000)` pide `http://127.0.0.1:3000/api/estado` (espera máxima de
-  1,5 s) y solo lo da por bueno si la respuesta es JSON con un campo `salas`. Así no confunde otro
-  programa con Here to Slay. Si ya hay uno, solo abre el navegador; la ventana nueva se cierra.
-- **Puerto ocupado por otro programa:** si escuchar en el 3000 falla con `EADDRINUSE`, arranca en el
-  puerto `0` (el sistema elige uno libre). La consola muestra el puerto elegido. Ojo: un segundo doble
-  clic no encontrará ese servidor (solo comprueba el 3000) y arrancará otro.
-- **Navegador:** `abrirNavegador(url)` usa `rundll32 url.dll,FileProtocolHandler` en Windows (`open`
-  en macOS, `xdg-open` en Linux). Si falla, escribe la dirección en la consola.
-- **Consola:** queda abierta con las direcciones (`mostrarDirecciones`: este equipo y la red local).
-  **Cerrar la ventana detiene el servidor**; Ctrl+C también (`apagarAlSalir`).
-- **Errores:** cualquier error de arranque se muestra como "No se pudo arrancar Here to Slay: …" y la
-  ventana espera a que se pulse Intro (`esperarIntro`), para que se pueda leer antes de cerrarse.
-- El exe usa siempre las opciones por defecto del anfitrión: **no** lee `PUERTO`, `DIR_WEB` ni las
-  variables de milisegundos de `pnpm servidor`. Sí lee `CLOUDFLARED` (al abrir el túnel).
-
 ## Problemas habituales
 
-| Problema                                               | Causa y solución                                                                                                                                                                              |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| "Windows protegió su PC" (SmartScreen) al abrirlo      | El ejecutable no está firmado. Pulsa **Más información → Ejecutar de todas formas**. Suele salir la primera vez que se abre (y tras regenerarlo).                                             |
-| Aviso del cortafuegos                                  | El servidor escucha en toda la red local. Permite el acceso en **redes privadas** para que entren los de tu Wi-Fi; para jugar solo en este equipo no hace falta.                              |
-| Sigue saliendo el icono de Node o el antiguo           | La caché de iconos del Explorador. `pnpm empaquetar` la refresca con `ie4uinit -show`; si no basta, cierra sesión o reinicia el Explorador. Sin `pnpm recursos` no hay logo: sale el de Node. |
-| `HereToSlay.exe está abierto: ciérralo…` al empaquetar | Cierra la ventana del servidor y vuelve a ejecutar `pnpm empaquetar`.                                                                                                                         |
-| Abre en un puerto distinto del 3000                    | Otro programa ocupa el 3000. Mira el puerto en la consola, o cierra ese programa. Para invitar, comparte la dirección que muestra la consola.                                                 |
-| `Falta …\cartas.es.json` o `…\web`                     | La carpeta está incompleta (se copió solo el exe). Copia la carpeta entera o vuelve a ejecutar `pnpm empaquetar`.                                                                             |
-| `Falta …: instálalo con pnpm recursos` al empaquetar   | Faltan los recursos personales: `pnpm recursos` (ver el `README.md`).                                                                                                                         |
+| Problema                                      | Causa y solución                                                                                                                                                                                      |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tarda ~30 s en abrirse la primera vez         | Tras cada `pnpm empaquetar`, el antivirus analiza un ejecutable nuevo de unos 90 MB sin firmar. Es normal: después tarda alrededor de 1 s. No lo abras varias veces seguidas, espera.                 |
+| "Windows protegió su PC" (SmartScreen)        | El ejecutable no está firmado. Pulsa **Más información → Ejecutar de todas formas**. Suele salir la primera vez (y tras regenerarlo).                                                                 |
+| Sigue saliendo el icono de Node o el antiguo  | La caché de iconos del Explorador. `pnpm empaquetar` la refresca con `ie4uinit -show`; si no basta, cierra sesión o reinicia el Explorador. Sin `pnpm recursos` no hay logo: sale el de Node.         |
+| `HereToSlay.exe está en uso…` al empaquetar   | El ejecutable sigue abierto (o el antivirus lo está analizando). Espera a que termine y vuelve a ejecutar `pnpm empaquetar`.                                                                          |
+| No se abre el navegador                       | No hay navegador predeterminado, o falló la orden del sistema (el lanzador no muestra errores). Abre a mano la dirección de `URL_EN_LINEA`; comprueba también el navegador predeterminado de Windows. |
+| Abre una dirección que ya no funciona         | Cambió la dirección de Render: ver la sección anterior.                                                                                                                                               |
+| Quiero jugar sin internet o en la misma Wi-Fi | El `.exe` no arranca servidor: usa `pnpm servidor` ([EN_LINEA.md](EN_LINEA.md)).                                                                                                                      |
 
-Para el resto (jugar por internet, túnel de Cloudflare, invitar) ver [EN_LINEA.md](EN_LINEA.md).
+Para jugar por internet con túnel de Cloudflare o invitar, ver [EN_LINEA.md](EN_LINEA.md).

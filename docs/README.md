@@ -14,7 +14,7 @@ archivos y nombres reales.
 | ------------------------------ | ----------------------------------------------------------------------------------- |
 | [EN_LINEA.md](EN_LINEA.md)     | Guía práctica del modo en línea: arrancar el servidor, invitar, túnel, desconexión. |
 | [DESPLIEGUE.md](DESPLIEGUE.md) | Guía para desplegar el servidor en la nube (Render, plan gratuito) con contraseña.  |
-| [ESCRITORIO.md](ESCRITORIO.md) | El ejecutable `HereToSlay.exe`: cómo se genera, qué contiene y cómo funciona.       |
+| [ESCRITORIO.md](ESCRITORIO.md) | El lanzador `HereToSlay.exe`: abre el juego de Render; empaquetado y problemas.     |
 
 ### Reglas
 
@@ -43,7 +43,8 @@ archivos y nombres reales.
 
 1. [README del repositorio](../README.md): requisitos, instalación, recursos de las cartas y
    cómo se juega en la pantalla.
-2. [ESCRITORIO.md](ESCRITORIO.md), si prefieres un ejecutable con doble clic.
+2. [ESCRITORIO.md](ESCRITORIO.md), si prefieres un ejecutable con doble clic (abre el juego en
+   línea de Render).
 3. [REGLAS.md](REGLAS.md), si necesitas consultar una regla.
 
 ### Quiero montar partidas en línea
@@ -51,7 +52,7 @@ archivos y nombres reales.
 1. [EN_LINEA.md](EN_LINEA.md): servidor, enlaces de invitación, túnel y problemas habituales.
 2. [DESPLIEGUE.md](DESPLIEGUE.md): servidor en la nube (Render) con dirección fija y contraseña,
    útil si tu red bloquea los túneles.
-3. [ESCRITORIO.md](ESCRITORIO.md): hacer de servidor con `HereToSlay.exe`.
+3. [ESCRITORIO.md](ESCRITORIO.md): el lanzador `HereToSlay.exe` (no hace de servidor).
 4. [SERVIDOR_Y_PROTOCOLO.md](SERVIDOR_Y_PROTOCOLO.md): variables de entorno, límites y seguridad.
 
 ### Soy desarrollador y llego nuevo

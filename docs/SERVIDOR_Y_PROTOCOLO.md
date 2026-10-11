@@ -21,7 +21,7 @@ para el encaje general, [ARQUITECTURA.md](ARQUITECTURA.md).
 | `apps/server/src/principal.ts`                             | Punto de entrada de `pnpm servidor`; lee las variables de entorno.       |
 | `apps/server/src/red.ts`                                   | `ipRedLocal` y `buscarCloudflared`.                                      |
 | `apps/server/src/tunel.ts`                                 | `Tunel`: lanza `cloudflared` y lee la dirección pública.                 |
-| `apps/server/src/escritorio.ts`, `principal-escritorio.ts` | El ejecutable (ver [ESCRITORIO.md](ESCRITORIO.md)).                      |
+| `apps/server/src/escritorio.ts`, `principal-escritorio.ts` | El lanzador de escritorio (ver [ESCRITORIO.md](ESCRITORIO.md)).          |
 | `packages/anfitrion/src/protocolo.ts`                      | Nombres de los mensajes, esquemas Zod y tipos de las respuestas.         |
 
 Tests en `apps/server/test/` (clientes reales de `socket.io-client` contra un servidor en un puerto
@@ -253,7 +253,7 @@ Si la variable `CLAVE_ACCESO` está definida, el servidor exige haber entrado an
 introducir la contraseña correcta guarda una cookie `HttpOnly` firmada, válida 30 días. Los enlaces
 de invitación (`?sala=…`) piden la contraseña y luego llevan a la sala. La ruta `/salud` es pública
 (la usa el chequeo de Render; responde `{ ok: true }`). Sin la variable, no se protege nada
-(`pnpm servidor`, el `.exe`). Se usa en el despliegue en la nube: ver [DESPLIEGUE.md](DESPLIEGUE.md).
+(`pnpm servidor`). Se usa en el despliegue en la nube: ver [DESPLIEGUE.md](DESPLIEGUE.md).
 
 Detalles de `apps/server/src/acceso.ts` (`protegerConClave`, `tieneAcceso`):
 
@@ -323,8 +323,8 @@ el servidor (`serveClient: false`): va dentro de la web compilada.
 
 Las cuatro de milisegundos existen sobre todo para las pruebas e2e, que las bajan
 (`apps/e2e/playwright.config.ts`: 40, 300, 50 y 50 ms) para que las partidas vayan rápidas. El
-ejecutable de escritorio **no** lee `PUERTO`, `DIR_WEB` ni las de milisegundos (ver
-[ESCRITORIO.md](ESCRITORIO.md)); `CLOUDFLARED` sí, porque la usa `buscarCloudflared`.
+lanzador de escritorio no lee ninguna variable ni arranca el servidor (ver
+[ESCRITORIO.md](ESCRITORIO.md)). `CLOUDFLARED` la usa `buscarCloudflared`.
 
 ## Red local y túnel (`red.ts`, `tunel.ts`)
 

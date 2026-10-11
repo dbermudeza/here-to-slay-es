@@ -10,7 +10,7 @@
     "dev": "pnpm --filter @hts/web dev",
     "build": "pnpm --filter @hts/web build",
     "servidor": "pnpm build && pnpm --filter @hts/server start",
-    "empaquetar": "pnpm build && pnpm --filter @hts/server empaquetar",
+    "empaquetar": "pnpm --filter @hts/server empaquetar",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "pnpm -r --parallel typecheck",

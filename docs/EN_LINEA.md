@@ -10,21 +10,11 @@ Esta es la guía práctica. El detalle técnico (mensajes, seguridad, variables 
 
 ## 1. Arrancar el servidor (en el equipo que hace de servidor)
 
-Hay dos formas. Las dos necesitan haber instalado antes las dependencias y los recursos de las
-cartas (`pnpm install` y `pnpm recursos`; ver el `README.md`).
+Necesitas haber instalado antes las dependencias y los recursos de las cartas (`pnpm install` y
+`pnpm recursos`; ver el `README.md`).
 
-### Con el ejecutable (sin terminal)
-
-`pnpm empaquetar` genera `dist-app/HereToSlay/HereToSlay.exe` (una vez; vuelve a ejecutarlo tras
-actualizar el juego). Con doble clic pregunta cómo jugar: elige `2` (o ábrelo con el argumento
-`local`; ver [ESCRITORIO.md](ESCRITORIO.md#los-dos-modos)) y arranca el servidor en el puerto
-**3000** (o en uno libre, si
-otro programa lo ocupa) y abre el navegador; si ya estaba en marcha, solo abre el navegador. La
-ventana que se queda abierta muestra las direcciones para invitar; **al cerrarla se detiene el
-servidor**. La primera vez Windows puede avisar (SmartScreen y el cortafuegos) porque el ejecutable
-no está firmado: ver [ESCRITORIO.md](ESCRITORIO.md#problemas-habituales).
-
-### Con la terminal
+> `HereToSlay.exe` ([ESCRITORIO.md](ESCRITORIO.md)) **no** arranca el servidor: solo abre en el
+> navegador el juego desplegado en Render. Para un servidor en este equipo se usa `pnpm servidor`.
 
 ```sh
 pnpm servidor

@@ -19,7 +19,7 @@ usar ese anfitrión: **en el navegador** (partidas locales) o **en un servidor a
 - [ANFITRION.md](ANFITRION.md) — `packages/anfitrion`: temporizadores, pausas, bots y conexiones.
 - [SERVIDOR_Y_PROTOCOLO.md](SERVIDOR_Y_PROTOCOLO.md) — `apps/server` y el protocolo Socket.IO.
 - [WEB.md](WEB.md) — `apps/web`: pantallas, mesa, estado e i18n.
-- [ESCRITORIO.md](ESCRITORIO.md) — ejecutable de escritorio (`pnpm empaquetar`).
+- [ESCRITORIO.md](ESCRITORIO.md) — lanzador de escritorio (`pnpm empaquetar`).
 - [PRUEBAS.md](PRUEBAS.md) — Vitest, simulación y Playwright.
 - [GLOSARIO.md](GLOSARIO.md) — términos del juego y del código.
 - [EN_LINEA.md](EN_LINEA.md) — cómo jugar en línea (guía de uso).
@@ -50,7 +50,8 @@ usar ese anfitrión: **en el navegador** (partidas locales) o **en un servidor a
   pausas, traspaso del dispositivo, desconexiones) y `protocolo.ts` (mensajes Socket.IO y esquemas
   Zod).
 - **`apps/server`**: Fastify + Socket.IO. Salas en memoria, valida cada mensaje, ejecuta un
-  `Anfitrion` por sala y sirve la web compilada. También es la base del ejecutable de escritorio.
+  `Anfitrion` por sala y sirve la web compilada. También contiene el lanzador de escritorio (`HereToSlay.exe`), que solo
+  abre en el navegador el juego desplegado en Render.
 - **`apps/web`**: React 19 + Vite + Zustand + Tailwind 4 + Framer Motion. La mesa lee de una
   `FuenteMesa`: el `Anfitrion` en local o `ClienteEnLinea` en línea. (`@hts/server` solo figura
   como dependencia de desarrollo, para tipos y pruebas.)

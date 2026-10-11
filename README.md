@@ -178,16 +178,13 @@ contraseña): **[docs/DESPLIEGUE.md](docs/DESPLIEGUE.md)**.
 pnpm empaquetar
 ```
 
-Genera `dist-app/HereToSlay/` con `HereToSlay.exe` (con el logo del juego como icono), la web
-compilada y las cartas. Al abrir `HereToSlay.exe`, la consola pregunta cómo jugar: `1` o Intro,
-**jugar en internet** (abre en el navegador el juego desplegado en Render, que pide contraseña, y
-la ventana se cierra sola); `2`, **servidor en este equipo** (arranca el servidor y abre el
-navegador; cerrar la ventana lo detiene). Se puede saltar la pregunta con un argumento,
-`HereToSlay.exe web` o `HereToSlay.exe local`, por ejemplo en un acceso directo. No necesita Node
-ni pnpm, así que la carpeta se puede copiar a otro equipo. Vuelve a ejecutar `pnpm empaquetar`
-cuando cambie el código o la dirección del despliegue. Detalles en
-[docs/ESCRITORIO.md](docs/ESCRITORIO.md). La carpeta contiene el arte y los textos de las cartas: es
-personal y no se versiona.
+Genera `dist-app/HereToSlay/HereToSlay.exe`, un lanzador con el logo del juego como icono (necesita
+`pnpm recursos`). Con doble clic abre en el navegador el juego desplegado en Render (pide
+contraseña) y termina, sin ventana de consola. No arranca ningún servidor: para jugar en este
+equipo (misma Wi-Fi o sin internet) usa `pnpm servidor`. No necesita Node ni pnpm, así que el
+`.exe` se puede copiar a otro equipo. La primera vez tras empaquetar, Windows puede tardar unos
+30 s en abrirlo (el antivirus analiza el ejecutable nuevo). Vuelve a ejecutar `pnpm empaquetar`
+si cambia la dirección del despliegue. Detalles en [docs/ESCRITORIO.md](docs/ESCRITORIO.md).
 
 En línea, el creador puede añadir bots; si alguien se desconecta se le esperan 60 s y después un
 bot juega por él hasta que vuelve; y se puede poner un tiempo máximo por decisión.
@@ -242,8 +239,8 @@ El servidor (`pnpm servidor`) acepta estas variables de entorno (en PowerShell:
 
 `HTS_TRAZA=1` muestra en `pnpm e2e` cada paso del piloto (para depurar pruebas) y
 `HTS_RECURSOS_REPO` cambia el repositorio de `pnpm recursos` (y `HTS_RECURSOS_TOKEN` aporta un
-token de solo lectura, como en el despliegue en la nube). El ejecutable de escritorio solo lee
-`CLOUDFLARED`. Más en [docs/SERVIDOR_Y_PROTOCOLO.md](docs/SERVIDOR_Y_PROTOCOLO.md).
+token de solo lectura, como en el despliegue en la nube). El ejecutable de escritorio no lee
+ninguna. Más en [docs/SERVIDOR_Y_PROTOCOLO.md](docs/SERVIDOR_Y_PROTOCOLO.md).
 
 ## Arquitectura
 
@@ -283,7 +280,7 @@ sistema (motor, cartas y efectos, bots, anfitrión, servidor y protocolo, web), 
 | `pnpm dev`               | Aplicación en http://localhost:5173 (en línea: con el servidor arrancado) |
 | `pnpm build`             | Compila la aplicación web (`apps/web/dist`)                               |
 | `pnpm servidor`          | Compila la web y arranca el servidor en línea en el puerto 3000           |
-| `pnpm empaquetar`        | Genera el ejecutable de escritorio `dist-app/HereToSlay/HereToSlay.exe`   |
+| `pnpm empaquetar`        | Genera el lanzador `dist-app/HereToSlay/HereToSlay.exe` (abre Render)     |
 | `pnpm lint`              | ESLint con TypeScript estricto                                            |
 | `pnpm format`            | Formatea con Prettier                                                     |
 | `pnpm typecheck`         | Comprobación de tipos en todos los paquetes                               |
