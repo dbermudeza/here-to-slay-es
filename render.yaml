@@ -11,8 +11,8 @@ services:
     region: virginia
     branch: main
     autoDeploy: true
+    # Render ya trae pnpm (en /usr/bin, de solo lectura): no se usa `corepack enable`.
     buildCommand: >-
-      corepack enable &&
       pnpm install --frozen-lockfile --prod=false &&
       pnpm recursos &&
       pnpm build
@@ -21,6 +21,9 @@ services:
     envVars:
       - key: NODE_VERSION
         value: '24'
+      # Que corepack (si el pnpm de Render lo usa) no se pare a preguntar antes de descargar pnpm.
+      - key: COREPACK_ENABLE_DOWNLOAD_PROMPT
+        value: '0'
       # Contraseña para entrar a la web (se pide al crear el servicio; no se guarda aquí).
       - key: CLAVE_ACCESO
         sync: false

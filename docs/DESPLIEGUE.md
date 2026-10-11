@@ -30,18 +30,18 @@ sirve la web compilada (`apps/web/dist`). Render lo compila y lo ejecuta en cada
 El archivo [`render.yaml`](../render.yaml) de la raíz (un _Blueprint_ de Render) describe el
 servicio, para que no tengas que configurarlo a mano:
 
-| Campo en `render.yaml`    | Valor                                                                                            |
-| ------------------------- | ------------------------------------------------------------------------------------------------ |
-| `type`, `runtime`, `plan` | Servicio web (`web`) de Node, plan `free`.                                                       |
-| `name`                    | `here-to-slay` (da la dirección `https://here-to-slay.onrender.com`).                            |
-| `region`                  | `virginia` (ver [cómo cambiarla](#cambiar-el-nombre-o-la-región)).                               |
-| `branch` y `autoDeploy`   | `main` y `true`: cada `push` a `main` redespliega.                                               |
-| `buildCommand`            | `corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm recursos && pnpm build`. |
-| `startCommand`            | `pnpm --filter @hts/server start`.                                                               |
-| `healthCheckPath`         | `/salud` (ruta pública; Render la consulta para saber si el servicio vive).                      |
-| `NODE_VERSION`            | `24` (la misma que `.nvmrc`).                                                                    |
-| `CLAVE_ACCESO`            | Secreta (`sync: false`): Render la pide al crear el servicio.                                    |
-| `HTS_RECURSOS_TOKEN`      | Secreta (`sync: false`): Render la pide al crear el servicio.                                    |
+| Campo en `render.yaml`    | Valor                                                                                                                                                            |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`, `runtime`, `plan` | Servicio web (`web`) de Node, plan `free`.                                                                                                                       |
+| `name`                    | `here-to-slay` (da la dirección `https://here-to-slay.onrender.com`).                                                                                            |
+| `region`                  | `virginia` (ver [cómo cambiarla](#cambiar-el-nombre-o-la-región)).                                                                                               |
+| `branch` y `autoDeploy`   | `main` y `true`: cada `push` a `main` redespliega.                                                                                                               |
+| `buildCommand`            | `pnpm install --frozen-lockfile --prod=false && pnpm recursos && pnpm build` (sin `corepack enable`: Render ya trae pnpm en `/usr/bin`, que es de solo lectura). |
+| `startCommand`            | `pnpm --filter @hts/server start`.                                                                                                                               |
+| `healthCheckPath`         | `/salud` (ruta pública; Render la consulta para saber si el servicio vive).                                                                                      |
+| `NODE_VERSION`            | `24` (la misma que `.nvmrc`).                                                                                                                                    |
+| `CLAVE_ACCESO`            | Secreta (`sync: false`): Render la pide al crear el servicio.                                                                                                    |
+| `HTS_RECURSOS_TOKEN`      | Secreta (`sync: false`): Render la pide al crear el servicio.                                                                                                    |
 
 Si el nombre `here-to-slay` ya lo usa otra cuenta, la dirección puede llevar un sufijo; Render
 muestra la definitiva al crear el servicio.
@@ -187,6 +187,7 @@ alguna vez lo ves escrito, revócalo y crea otro.
 | La compilación falla en `pnpm recursos`                                                                      | Falta `HTS_RECURSOS_TOKEN`, ha caducado, está mal copiado o no tiene acceso a `here-to-slay-recursos`. Crea otro (§3) y actualízalo (§8).                                                                                                                                                                             |
 | La compilación falla en `pnpm recursos` con «No se pudieron descargar los recursos con `HTS_RECURSOS_TOKEN`» | El mensaje lista tres causas: el token **caducó o se revocó**; **no tiene permiso** de lectura (debe ser «Contents: Read-only» sobre `here-to-slay-recursos`); o el repositorio no es el esperado. Crea otro token (§3) y actualízalo (§8). Si el error habla de una URL, recuerda que con token debe ser `https://`. |
 | La compilación falla al instalar o con un error de versión de Node                                           | Render usó otra versión de Node. Comprueba que `NODE_VERSION` vale `24` en _Environment_ (es la de `.nvmrc`; el proyecto exige Node ≥ 20.12) y redespliega con _Clear build cache & deploy_.                                                                                                                          |
+| La compilación falla al instante con `EROFS: read-only file system, unlink '/usr/bin/pnpm'`                  | El `buildCommand` lleva `corepack enable`: Render ya trae pnpm en una carpeta de solo lectura. Quítalo de `render.yaml` (el actual ya no lo lleva) y redespliega.                                                                                                                                                     |
 | Compila, pero la web dice «Faltan las cartas»                                                                | Los recursos no se instalaron: mira los registros de la compilación. Redespliega tras arreglar el token.                                                                                                                                                                                                              |
 | Error `401` en la web, las imágenes o la API                                                                 | No has entrado por `/acceso` o la cookie caducó o se borró: abre la raíz e introduce `<tu-contraseña>`. Si cambiaste `CLAVE_ACCESO`, hay que volver a entrar.                                                                                                                                                         |
 | Responde «Demasiados intentos» (429)                                                                         | Hubo muchos fallos (10 desde tu IP o 50 en total en 10 minutos): las entradas **nuevas** quedan bloqueadas. Espera 10 minutos y vuelve a probar con la contraseña correcta. Las sesiones ya abiertas no se ven afectadas.                                                                                             |
