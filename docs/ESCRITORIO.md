@@ -1,9 +1,11 @@
 # Ejecutable de escritorio (`HereToSlay.exe`)
 
 **Resumen.** `pnpm empaquetar` genera la carpeta `dist-app/HereToSlay/`, con la que se puede jugar
-sin Node ni pnpm: un doble clic en `HereToSlay.exe` arranca el [servidor en línea](SERVIDOR_Y_PROTOCOLO.md)
-en el puerto 3000 y abre el navegador. Sirve tanto para jugar en este equipo (local o contra bots)
-como para hacer de servidor de una partida en línea ([EN_LINEA.md](EN_LINEA.md)). El ejecutable es
+sin Node ni pnpm. Al abrir `HereToSlay.exe`, la consola pregunta cómo jugar: **jugar en internet**
+(abre el juego desplegado en Render, [DESPLIEGUE.md](DESPLIEGUE.md)) o **servidor en este equipo**
+(arranca el [servidor en línea](SERVIDOR_Y_PROTOCOLO.md) en el puerto 3000 y abre el navegador; sirve
+para jugar en este equipo o hacer de servidor de una partida en línea, [EN_LINEA.md](EN_LINEA.md)).
+La pregunta se puede saltar con un argumento (`web` o `local`). El ejecutable es
 el propio Node con el código del servidor dentro (_Single Executable Application_, SEA); la web y
 las cartas van en archivos junto a él.
 
@@ -98,11 +100,61 @@ bastante (incluye un Node completo). Se regenera con `pnpm empaquetar`.
 `principal-escritorio.ts` decide dónde están los archivos: si se ejecuta como SEA (`isSea()` de
 `node:sea`), junto al ejecutable (`rutasEscritorio(dirname(process.execPath))`); si se ejecuta con
 `tsx` en el repositorio, los del repositorio (`Referencias/cartas.es.json` y `apps/web/dist`).
-Después llama a `principal(rutas)` (`escritorio.ts`):
+Después llama a `principal(rutas, process.argv[2])` (`escritorio.ts`). Con el ejecutable empaquetado
+`argv[0]` y `argv[1]` son el propio `.exe`, así que el argumento del usuario es `argv[2]`.
+
+### Los dos modos
 
 ```mermaid
 flowchart TD
-    A[Doble clic] --> B{¿Existen cartas.es.json y web/?}
+    A[Abrir HereToSlay.exe] --> B{¿Argumento válido?<br/>modoDeArgumento}
+    B -- sí --> M{Modo}
+    B -- no --> P[Pregunta: 1 internet / 2 local<br/>Intro = 1; otra cosa, repite]
+    P --> M
+    M -- web --> W1[Abre URL_EN_LINEA en el navegador]
+    W1 --> W2[Espera 6 s y la ventana se cierra]
+    M -- local --> L[Servidor en este equipo: ver abajo]
+```
+
+| Modo    | Qué hace                                                                                                                   |
+| ------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `web`   | Abre `URL_EN_LINEA` (`jugarEnInternet`), avisa de la contraseña y de la carga lenta, y termina a los 6 s. No arranca nada. |
+| `local` | `servidorLocal`: lo de la sección siguiente (necesita `web/` y `cartas.es.json`).                                          |
+
+**Argumentos** (`modoDeArgumento`, sin distinguir mayúsculas ni espacios):
+
+| Argumento              | Modo                   |
+| ---------------------- | ---------------------- |
+| `web`, `en-linea`, `1` | `web`                  |
+| `local`, `2`           | `local`                |
+| ausente u otro valor   | pregunta en la consola |
+
+**Pregunta de la consola** (`modoDeRespuesta`): `1` o Intro → `web`; `2` → `local`; cualquier otra
+respuesta vuelve a preguntar.
+
+**Accesos directos en Windows.** Para tener dos iconos con la pregunta ya resuelta:
+
+1. En el Explorador, clic derecho sobre `HereToSlay.exe` → **Mostrar más opciones** → **Crear
+   acceso directo** (o **Enviar a → Escritorio**).
+2. Renómbralo «Here to Slay (web)».
+3. Clic derecho → **Propiedades** → pestaña **Acceso directo** → campo **Destino**: deja la ruta
+   entre comillas y añade el argumento detrás, p. ej. `"…\HereToSlay\HereToSlay.exe" web`.
+4. Repite para «Here to Slay (local)» con el argumento `local`.
+
+Los accesos directos conservan el icono del juego. Si mueves la carpeta, hay que rehacerlos.
+
+### Si cambia la dirección de Render
+
+La dirección va escrita en el código a propósito: `URL_EN_LINEA` en
+`apps/server/src/escritorio.ts`. Si el servicio de Render cambia de dirección
+([DESPLIEGUE.md](DESPLIEGUE.md)), cambia esa constante y ejecuta `pnpm empaquetar`: el `.exe` ya
+generado seguirá abriendo la dirección antigua.
+
+### Modo local
+
+```mermaid
+flowchart TD
+    A[Modo local] --> B{¿Existen cartas.es.json y web/?}
     B -- no --> E1[Error: Falta … vuelve a generarlo con pnpm empaquetar]
     B -- sí --> C{¿/api/estado en el 3000<br/>responde como Here to Slay?}
     C -- sí --> N1[Abre el navegador en localhost:3000 y termina]

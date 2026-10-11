@@ -11,7 +11,8 @@ const rutas = isSea()
   ? rutasEscritorio(dirname(process.execPath))
   : { rutaCartas: RUTA_CARTAS_JSON, dirWeb: join(RAIZ, 'apps/web/dist') };
 
-principal(rutas).catch(async (e: unknown) => {
+// argv[2]: `web` o `local` (con el ejecutable empaquetado, argv[0] y argv[1] son el propio .exe).
+principal(rutas, process.argv[2]).catch(async (e: unknown) => {
   console.error(
     `\nNo se pudo arrancar Here to Slay: ${e instanceof Error ? e.message : String(e)}`,
   );

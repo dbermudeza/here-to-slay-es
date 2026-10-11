@@ -6,9 +6,36 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { RUTA_CARTAS_JSON } from '../../../packages/cards/src/rutas';
 import { arrancar } from '../src/arranque';
-import { estaEnMarcha, rutasEscritorio } from '../src/escritorio';
+import {
+  estaEnMarcha,
+  modoDeArgumento,
+  modoDeRespuesta,
+  rutasEscritorio,
+  URL_EN_LINEA,
+} from '../src/escritorio';
 
 describe('Ejecutable de escritorio', () => {
+  it('al abrirlo se elige web (Intro o 1) o servidor local (2); otra respuesta vuelve a preguntar', () => {
+    expect(modoDeRespuesta('')).toBe('web');
+    expect(modoDeRespuesta(' 1 ')).toBe('web');
+    expect(modoDeRespuesta('2')).toBe('local');
+    expect(modoDeRespuesta('3')).toBeNull();
+    expect(modoDeRespuesta('si')).toBeNull();
+  });
+
+  it('el modo se puede dar como argumento (accesos directos)', () => {
+    expect(modoDeArgumento('web')).toBe('web');
+    expect(modoDeArgumento('WEB')).toBe('web');
+    expect(modoDeArgumento('en-linea')).toBe('web');
+    expect(modoDeArgumento('local')).toBe('local');
+    expect(modoDeArgumento(undefined)).toBeNull();
+    expect(modoDeArgumento('otra')).toBeNull();
+  });
+
+  it('la dirección en línea es https', () => {
+    expect(new URL(URL_EN_LINEA).protocol).toBe('https:');
+  });
+
   it('busca la web y las cartas junto al ejecutable', () => {
     const base = join('C:', 'Juegos', 'HereToSlay');
     expect(rutasEscritorio(base)).toEqual({

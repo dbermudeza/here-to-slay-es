@@ -16,7 +16,9 @@ cartas (`pnpm install` y `pnpm recursos`; ver el `README.md`).
 ### Con el ejecutable (sin terminal)
 
 `pnpm empaquetar` genera `dist-app/HereToSlay/HereToSlay.exe` (una vez; vuelve a ejecutarlo tras
-actualizar el juego). Con doble clic arranca el servidor en el puerto **3000** (o en uno libre, si
+actualizar el juego). Con doble clic pregunta cómo jugar: elige `2` (o ábrelo con el argumento
+`local`; ver [ESCRITORIO.md](ESCRITORIO.md#los-dos-modos)) y arranca el servidor en el puerto
+**3000** (o en uno libre, si
 otro programa lo ocupa) y abre el navegador; si ya estaba en marcha, solo abre el navegador. La
 ventana que se queda abierta muestra las direcciones para invitar; **al cerrarla se detiene el
 servidor**. La primera vez Windows puede avisar (SmartScreen y el cortafuegos) porque el ejecutable

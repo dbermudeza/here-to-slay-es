@@ -179,9 +179,13 @@ pnpm empaquetar
 ```
 
 Genera `dist-app/HereToSlay/` con `HereToSlay.exe` (con el logo del juego como icono), la web
-compilada y las cartas. Al abrir `HereToSlay.exe` arranca el servidor y abre el navegador; cerrar su
-ventana lo detiene. No necesita Node ni pnpm, así que la carpeta se puede copiar a otro equipo.
-Vuelve a ejecutar `pnpm empaquetar` cuando cambie el código. Detalles en
+compilada y las cartas. Al abrir `HereToSlay.exe`, la consola pregunta cómo jugar: `1` o Intro,
+**jugar en internet** (abre en el navegador el juego desplegado en Render, que pide contraseña, y
+la ventana se cierra sola); `2`, **servidor en este equipo** (arranca el servidor y abre el
+navegador; cerrar la ventana lo detiene). Se puede saltar la pregunta con un argumento,
+`HereToSlay.exe web` o `HereToSlay.exe local`, por ejemplo en un acceso directo. No necesita Node
+ni pnpm, así que la carpeta se puede copiar a otro equipo. Vuelve a ejecutar `pnpm empaquetar`
+cuando cambie el código o la dirección del despliegue. Detalles en
 [docs/ESCRITORIO.md](docs/ESCRITORIO.md). La carpeta contiene el arte y los textos de las cartas: es
 personal y no se versiona.
 
