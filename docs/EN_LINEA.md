@@ -5,7 +5,7 @@ servidor y cada jugador, desde su navegador, solo recibe lo que puede ver (su ma
 número de cartas de los demás). No hace falta contratar ningún servidor.
 
 Esta es la guía práctica. El detalle técnico (mensajes, seguridad, variables de entorno) está en
-[SERVIDOR_Y_PROTOCOLO.md](SERVIDOR_Y_PROTOCOLO.md), y el del ejecutable en
+[SERVIDOR_Y_PROTOCOLO.md](SERVIDOR_Y_PROTOCOLO.md), y el del acceso directo en
 [ESCRITORIO.md](ESCRITORIO.md).
 
 ## 1. Arrancar el servidor (en el equipo que hace de servidor)
@@ -13,7 +13,7 @@ Esta es la guía práctica. El detalle técnico (mensajes, seguridad, variables 
 Necesitas haber instalado antes las dependencias y los recursos de las cartas (`pnpm install` y
 `pnpm recursos`; ver el `README.md`).
 
-> `HereToSlay.exe` ([ESCRITORIO.md](ESCRITORIO.md)) **no** arranca el servidor: solo abre en el
+> El acceso directo `Here to Slay.url` ([ESCRITORIO.md](ESCRITORIO.md)) **no** arranca el servidor: solo abre en el
 > navegador el juego desplegado en Render. Para un servidor en este equipo se usa `pnpm servidor`.
 
 ```sh
@@ -59,7 +59,7 @@ El servidor está en tu casa, así que hay que hacerlo accesible desde fuera. Do
    El servidor lo busca en el `PATH` y en las carpetas de instalación habituales. Si aun así no lo
    encuentra, cierra y vuelve a abrir la terminal, o indica su ruta en la variable `CLOUDFLARED`.
 
-2. Arranca el servidor (ejecutable o `pnpm servidor`), abre `http://localhost:3000` **en el mismo
+2. Arranca el servidor (`pnpm servidor`), abre `http://localhost:3000` **en el mismo
    equipo** y crea la sala.
 3. En **Invitar a jugar → Jugar por internet**, pulsa **Abrir acceso por internet**. En unos segundos
    aparece el **enlace por internet** (`https://….trycloudflare.com/?sala=CÓDIGO`): pulsa **Copiar** y

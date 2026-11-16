@@ -7,22 +7,22 @@ _intenciones_ (acciones) y reciben su **vista filtrada**. Todo lo que llega de u
 con los esquemas Zod de `packages/anfitrion/src/protocolo.ts`. Las salas viven en memoria: al
 apagar el servidor desaparecen.
 
-Para jugar (arrancar, invitar, túnel) ver la guía [EN_LINEA.md](EN_LINEA.md); para el ejecutable de
-Windows, [ESCRITORIO.md](ESCRITORIO.md); para el cliente web (`ClienteEnLinea`), [WEB.md](WEB.md);
+Para jugar (arrancar, invitar, túnel) ver la guía [EN_LINEA.md](EN_LINEA.md); para el acceso directo
+de Windows, [ESCRITORIO.md](ESCRITORIO.md); para el cliente web (`ClienteEnLinea`), [WEB.md](WEB.md);
 para el encaje general, [ARQUITECTURA.md](ARQUITECTURA.md).
 
 ## Archivos
 
-| Archivo                                                    | Contenido                                                                |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `apps/server/src/servidor.ts`                              | `crearServidor`: Fastify + Socket.IO, manejadores y difusión de estados. |
-| `apps/server/src/salas.ts`                                 | `Sala` y `GestorSalas`: asientos, tokens, lobby, limpieza.               |
-| `apps/server/src/arranque.ts`                              | `arrancar`, `mostrarDirecciones`, `apagarAlSalir` (comunes con el exe).  |
-| `apps/server/src/principal.ts`                             | Punto de entrada de `pnpm servidor`; lee las variables de entorno.       |
-| `apps/server/src/red.ts`                                   | `ipRedLocal` y `buscarCloudflared`.                                      |
-| `apps/server/src/tunel.ts`                                 | `Tunel`: lanza `cloudflared` y lee la dirección pública.                 |
-| `apps/server/src/escritorio.ts`, `principal-escritorio.ts` | El lanzador de escritorio (ver [ESCRITORIO.md](ESCRITORIO.md)).          |
-| `packages/anfitrion/src/protocolo.ts`                      | Nombres de los mensajes, esquemas Zod y tipos de las respuestas.         |
+| Archivo                               | Contenido                                                                |
+| ------------------------------------- | ------------------------------------------------------------------------ |
+| `apps/server/src/servidor.ts`         | `crearServidor`: Fastify + Socket.IO, manejadores y difusión de estados. |
+| `apps/server/src/salas.ts`            | `Sala` y `GestorSalas`: asientos, tokens, lobby, limpieza.               |
+| `apps/server/src/arranque.ts`         | `arrancar`, `mostrarDirecciones`, `apagarAlSalir` (comunes con el exe).  |
+| `apps/server/src/principal.ts`        | Punto de entrada de `pnpm servidor`; lee las variables de entorno.       |
+| `apps/server/src/red.ts`              | `ipRedLocal` y `buscarCloudflared`.                                      |
+| `apps/server/src/tunel.ts`            | `Tunel`: lanza `cloudflared` y lee la dirección pública.                 |
+| `apps/server/src/escritorio.ts`       | El acceso directo de escritorio (ver [ESCRITORIO.md](ESCRITORIO.md)).    |
+| `packages/anfitrion/src/protocolo.ts` | Nombres de los mensajes, esquemas Zod y tipos de las respuestas.         |
 
 Tests en `apps/server/test/` (clientes reales de `socket.io-client` contra un servidor en un puerto
 aleatorio): `servidor.test.ts`, `celebracion.test.ts`, `estaticos.test.ts`, `red.test.ts`,
@@ -323,7 +323,7 @@ el servidor (`serveClient: false`): va dentro de la web compilada.
 
 Las cuatro de milisegundos existen sobre todo para las pruebas e2e, que las bajan
 (`apps/e2e/playwright.config.ts`: 40, 300, 50 y 50 ms) para que las partidas vayan rápidas. El
-lanzador de escritorio no lee ninguna variable ni arranca el servidor (ver
+acceso directo de escritorio no lee ninguna variable ni arranca el servidor (ver
 [ESCRITORIO.md](ESCRITORIO.md)). `CLOUDFLARED` la usa `buscarCloudflared`.
 
 ## Red local y túnel (`red.ts`, `tunel.ts`)

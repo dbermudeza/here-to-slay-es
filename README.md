@@ -172,19 +172,18 @@ router). Los detalles están en **[docs/EN_LINEA.md](docs/EN_LINEA.md)**. Si tu 
 o quieres una dirección fija, puedes desplegar el servidor en la nube (Render, plan gratuito, con
 contraseña): **[docs/DESPLIEGUE.md](docs/DESPLIEGUE.md)**.
 
-### Con doble clic (ejecutable de escritorio)
+### Con doble clic (acceso directo de escritorio)
 
 ```sh
 pnpm empaquetar
 ```
 
-Genera `dist-app/HereToSlay/HereToSlay.exe`, un lanzador con el logo del juego como icono (necesita
-`pnpm recursos`). Con doble clic abre en el navegador el juego desplegado en Render (pide
-contraseña) y termina, sin ventana de consola. No arranca ningún servidor: para jugar en este
-equipo (misma Wi-Fi o sin internet) usa `pnpm servidor`. No necesita Node ni pnpm, así que el
-`.exe` se puede copiar a otro equipo. La primera vez tras empaquetar, Windows puede tardar unos
-30 s en abrirlo (el antivirus analiza el ejecutable nuevo). Vuelve a ejecutar `pnpm empaquetar`
-si cambia la dirección del despliegue. Detalles en [docs/ESCRITORIO.md](docs/ESCRITORIO.md).
+Genera `dist-app/HereToSlay/Here to Slay.url`, un acceso directo de Windows con el logo del juego
+como icono (necesita `pnpm recursos`). Con doble clic abre en el navegador el juego desplegado en
+Render (pide contraseña), al instante. Puedes copiarlo al escritorio. No arranca ningún servidor:
+para jugar en este equipo (misma Wi-Fi o sin internet) usa `pnpm servidor`. Vuelve a ejecutar
+`pnpm empaquetar` si cambia la dirección del despliegue o mueves el proyecto. Detalles en
+[docs/ESCRITORIO.md](docs/ESCRITORIO.md).
 
 En línea, el creador puede añadir bots; si alguien se desconecta se le esperan 60 s y después un
 bot juega por él hasta que vuelve; y se puede poner un tiempo máximo por decisión.
@@ -239,8 +238,8 @@ El servidor (`pnpm servidor`) acepta estas variables de entorno (en PowerShell:
 
 `HTS_TRAZA=1` muestra en `pnpm e2e` cada paso del piloto (para depurar pruebas) y
 `HTS_RECURSOS_REPO` cambia el repositorio de `pnpm recursos` (y `HTS_RECURSOS_TOKEN` aporta un
-token de solo lectura, como en el despliegue en la nube). El ejecutable de escritorio no lee
-ninguna. Más en [docs/SERVIDOR_Y_PROTOCOLO.md](docs/SERVIDOR_Y_PROTOCOLO.md).
+token de solo lectura, como en el despliegue en la nube). El acceso directo de escritorio no
+lee ninguna. Más en [docs/SERVIDOR_Y_PROTOCOLO.md](docs/SERVIDOR_Y_PROTOCOLO.md).
 
 ## Arquitectura
 
@@ -254,7 +253,7 @@ packages/
   anfitrion/  Host de partida (temporizadores, bots, conexiones) y protocolo de red
 apps/
   web/        Aplicación React + Vite + Zustand + Tailwind + Framer Motion
-  server/     Servidor autoritativo Fastify + Socket.IO, túnel de Cloudflare y ejecutable
+  server/     Servidor autoritativo Fastify + Socket.IO, túnel de Cloudflare y acceso directo
   e2e/        Pruebas e2e con Playwright
 docs/         Documentación completa (ver más abajo)
 ```
@@ -270,7 +269,7 @@ lo que puede ver. El detalle, con diagramas, está en [docs/ARQUITECTURA.md](doc
 Todo está en [docs/](docs/README.md), con un índice y un mapa de lectura según lo que quieras hacer:
 las reglas ([REGLAS.md](docs/REGLAS.md), [DUDAS_REGLAS.md](docs/DUDAS_REGLAS.md)), cada pieza del
 sistema (motor, cartas y efectos, bots, anfitrión, servidor y protocolo, web), el
-[modo en línea](docs/EN_LINEA.md), el [despliegue en la nube](docs/DESPLIEGUE.md), el [ejecutable de escritorio](docs/ESCRITORIO.md), la
+[modo en línea](docs/EN_LINEA.md), el [despliegue en la nube](docs/DESPLIEGUE.md), el [acceso directo de escritorio](docs/ESCRITORIO.md), la
 [estrategia de pruebas](docs/PRUEBAS.md) y un [glosario](docs/GLOSARIO.md).
 
 ## Desarrollo
@@ -280,7 +279,7 @@ sistema (motor, cartas y efectos, bots, anfitrión, servidor y protocolo, web), 
 | `pnpm dev`               | Aplicación en http://localhost:5173 (en línea: con el servidor arrancado) |
 | `pnpm build`             | Compila la aplicación web (`apps/web/dist`)                               |
 | `pnpm servidor`          | Compila la web y arranca el servidor en línea en el puerto 3000           |
-| `pnpm empaquetar`        | Genera el lanzador `dist-app/HereToSlay/HereToSlay.exe` (abre Render)     |
+| `pnpm empaquetar`        | Genera el acceso directo `dist-app/HereToSlay/Here to Slay.url` (Render)  |
 | `pnpm lint`              | ESLint con TypeScript estricto                                            |
 | `pnpm format`            | Formatea con Prettier                                                     |
 | `pnpm typecheck`         | Comprobación de tipos en todos los paquetes                               |
