@@ -8,6 +8,10 @@ navegador: en un mismo dispositivo, contra bots o en línea con amigos.
 > textos de las cartas son de Unstable Games y **no se incluyen**: para jugar necesitas tus propios
 > recursos (ver [Recursos de las cartas](#recursos-de-las-cartas)).
 
+> 🎮 **Demo en vivo:** <https://here-to-slay-13l0.onrender.com> — contraseña: `heretoslay_123`.
+> Está en el plan gratuito de Render: si lleva un rato sin uso, la primera carga tarda alrededor de
+> un minuto mientras el servidor despierta (ver [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md)).
+
 ## Índice
 
 - [Inicio rápido](#inicio-rápido)

@@ -7,6 +7,9 @@ acceso** (`CLAVE_ACCESO`), porque la web incluye el arte y los textos oficiales 
 Para jugar desde tu propio equipo, mira [EN_LINEA.md](EN_LINEA.md); el detalle técnico del
 servidor está en [SERVIDOR_Y_PROTOCOLO.md](SERVIDOR_Y_PROTOCOLO.md).
 
+> **Demo en vivo:** el despliegue de este proyecto está en <https://here-to-slay-13l0.onrender.com>
+> y su contraseña es `heretoslay_123`.
+
 ```mermaid
 flowchart LR
     GH[("GitHub<br/>repositorio público")] -- "push a main" --> R["Render<br/>compila y arranca"]
@@ -245,7 +248,9 @@ dirección deja de existir). Si borras el servicio, revoca también el token en 
   indica que el servicio está vivo.
 - **HTTPS:** Render sirve la dirección `onrender.com` con HTTPS, así que la contraseña no viaja en
   claro.
-- Usa el servicio solo con amigos y no publiques la dirección ni la contraseña.
+- Usa el servicio solo con amigos y testers. La contraseña de la demo de este proyecto está
+  publicada a propósito en el README para que los testers puedan entrar; si quieres volver a
+  restringir el acceso, cambia `CLAVE_ACCESO` (ver [§8](#8-rotar-la-contraseña-y-el-token)).
 
 ## Para desarrolladores
 
